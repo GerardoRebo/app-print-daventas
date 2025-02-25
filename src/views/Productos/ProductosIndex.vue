@@ -203,6 +203,7 @@
           autocomplete="off"
           placeholder=""
           density="compact"
+          variant="outlined"
           :error-messages="errors.descripcion ? errors.descripcion[0] : null"
           v-model="product_form.descripcion"
         />
@@ -227,14 +228,49 @@
           v-model="product_form.porcentaje_ganancia"
         />
         <v-row dense>
+          {{ product_form }}
           <v-col cols="12" sm="6">
             <v-radio-group v-model="product_form.es_kit" density="compact">
               <template v-slot:label>
                 <div>El producto es kit?:</div>
               </template>
-              <v-radio label="No" value="0"></v-radio>
-              <v-radio label="Sí" value="1"></v-radio>
+              <v-radio label="No" :value="0"></v-radio>
+              <v-radio label="Sí" :value="1"></v-radio>
             </v-radio-group>
+          </v-col>
+          <v-col cols="12" sm="6" v-if="!product_form.es_kit">
+            <v-radio-group
+              v-model="product_form.es_consumible"
+              density="compact"
+            >
+              <template v-slot:label>
+                <div>El producto es consumible:</div>
+              </template>
+              <v-radio label="No" :value="0"></v-radio>
+              <v-radio label="Sí" :value="1"></v-radio>
+            </v-radio-group>
+          </v-col>
+          <v-col cols="12" sm="6" v-if="product_form.es_consumible">
+            <v-radio-group
+              v-model="product_form.tipo_consumible"
+              density="compact"
+            >
+              <template v-slot:label>
+                <div>Tipo de consumible:</div>
+              </template>
+              <v-radio label="Regular" value="regular"></v-radio>
+              <v-radio label="Genérico" value="generico"></v-radio>
+              <v-radio label="Especifico" value="especifico"></v-radio>
+            </v-radio-group>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-switch
+              v-model="product_form.usa_medidas"
+              density="compact"
+              label="Usa medidas"
+              color="primary"
+            >
+            </v-switch>
           </v-col>
           <v-col cols="12" sm="6">
             <v-radio-group v-model="product_form.tventa" density="compact">
@@ -483,7 +519,10 @@ const product_form = reactive({
   tventa: "U",
   pcosto: "",
   prioridad: "0",
-  es_kit: "0",
+  es_kit: 0,
+  es_consumible: 0,
+  tipo_consumible: "regular",
+  usa_medidas: false,
   es_presentacion_de_compra: "1",
 });
 const inventario_form = reactive({
@@ -625,6 +664,24 @@ watch(keyword, () => {
   page.value = 1;
   pushQuery("keyword", keyword.value);
 });
+watch(
+  () => product_form.es_kit,
+  (newVal) => {
+    if (newVal) {
+    } else {
+      product_form.es_consumible = 0;
+    }
+  }
+);
+watch(
+  () => product_form.es_consumible,
+  (newVal) => {
+    if (newVal) {
+    } else {
+      product_form.tipo_consumible = null;
+    }
+  }
+);
 function debounce(func, wait = 1000) {
   cargando.value = true;
   clearTimeout(timeOut.value);
@@ -742,7 +799,7 @@ function limpiarCampos() {
   product_form.precio_sugerido = "";
   product_form.porcentaje_ganancia = "";
   product_form.pcosto = "";
-  product_form.es_kit = "0";
+  product_form.es_kit = 0;
   product_form.tventa = "U";
   product_form.prioridad = "0";
 }

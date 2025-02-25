@@ -5,18 +5,75 @@
       <v-card-text>
         <v-row>
           <v-col cols="12" sm="7">
-            <v-text-field label="Código" autocomplete="password"
-              :error-messages="errors.codigo ? errors.codigo[0] : null" v-model="product_form.codigo" />
-            <v-text-field label="Nombre" id="name" autocomplete="off"
-              :error-messages="errors.name ? errors.name[0] : null" v-model="product_form.name" />
-            <v-textarea label="Descripción" id="descripcion" autocomplete="off"
-              :error-messages="errors.descripcion ? errors.descripcion[0] : null" v-model="product_form.descripcion"
-              variant="outlined" />
-            <v-text-field label="Porcentaje Deseado" id="porcentaje_ganancia" autocomplete="off"
-              :error-messages="errors.porcentaje_ganancia ? errors.porcentaje_ganancia[0] : null"
-              v-model="product_form.porcentaje_ganancia" />
-            <v-text-field label="Precio Costo" id="pcosto" autocomplete="off"
-              :error-messages="errors.pcosto ? errors.pcosto[0] : null" v-model="product_form.pcosto" />
+            <v-text-field
+              label="Código"
+              autocomplete="password"
+              :error-messages="errors.codigo ? errors.codigo[0] : null"
+              v-model="product_form.codigo"
+            />
+            <v-text-field
+              label="Nombre"
+              id="name"
+              autocomplete="off"
+              :error-messages="errors.name ? errors.name[0] : null"
+              v-model="product_form.name"
+            />
+            <v-textarea
+              label="Descripción"
+              id="descripcion"
+              autocomplete="off"
+              :error-messages="
+                errors.descripcion ? errors.descripcion[0] : null
+              "
+              v-model="product_form.descripcion"
+              variant="outlined"
+            />
+            <v-text-field
+              label="Porcentaje Deseado"
+              id="porcentaje_ganancia"
+              autocomplete="off"
+              :error-messages="
+                errors.porcentaje_ganancia
+                  ? errors.porcentaje_ganancia[0]
+                  : null
+              "
+              v-model="product_form.porcentaje_ganancia"
+            />
+            <v-text-field
+              label="Precio Costo"
+              id="pcosto"
+              autocomplete="off"
+              :error-messages="errors.pcosto ? errors.pcosto[0] : null"
+              v-model="product_form.pcosto"
+            />
+            <v-switch
+              v-model="product_form.es_consumible"
+              density="compact"
+              v-if="!product_form.es_kit"
+              label="El producto es consumible:"
+            >
+            </v-switch>
+            <v-radio-group
+              v-model="product_form.tipo_consumible"
+              density="compact"
+              v-if="!!product_form.es_consumible"
+            >
+              <template v-slot:label>
+                <div>Tipo de consumible:</div>
+              </template>
+              <v-radio label="Regular" value="regular"></v-radio>
+              <v-radio label="Genérico" value="generico"></v-radio>
+              <v-radio label="Especifico" value="especifico"></v-radio>
+            </v-radio-group>
+            <v-col cols="12" sm="6">
+              <v-switch
+                v-model="product_form.usa_medidas"
+                density="compact"
+                label="Usa medidas"
+                color="primary"
+              >
+              </v-switch>
+            </v-col>
           </v-col>
           <v-col cols="12" sm="5">
             <v-radio-group v-model="product_form.es_kit">
@@ -52,10 +109,15 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn @click="editarProduct" :loading="cargando" color="accent" variant="outlined">Actualizar</v-btn>
+        <v-btn
+          @click="editarProduct"
+          :loading="cargando"
+          color="accent"
+          variant="outlined"
+          >Actualizar</v-btn
+        >
       </v-card-actions>
     </v-card>
-
   </v-container>
 </template>
 
@@ -74,13 +136,39 @@ const product_form = reactive({
   tventa: "U",
   pcosto: "",
   prioridad: false,
-  es_kit: false,
+  es_kit: 0,
+  es_consumible: 0,
+  tipo_consumible: null,
+  usa_medidas: false,
 });
 const errors = ref([]);
 
-watch(() => route.params.productId, () => {
-  showProduct();
-}, { immediate: true });
+watch(
+  () => route.params.productId,
+  () => {
+    showProduct();
+  },
+  { immediate: true }
+);
+watch(
+  () => product_form.es_kit,
+  (newVal) => {
+    if (newVal) {
+      product_form.es_consumible = 0;
+    } else {
+    }
+  }
+);
+watch(
+  () => product_form.es_consumible,
+  (newVal) => {
+    if (newVal) {
+      product_form.tipo_consumible = "regular";
+    } else {
+      product_form.tipo_consumible = null;
+    }
+  }
+);
 
 function showProduct() {
   Product.show(route.params.productId)
@@ -89,20 +177,29 @@ function showProduct() {
       product_form.codigo = response.data.codigo;
       product_form.descripcion = response.data.descripcion;
       product_form.porcentaje_ganancia = response.data.porcentaje_ganancia;
-      product_form.es_presentacion_de_compra = response.data.es_presentacion_de_compra;
+      product_form.es_presentacion_de_compra =
+        response.data.es_presentacion_de_compra;
       product_form.pcosto = response.data.pcosto;
       product_form.es_kit = !!response.data.es_kit;
+      product_form.es_consumible = !!response.data.es_consumible;
+      product_form.tipo_consumible = response.data.tipo_consumible;
       product_form.tventa = response.data.tventa;
       product_form.prioridad = !!response.data.prioridad;
     })
     .catch((error) => {
       handleOpException(error);
-      alert("Ha ocurrido un error")
+      alert("Ha ocurrido un error");
     });
 }
 
 function editarProduct() {
   errors.value = [];
+  if (product_form.es_kit) {
+    product_form.es_consumible = 0;
+  }
+  if (!product_form.es_consumible) {
+    product_form.tipo_consumible = null;
+  }
   Product.update(route.params.productId, product_form)
     .then(() => {
       showProduct();
@@ -119,7 +216,6 @@ function editarProduct() {
 onMounted(() => {
   // productActualId.value = inject("productActualId");
 });
-
 </script>
 
 <style></style>
