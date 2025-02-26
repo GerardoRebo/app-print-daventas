@@ -167,7 +167,7 @@ const frontRoutes = [
             meta: { hasOrganization: false, requiresAuth: false },
           },
           {
-            path: "components",
+            path: "consumibles",
             name: "ProductosShowConsumibles",
             component: ProductosShowConsumibles,
             meta: { hasOrganization: false, requiresAuth: false },

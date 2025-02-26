@@ -18,6 +18,13 @@ export default {
       },
     });
   },
+  getConsumibles(productActualId) {
+    return Api().get("/products/getconsumibles", {
+      params: {
+        productActualId,
+      },
+    });
+  },
   getImages(productId) {
     return Api().get(`/products/${productId}/images/`);
   },
@@ -36,8 +43,22 @@ export default {
       },
     });
   },
+  agregarConsumible(productActualId, productEncontradoId, cantidad) {
+    return Api().post("/products/agregarconsumible", {
+      productActualId,
+      productEncontradoId,
+      cantidad,
+    });
+  },
   eliminarComponente(componente) {
     return Api().get("/products/eliminarComponente", {
+      params: {
+        componente,
+      },
+    });
+  },
+  eliminarConsumible(componente) {
+    return Api().get("/products/eliminarConsumible", {
       params: {
         componente,
       },
