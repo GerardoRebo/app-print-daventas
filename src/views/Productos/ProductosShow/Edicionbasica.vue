@@ -46,30 +46,38 @@
               :error-messages="errors.pcosto ? errors.pcosto[0] : null"
               v-model="product_form.pcosto"
             />
-            <v-switch
-              v-model="product_form.es_consumible"
-              density="compact"
-              v-if="!product_form.es_kit"
-              label="El producto es consumible:"
-            >
-            </v-switch>
-            <v-radio-group
-              v-model="product_form.tipo_consumible"
-              density="compact"
-              v-if="!!product_form.es_consumible"
-            >
-              <template v-slot:label>
-                <div>Tipo de consumible:</div>
-              </template>
-              <v-radio label="Regular" value="regular"></v-radio>
-              <v-radio label="Genérico" value="generico"></v-radio>
-              <v-radio label="Especifico" value="especifico"></v-radio>
-            </v-radio-group>
-            <v-col cols="12" sm="6">
+            <v-col cols="12" sm="6" v-if="!product_form.es_kit">
+              <v-switch
+                v-model="product_form.es_consumible_generico"
+                density="compact"
+                color="primary"
+                label="El producto es consumible generico:"
+              >
+              </v-switch>
+            </v-col>
+            <v-col cols="12" sm="6" v-if="!product_form.es_consumible_generico">
+              <v-switch
+                v-model="product_form.necesita_produccion"
+                density="compact"
+                label="El producto necesita producción:"
+                color="primary"
+              >
+              </v-switch>
+            </v-col>
+            <v-col cols="12" sm="6" v-if="!product_form.es_consumible_generico">
               <v-switch
                 v-model="product_form.usa_medidas"
                 density="compact"
                 label="Usa medidas"
+                color="primary"
+              >
+              </v-switch>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <v-switch
+                v-model="product_form.prioridad"
+                density="compact"
+                label="El producto es prioritario:"
                 color="primary"
               >
               </v-switch>
@@ -137,9 +145,9 @@ const product_form = reactive({
   pcosto: "",
   prioridad: false,
   es_kit: 0,
-  es_consumible: 0,
-  tipo_consumible: null,
+  es_consumible_generico: 0,
   usa_medidas: false,
+  necesita_produccion: false,
 });
 const errors = ref([]);
 
@@ -181,8 +189,10 @@ function showProduct() {
         response.data.es_presentacion_de_compra;
       product_form.pcosto = response.data.pcosto;
       product_form.es_kit = !!response.data.es_kit;
-      product_form.es_consumible = !!response.data.es_consumible;
-      product_form.tipo_consumible = response.data.tipo_consumible;
+      product_form.es_consumible_generico =
+        !!response.data.es_consumible_generico;
+      product_form.necesita_produccion = !!response.data.necesita_produccion;
+      product_form.usa_medidas = !!response.data.usa_medidas;
       product_form.tventa = response.data.tventa;
       product_form.prioridad = !!response.data.prioridad;
     })
