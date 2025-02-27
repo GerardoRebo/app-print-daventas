@@ -1,8 +1,8 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import Production from "../../apis/Production";
-
-const itemsPerPage = ref(4);
+import Stepper from "./Stepper.vue";
+const itemsPerPage = ref(1);
 const mice = ref([
   {
     name: "Logitech G Pro X",
@@ -170,13 +170,14 @@ const mice = ref([
     src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/14.png",
   },
 ]);
+const orders = ref([]);
 
 const onClickSeeAll = () => {
   itemsPerPage.value = itemsPerPage.value === 4 ? mice.value.length : 4;
 };
 const getProductionOrders = async () => {
   const { data } = await Production.index();
-  console.log(data, "data");
+  orders.value = data;
 };
 onMounted(() => {
   getProductionOrders();
@@ -184,11 +185,9 @@ onMounted(() => {
 </script>
 <template>
   <v-container fluid>
-    <v-data-iterator :items="mice" :items-per-page="itemsPerPage">
+    <v-data-iterator :items="orders" :items-per-page="itemsPerPage">
       <template v-slot:header="{ page, pageCount, prevPage, nextPage }">
-        <h1
-          class="text-h4 font-weight-bold d-flex justify-space-between mb-4 align-center"
-        >
+        <h1 class="text-h4 font-weight-bold d-flex justify-space-between mb-4 align-center">
           <div class="text-truncate">Produccion</div>
 
           <div class="d-flex align-center">
@@ -197,22 +196,11 @@ onMounted(() => {
             </v-btn>
 
             <div class="d-inline-flex">
-              <v-btn
-                :disabled="page === 1"
-                class="me-2"
-                icon="mdi-arrow-left"
-                size="small"
-                variant="tonal"
-                @click="prevPage"
-              ></v-btn>
+              <v-btn :disabled="page === 1" class="me-2" icon="mdi-arrow-left" size="small" variant="tonal"
+                @click="prevPage"></v-btn>
 
-              <v-btn
-                :disabled="page === pageCount"
-                icon="mdi-arrow-right"
-                size="small"
-                variant="tonal"
-                @click="nextPage"
-              ></v-btn>
+              <v-btn :disabled="page === pageCount" icon="mdi-arrow-right" size="small" variant="tonal"
+                @click="nextPage"></v-btn>
             </div>
           </div>
         </h1>
@@ -220,74 +208,29 @@ onMounted(() => {
 
       <template v-slot:default="{ items }">
         <v-row>
-          <v-col v-for="(item, i) in items" :key="i" cols="12" sm="6" xl="3">
+          <v-col v-for="(item, i) in items" :key="i" cols="12">
             <v-sheet border>
-              <v-img
-                :gradient="`to top right, rgba(255, 255, 255, .1), rgba(${item.raw.color}, .15)`"
-                :src="item.raw.src"
-                height="150"
-                cover
-              ></v-img>
-
-              <v-list-item
-                :title="item.raw.name"
-                density="comfortable"
-                lines="two"
-                subtitle="Lorem ipsum dil orei namdie dkaf"
-              >
+              <v-img :src="item.raw.src" height="50" cover></v-img>
+              <v-list-item :title="item.raw.ventaticket_articulo?.product?.name" density="comfortable" lines="two"
+                subtitle="Lorem ipsum dil orei namdie dkaf">
                 <template v-slot:title>
                   <strong class="text-h6">
-                    {{ item.raw.name }}
+                    {{ item.raw.ventaticket_articulo?.product?.name }}
                   </strong>
                 </template>
               </v-list-item>
-
-              <v-table class="text-caption" density="compact">
-                <tbody>
-                  <tr align="right">
-                    <th>DPI:</th>
-
-                    <td>{{ item.raw.dpi }}</td>
-                  </tr>
-
-                  <tr align="right">
-                    <th>Buttons:</th>
-
-                    <td>{{ item.raw.buttons }}</td>
-                  </tr>
-
-                  <tr align="right">
-                    <th>Weight:</th>
-
-                    <td>{{ item.raw.weight }}</td>
-                  </tr>
-
-                  <tr align="right">
-                    <th>Wireless:</th>
-
-                    <td>{{ item.raw.wireless ? "Yes" : "No" }}</td>
-                  </tr>
-
-                  <tr align="right">
-                    <th>Price:</th>
-
-                    <td>${{ item.raw.price }}</td>
-                  </tr>
-                </tbody>
-              </v-table>
+              <!-- stepper -->
+              <Stepper></Stepper>
             </v-sheet>
           </v-col>
         </v-row>
       </template>
 
       <template v-slot:footer="{ page, pageCount }">
-        <v-footer
-          class="justify-space-between text-body-2 mt-4"
-          color="surface-variant"
-        >
-          Total mice: {{ mice.length }}
+        <v-footer class="justify-space-between text-body-2 mt-4" color="surface-variant">
+          Total ordenes: {{ mice.length }}
 
-          <div>Page {{ page }} of {{ pageCount }}</div>
+          <div>Página {{ page }} de {{ pageCount }}</div>
         </v-footer>
       </template>
     </v-data-iterator>
