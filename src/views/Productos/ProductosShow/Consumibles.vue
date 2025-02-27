@@ -329,6 +329,7 @@ function searchKeywordSimple() {
 function getAll() {
   Product.getConsumibles(productActual.value.id)
     .then((response) => {
+      console.log(response, "res");
       consumibles.value = response.data;
     })
     .catch((error) => {
