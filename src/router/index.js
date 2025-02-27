@@ -31,6 +31,7 @@ const ProductosShowImagenes = () =>
 const Clientes = () => import("../views/Clientes.vue");
 const CreditosIndex = () => import("../views/Creditos/CreditosIndex.vue");
 const PuntoVenta = () => import("../views/PuntoVenta.vue");
+const Produccion = () => import("../views/Produccion/Produccion.vue");
 const Cotizaciones = () => import("../views/Cotizaciones/Cotizaciones.vue");
 const CotizacionesIndex = () =>
   import("../views/Cotizaciones/CotizacionesIndex.vue");
@@ -222,6 +223,12 @@ const frontRoutes = [
     path: "puntoventa",
     name: "PuntoVenta",
     component: PuntoVenta,
+    meta: { hasOrganization: true, requiresAuth: true },
+  },
+  {
+    path: "produccion",
+    name: "Produccion",
+    component: Produccion,
     meta: { hasOrganization: true, requiresAuth: true },
   },
   {
