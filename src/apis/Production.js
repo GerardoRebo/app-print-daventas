@@ -5,4 +5,13 @@ export default {
   index() {
     return Api().get(`${base}/`, {});
   },
+  updateState(productionOrder, payload) {
+    return Api().put(`${base}/${productionOrder}`, payload);
+  },
+  storeConsumibleGenerico(productionOrder, payload) {
+    return Api().post(
+      `${base}/${productionOrder}/storeConsumibleGenerico`,
+      payload
+    );
+  },
 };

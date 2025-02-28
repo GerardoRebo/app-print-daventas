@@ -2,7 +2,7 @@
 import { onMounted, ref } from "vue";
 import Production from "../../apis/Production";
 import Stepper from "./Stepper.vue";
-const itemsPerPage = ref(1);
+const itemsPerPage = ref(4);
 const mice = ref([
   {
     name: "Logitech G Pro X",
@@ -210,7 +210,10 @@ onMounted(() => {
         <v-row>
           <v-col v-for="(item, i) in items" :key="i" cols="12">
             <v-sheet border>
-              <v-img :src="item.raw.src" height="50" cover></v-img>
+              <!-- <v-img :src="item.raw.src" height="100" cover></v-img> -->
+              <v-img
+                :src="`https://cdn.autobild.es/sites/navi.axelspringer.es/public/media/image/2020/04/mejores-motos-honda-historia-1925125.jpg?tf=3840x`"
+                height="200" cover></v-img>
               <v-list-item :title="item.raw.ventaticket_articulo?.product?.name" density="comfortable" lines="two"
                 subtitle="Lorem ipsum dil orei namdie dkaf">
                 <template v-slot:title>
@@ -220,7 +223,7 @@ onMounted(() => {
                 </template>
               </v-list-item>
               <!-- stepper -->
-              <Stepper></Stepper>
+              <Stepper :order="item.raw"></Stepper>
             </v-sheet>
           </v-col>
         </v-row>
