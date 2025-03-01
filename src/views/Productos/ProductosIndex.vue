@@ -4,8 +4,7 @@
     <RouterLink :to="{ name: 'PuntoVenta' }" class="font-bold underline" @click="hideBanner">Click Aqui</RouterLink>
   </BannerVue> -->
   <v-toolbar density="compact" color="neutral200">
-    <v-toolbar-title class="text-primary_d600"
-      >Catálogo Productos
+    <v-toolbar-title class="text-primary_d600">Catálogo Productos
     </v-toolbar-title>
     <v-btn color="primary" icon v-if="mdAndDown">
       <v-icon @click="abrirProducto">mdi-plus-circle-outline</v-icon>
@@ -18,134 +17,49 @@
   <v-card v-if="mdAndUp">
     <v-container fluid>
       <v-row class="mb-2">
-        <v-btn
-          @click="abrirProducto"
-          small
-          class="ma-2"
-          prepend-icon="mdi-plus"
-          color="primary"
-          variant="outlined"
-        >
+        <v-btn @click="abrirProducto" small class="ma-2" prepend-icon="mdi-plus" color="primary" variant="outlined">
           Crear Producto
         </v-btn>
-        <v-select
-          :items="almacensItems"
-          label="Almacen"
-          v-model="almacenActualId"
-          class="ma-2"
-          max-width="200"
-          color="primary_d700"
-          hide-details
-        ></v-select>
+        <v-select :items="almacensItems" label="Almacen" v-model="almacenActualId" class="ma-2" max-width="200"
+          color="primary_d700" hide-details></v-select>
         <!-- Departamentos -->
-        <v-select
-          :items="departamentosItems"
-          label="Departamento"
-          v-model="departamentoActualId"
-          class="ma-2"
-          max-width="200"
-          clearable
-          color="primary_d700"
-          hide-details
-        ></v-select>
+        <v-select :items="departamentosItems" label="Departamento" v-model="departamentoActualId" class="ma-2"
+          max-width="200" clearable color="primary_d700" hide-details></v-select>
         <!-- Proveedors -->
-        <v-select
-          :items="proveedorsItems"
-          label="Proveedor"
-          v-model="proveedorActualId"
-          class="ma-2"
-          max-width="200"
-          clearable
-          color="primary_d700"
-          hide-details
-        ></v-select>
+        <v-select :items="proveedorsItems" label="Proveedor" v-model="proveedorActualId" class="ma-2" max-width="200"
+          clearable color="primary_d700" hide-details></v-select>
         <v-spacer></v-spacer>
-        <v-checkbox
-          v-model="bajostock"
-          label="Bajo stock"
-          hide-details
-        ></v-checkbox>
-        <v-checkbox
-          v-model="prioritario"
-          label="Prioritarios"
-          hide-details
-        ></v-checkbox>
+        <v-checkbox v-model="bajostock" label="Bajo stock" hide-details></v-checkbox>
+        <v-checkbox v-model="prioritario" label="Prioritarios" hide-details></v-checkbox>
       </v-row>
     </v-container>
   </v-card>
 
   <!-- Mobile Navigation Drawer -->
-  <v-navigation-drawer
-    v-model="drawer"
-    :location="$vuetify.display.mobile ? 'bottom' : undefined"
-    temporary
-    v-if="mdAndDown"
-  >
+  <v-navigation-drawer v-model="drawer" :location="$vuetify.display.mobile ? 'bottom' : undefined" temporary
+    v-if="mdAndDown">
     <v-card>
       <v-container>
-        <v-select
-          :items="almacensItems"
-          label="Almacen"
-          density="compact"
-          v-model="almacenActualId"
-          class="ma-2"
-        ></v-select>
+        <v-select :items="almacensItems" label="Almacen" density="compact" v-model="almacenActualId"
+          class="ma-2"></v-select>
 
         <!-- Departamentos -->
-        <v-select
-          :items="departamentosItems"
-          label="Departamento"
-          density="compact"
-          v-model="departamentoActualId"
-          class="ma-2"
-          clearable
-        ></v-select>
+        <v-select :items="departamentosItems" label="Departamento" density="compact" v-model="departamentoActualId"
+          class="ma-2" clearable></v-select>
         <!-- Proveedors -->
-        <v-select
-          :items="proveedorsItems"
-          label="Proveedor"
-          density="compact"
-          v-model="proveedorActualId"
-          class="ma-2"
-          clearable
-        ></v-select>
-        <v-checkbox
-          v-model="bajostock"
-          label="Bajo stock"
-          density="compact"
-        ></v-checkbox>
-        <v-checkbox
-          v-model="prioritario"
-          label="Prioritarios"
-          density="compact"
-        ></v-checkbox>
+        <v-select :items="proveedorsItems" label="Proveedor" density="compact" v-model="proveedorActualId" class="ma-2"
+          clearable></v-select>
+        <v-checkbox v-model="bajostock" label="Bajo stock" density="compact"></v-checkbox>
+        <v-checkbox v-model="prioritario" label="Prioritarios" density="compact"></v-checkbox>
       </v-container>
     </v-card>
   </v-navigation-drawer>
   <!-- Tabla -->
   <v-container fluid>
-    <v-text-field
-      v-model="keyword"
-      label="Buscar Producto"
-      prepend-inner-icon="mdi-magnify"
-      variant="solo-filled"
-      flat
-      hide-details
-      single-line
-      ref="keywordRef"
-      color="accent"
-    ></v-text-field>
-    <v-progress-linear
-      color="primary_l800"
-      v-if="!cargando"
-      model-value="100"
-    ></v-progress-linear>
-    <v-progress-linear
-      color="primary_l100"
-      indeterminate
-      v-if="cargando"
-      model-value="100"
-    ></v-progress-linear>
+    <v-text-field v-model="keyword" label="Buscar Producto" prepend-inner-icon="mdi-magnify" variant="solo-filled" flat
+      hide-details single-line ref="keywordRef" color="accent" clearable></v-text-field>
+    <v-progress-linear color="primary_l800" v-if="!cargando" model-value="100"></v-progress-linear>
+    <v-progress-linear color="primary_l100" indeterminate v-if="cargando" model-value="100"></v-progress-linear>
     <v-table density="compact" fixed-header height="50vh" hover>
       <thead>
         <tr>
@@ -155,131 +69,55 @@
         </tr>
       </thead>
       <tbody>
-        <TableRow
-          v-for="product in products.data"
-          :key="product.id"
-          :product="product"
-          @ajuste-product="ajusteProduct"
-          @destroy-product="destroyProduct"
-          @abrir-existencias="abrirExistencias"
-        ></TableRow>
+        <TableRow v-for="product in products.data" :key="product.id" :product="product" @ajuste-product="ajusteProduct"
+          @destroy-product="destroyProduct" @abrir-existencias="abrirExistencias"></TableRow>
       </tbody>
     </v-table>
   </v-container>
   <v-row class="ma-1" justify="end">
-    <v-pagination
-      v-model="page"
-      :length="products.last_page"
-      :total-visible="5"
-      density="compact"
-    ></v-pagination>
+    <v-pagination v-model="page" :length="products.last_page" :total-visible="5" density="compact"></v-pagination>
   </v-row>
   <!-- Crear Producto -->
   <v-dialog v-model="isVisible" max-width="800">
     <v-card>
       <v-card-title>Crea Producto Aquí</v-card-title>
       <v-card-text>
-        <v-text-field
-          label="Código"
-          id="cod"
-          autocomplete="off"
-          placeholder=""
-          density="compact"
-          :error-messages="errors.codigo ? errors.codigo[0] : null"
-          v-model="product_form.codigo"
-        />
-        <v-text-field
-          label="Nombre"
-          id="name"
-          autocomplete="off"
-          placeholder=""
-          density="compact"
-          :error-messages="errors.name ? errors.name[0] : null"
-          v-model="product_form.name"
-        />
-        <v-textarea
-          label="Descripción"
-          id="descripcion"
-          autocomplete="off"
-          placeholder=""
-          density="compact"
-          variant="outlined"
-          :error-messages="errors.descripcion ? errors.descripcion[0] : null"
-          v-model="product_form.descripcion"
-        />
-        <v-text-field
-          label="Precio Costo"
-          id="pcosto"
-          autocomplete="off"
-          placeholder=""
-          density="compact"
-          :error-messages="errors.pcosto ? errors.pcosto[0] : null"
-          v-model="product_form.pcosto"
-        />
-        <v-text-field
-          label="Porcentaje Deseado"
-          id="porcentaje_ganancia"
-          autocomplete="off"
-          placeholder=""
-          density="compact"
-          :error-messages="
-            errors.porcentaje_ganancia ? errors.porcentaje_ganancia[0] : null
-          "
-          v-model="product_form.porcentaje_ganancia"
-        />
+        <v-text-field label="Código" id="cod" autocomplete="off" placeholder="" density="compact"
+          :error-messages="errors.codigo ? errors.codigo[0] : null" v-model="product_form.codigo" />
+        <v-text-field label="Nombre" id="name" autocomplete="off" placeholder="" density="compact"
+          :error-messages="errors.name ? errors.name[0] : null" v-model="product_form.name" />
+        <v-textarea label="Descripción" id="descripcion" autocomplete="off" placeholder="" density="compact"
+          variant="outlined" :error-messages="errors.descripcion ? errors.descripcion[0] : null"
+          v-model="product_form.descripcion" />
+        <v-text-field label="Precio Costo" id="pcosto" autocomplete="off" placeholder="" density="compact"
+          :error-messages="errors.pcosto ? errors.pcosto[0] : null" v-model="product_form.pcosto" />
+        <v-text-field label="Porcentaje Deseado" id="porcentaje_ganancia" autocomplete="off" placeholder=""
+          density="compact" :error-messages="errors.porcentaje_ganancia ? errors.porcentaje_ganancia[0] : null
+            " v-model="product_form.porcentaje_ganancia" />
+        <v-select label="El producto es consumible:" v-model="product_form.consumible" :items="consumibleItems">
+        </v-select>
         <v-row dense>
           <v-col cols="12" sm="6">
-            <v-switch
-              v-model="product_form.es_kit"
-              density="compact"
-              label="El producto es kit?:"
-              color="primary"
-            >
+            <v-switch v-model="product_form.es_kit" density="compact" label="El producto es kit?:" color="primary">
             </v-switch>
           </v-col>
-          <v-col cols="12" sm="6" v-if="!product_form.es_kit">
-            <v-switch
-              v-model="product_form.es_consumible_generico"
-              density="compact"
-              color="primary"
-              label="El producto es consumible generico:"
-            >
+          <v-col cols="12" sm="6" v-if="!product_form.consumible">
+            <v-switch v-model="product_form.necesita_produccion" density="compact"
+              label="El producto necesita producción:" color="primary">
             </v-switch>
           </v-col>
-          <v-col cols="12" sm="6" v-if="!product_form.es_consumible_generico">
-            <v-switch
-              v-model="product_form.necesita_produccion"
-              density="compact"
-              label="El producto necesita producción:"
-              color="primary"
-            >
-            </v-switch>
-          </v-col>
-          <v-col cols="12" sm="6" v-if="!product_form.es_consumible_generico">
-            <v-switch
-              v-model="product_form.usa_medidas"
-              density="compact"
-              label="Usa medidas"
-              color="primary"
-            >
+          <v-col cols="12" sm="6" v-if="!product_form.consumible">
+            <v-switch v-model="product_form.usa_medidas" density="compact" label="Usa medidas" color="primary">
             </v-switch>
           </v-col>
           <v-col cols="12" sm="6">
-            <v-switch
-              v-model="product_form.prioridad"
-              density="compact"
-              label="El producto es prioritario:"
-              color="primary"
-            >
+            <v-switch v-model="product_form.prioridad" density="compact" label="El producto es prioritario:"
+              color="primary">
             </v-switch>
           </v-col>
           <v-col cols="12" sm="6">
-            <v-switch
-              v-model="product_form.es_presentacion_de_compra"
-              density="compact"
-              label="El producto es presentación de compra:"
-              color="primary"
-            >
+            <v-switch v-model="product_form.es_presentacion_de_compra" density="compact"
+              label="El producto es presentación de compra:" color="primary">
             </v-switch>
           </v-col>
           <v-col cols="12" sm="6">
@@ -308,66 +146,40 @@
           <v-col cols="12" sm="2">
             <v-row class="d-flex flex-column">
               <p>Historial</p>
-              <v-btn
-                size="small"
-                class="ma-2"
-                :to="{
-                  name: 'Historial',
-                  params: {
-                    almacenId: almacenActualId,
-                    productId: productActualId || 0,
-                  },
-                }"
-                >Inventario</v-btn
-              >
-              <v-btn
-                size="small"
-                class="ma-2"
-                :to="{
-                  name: 'HistorialCosto',
-                  params: {
-                    almacenId: almacenActualId,
-                    productId: productActualId || 0,
-                  },
-                }"
-                >Costo</v-btn
-              >
-              <v-btn
-                size="small"
-                class="ma-2"
-                :to="{
-                  name: 'HistorialPrecio',
-                  params: {
-                    almacenId: almacenActualId,
-                    productId: productActualId || 0,
-                  },
-                }"
-                >Precio</v-btn
-              >
+              <v-btn size="small" class="ma-2" :to="{
+                name: 'Historial',
+                params: {
+                  almacenId: almacenActualId,
+                  productId: productActualId || 0,
+                },
+              }">Inventario</v-btn>
+              <v-btn size="small" class="ma-2" :to="{
+                name: 'HistorialCosto',
+                params: {
+                  almacenId: almacenActualId,
+                  productId: productActualId || 0,
+                },
+              }">Costo</v-btn>
+              <v-btn size="small" class="ma-2" :to="{
+                name: 'HistorialPrecio',
+                params: {
+                  almacenId: almacenActualId,
+                  productId: productActualId || 0,
+                },
+              }">Precio</v-btn>
             </v-row>
           </v-col>
           <v-col cols="12" sm="10">
-            <v-data-table
-              :headers="existenciasHeaders"
-              :items="existencias"
-              items-per-page="5"
-              show-select
-              select-strategy="single"
-            >
-              <template
-                v-slot:item.data-table-select="{
-                  internalItem,
-                  isSelected,
-                  toggleSelect,
-                  index,
-                }"
-              >
-                <v-checkbox-btn
-                  :model-value="isSelected(internalItem)"
-                  color="primary"
-                  @update:model-value="toggleSelect(internalItem)"
-                  class="articulosInputs"
-                ></v-checkbox-btn>
+            <v-data-table :headers="existenciasHeaders" :items="existencias" items-per-page="5" show-select
+              select-strategy="single">
+              <template v-slot:item.data-table-select="{
+                internalItem,
+                isSelected,
+                toggleSelect,
+                index,
+              }">
+                <v-checkbox-btn :model-value="isSelected(internalItem)" color="primary"
+                  @update:model-value="toggleSelect(internalItem)" class="articulosInputs"></v-checkbox-btn>
               </template>
               <template v-slot:item.product_name="{ item }">
                 <span>{{ item.product?.name }}</span>
@@ -391,65 +203,30 @@
   <!-- Ajuste Inventarios -->
   <v-dialog v-model="openAjuste" max-width="800">
     <v-card>
-      <v-card-title
-        >Ajuste Precio/Inventario: {{ inventario_form.name }}</v-card-title
-      >
+      <v-card-title>Ajuste Precio/Inventario: {{ inventario_form.name }}</v-card-title>
       <v-card-text>
         <p><span>Almacen: </span>{{ almacenAjusteInventario }}</p>
         <p>
           <span>Cantidad actual: </span>{{ inventario_form.cantidadActual }}
         </p>
-        <v-text-field
-          label="Ajustar cantidad a"
-          id="cantidadId"
-          autocomplete="off"
-          placeholder=""
-          density="compact"
-          @keydown.enter="ajusteInventarioGeneral"
-          v-model="inventario_form.cantidad"
-        />
-        <v-text-field
-          label="Precio Costo"
-          id="pcosto"
-          autocomplete="off"
-          placeholder=""
-          density="compact"
-          v-model="inventario_form.pcosto"
-          @keydown.enter="ajusteInventarioGeneral"
-        />
-        <v-text-field
-          :label="
-            inventario_form.precio_sugerido
-              ? 'Precio Venta (Sugerido: $' +
-                inventario_form.precio_sugerido +
-                ')'
-              : 'Precio Venta'
-          "
-          id="pcosto"
-          autocomplete="off"
-          placeholder=""
-          density="compact"
-          v-model="inventario_form.pventa"
-          @keydown.enter="ajusteInventarioGeneral"
-        />
+        <v-text-field label="Ajustar cantidad a" id="cantidadId" autocomplete="off" placeholder="" density="compact"
+          @keydown.enter="ajusteInventarioGeneral" v-model="inventario_form.cantidad" />
+        <v-text-field label="Precio Costo" id="pcosto" autocomplete="off" placeholder="" density="compact"
+          v-model="inventario_form.pcosto" @keydown.enter="ajusteInventarioGeneral" />
+        <v-text-field :label="inventario_form.precio_sugerido
+          ? 'Precio Venta (Sugerido: $' +
+          inventario_form.precio_sugerido +
+          ')'
+          : 'Precio Venta'
+          " id="pcosto" autocomplete="off" placeholder="" density="compact" v-model="inventario_form.pventa"
+          @keydown.enter="ajusteInventarioGeneral" />
         <!-- <v-text-field label="Precio Mayoreo" id="precio_mayoreo" autocomplete="off" placeholder="" density="compact"
           v-model="inventario_form.precio_mayoreo" @keydown.enter="ajusteInventarioGeneral" /> -->
       </v-card-text>
       <v-card-actions>
         <v-btn @click="openAjuste = false" :loading="cargando">Cancelar</v-btn>
-        <v-btn
-          @click="ajusteInventarioGeneral"
-          :loading="cargando"
-          variant="outlined"
-          >Guardar General</v-btn
-        >
-        <v-btn
-          @click="ajusteInventario"
-          :loading="cargando"
-          variant="outlined"
-          color="accent"
-          >Guardar</v-btn
-        >
+        <v-btn @click="ajusteInventarioGeneral" :loading="cargando" variant="outlined">Guardar General</v-btn>
+        <v-btn @click="ajusteInventario" :loading="cargando" variant="outlined" color="accent">Guardar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -509,11 +286,16 @@ const product_form = reactive({
   pcosto: "",
   prioridad: "0",
   es_kit: true,
-  es_consumible_generico: 0,
+  consumible: null,
   necesita_produccion: false,
   usa_medidas: false,
   es_presentacion_de_compra: true,
 });
+const consumibleItems = [
+  { title: 'No es consumible', value: null },
+  { title: 'Regular', value: 'regular' },
+  { title: 'Genérico', value: 'generico' },
+];
 const inventario_form = reactive({
   name: "",
   cantidadActual: null,
@@ -627,7 +409,7 @@ watch(page, (newVal, oldVal) => {
 const onPagination = (page) => {
   router
     .push({ name: route.name, query: { ...route.query, page } })
-    .catch(() => {})
+    .catch(() => { })
     .finally(() => {
       search();
     });

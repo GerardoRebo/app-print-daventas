@@ -15,7 +15,9 @@ const { product } = toRefs(props);
                 @keydown.enter="$emit('ajusteProduct', product.id)" color="accent">
                 <v-icon>mdi-pencil</v-icon>
             </v-btn>
-            <span class="font-weight-bold" :class="[product.es_kit ? 'text-green' : 'text-primary']">{{ product.name
+            <span class="font-weight-bold"
+                :class="[product.es_kit ? 'text-green' : '', product.consumible == 'generico' ? 'text-warning' : '', product.consumible == 'regular' ? 'text-neutral700' : '', product.consumible === null && !!!product.es_kit ? 'text-primary' : '',]">{{
+                    product.name
                 }}</span>
         </td>
         <td>${{ product.pcosto }}</td>

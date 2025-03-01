@@ -145,6 +145,13 @@ export default {
       },
     });
   },
+  searchConsumibleKeywordSimple(keyword) {
+    return Api().get(`/products/searchconsumiblekeywordsimple`, {
+      params: {
+        keyword,
+      },
+    });
+  },
   searchKeyWord(keyword, almacenActualId) {
     return Api().get(`/products/searchkeyword`, {
       params: {

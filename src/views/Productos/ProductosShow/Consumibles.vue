@@ -6,25 +6,10 @@
       <p class="font-weight-bold">Codigo: {{ productActual.codigo }}</p>
       <v-divider></v-divider>
       <v-row dense class="mt-4">
-        <v-text-field
-          label="Código"
-          autocomplete="password"
-          v-model="codigo"
-          @keydown.enter.stop="searchProduct"
-          hide-details
-          class="mx-2"
-          max-width="300"
-          ref="codigoRef"
-        />
-        <v-text-field
-          label="Nombre"
-          id="name"
-          autocomplete="off"
-          v-model="product_form.name"
-          hide-details
-          class="mx-2"
-          max-width="300"
-        />
+        <v-text-field label="Código" autocomplete="password" v-model="codigo" @keydown.enter.stop="searchProduct"
+          hide-details class="mx-2" max-width="300" ref="codigoRef" />
+        <v-text-field label="Nombre" id="name" autocomplete="off" v-model="product_form.name" hide-details class="mx-2"
+          max-width="300" />
         <!-- <v-text-field
           label="Cantidad"
           id="cantidad"
@@ -36,21 +21,11 @@
           class="mx-2"
           max-width="300"
         /> -->
-        <v-btn
-          @click="abrirModalBuscaProductsNombre"
-          prepend-icon="mdi-magnify"
-          variant="outlined"
-          color="primary"
-          class="mx-2"
-          >Buscar
+        <v-btn @click="abrirModalBuscaProductsNombre" prepend-icon="mdi-magnify" variant="outlined" color="primary"
+          class="mx-2">Buscar
         </v-btn>
-        <v-btn
-          prepend-icon="mdi-arrow-right-bold"
-          variant="outlined"
-          color="primary"
-          class="mx-2"
-          @click="agregarConsumible"
-          >Agregar
+        <v-btn prepend-icon="mdi-arrow-right-bold" variant="outlined" color="primary" class="mx-2"
+          @click="agregarConsumible">Agregar
         </v-btn>
       </v-row>
     </v-card-text>
@@ -64,62 +39,22 @@
       </v-row>
       <v-divider></v-divider>
       <v-row class="ma-2">
-        <v-text-field
-          label="Código"
-          autocomplete="password"
-          v-model="codigo"
-          @keydown.enter.stop="searchProduct"
-          hide-details
-          ref="codigoRef"
-        />
-        <v-btn
-          variant="outlined"
-          color="primary"
-          class="mx-2"
-          icon
-          size="x-small"
-          @click="searchProduct"
-        >
+        <v-text-field label="Código" autocomplete="password" v-model="codigo" @keydown.enter.stop="searchProduct"
+          hide-details ref="codigoRef" />
+        <v-btn variant="outlined" color="primary" class="mx-2" icon size="x-small" @click="searchProduct">
           <v-icon> mdi-magnify </v-icon>
         </v-btn>
-        <v-btn
-          @click="abrirModalBuscaProductsNombre"
-          variant="outlined"
-          color="primary"
-          class="mx-2"
-          icon
-          size="x-small"
-        >
+        <v-btn @click="abrirModalBuscaProductsNombre" variant="outlined" color="primary" class="mx-2" icon
+          size="x-small">
           <v-icon> mdi-binoculars </v-icon>
         </v-btn>
       </v-row>
-      <v-text-field
-        label="Nombre"
-        id="name"
-        autocomplete="off"
-        v-model="product_form.name"
-        hide-details
-        class="mx-2 mb-2"
-        v-if="product_form.name"
-      />
-      <v-text-field
-        label="Cantidad"
-        id="cantidad"
-        autocomplete="off"
-        placeholder="Cantidad"
-        v-model="product_form.cantidad"
-        hide-details
-        class="mx-2 mb-2"
-        v-if="product_form.name"
-      />
-      <v-btn
-        block
-        color="accent"
-        variant="outlined"
-        prepend-icon="mdi-pencil-plus"
-        v-if="codigo && product_form.cantidad"
-        @keydown.enter.stop="agregarConsumible"
-      >
+      <v-text-field label="Nombre" id="name" autocomplete="off" v-model="product_form.name" hide-details
+        class="mx-2 mb-2" v-if="product_form.name" />
+      <v-text-field label="Cantidad" id="cantidad" autocomplete="off" placeholder="Cantidad"
+        v-model="product_form.cantidad" hide-details class="mx-2 mb-2" v-if="product_form.name" />
+      <v-btn block color="accent" variant="outlined" prepend-icon="mdi-pencil-plus"
+        v-if="codigo && product_form.cantidad" @keydown.enter.stop="agregarConsumible">
         Agregar
       </v-btn>
     </v-card-text>
@@ -134,12 +69,7 @@
         {{ item.consumible.name }}
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-btn
-          icon="mdi-trash-can"
-          size="small"
-          color="error"
-          @click="eliminarConsumible(item.id)"
-        ></v-btn>
+        <v-btn icon="mdi-trash-can" size="small" color="error" @click="eliminarConsumible(item.id)"></v-btn>
       </template>
     </v-data-table>
   </v-container>
@@ -149,29 +79,13 @@
     <v-card>
       <v-card-title>Busca producto por nombre</v-card-title>
       <v-card-text>
-        <v-text-field
-          v-model="keyword"
-          label="Buscar Producto"
-          prepend-inner-icon="mdi-magnify"
-          variant="outlined"
-          hide-details
-          single-line
-          ref="keywordRef"
-        ></v-text-field>
-        <v-progress-linear
-          color="accent"
-          indeterminate
-          v-if="cargando"
-        ></v-progress-linear>
+        <v-text-field v-model="keyword" label="Buscar Producto" prepend-inner-icon="mdi-magnify" variant="outlined"
+          hide-details single-line ref="keywordRef"></v-text-field>
+        <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
         <v-data-table :headers="headers" :items="products" items-per-page="5">
           <template v-slot:item.actions="{ item }">
-            <v-btn
-              prepend-icon="mdi-check"
-              size="small"
-              @keydown.enter="showProduct(item.id)"
-              @click="showProduct(item.id)"
-              color="primary"
-            >
+            <v-btn prepend-icon="mdi-check" size="small" @keydown.enter="showProduct(item.id)"
+              @click="showProduct(item.id)" color="primary">
               Agregar
             </v-btn>
           </template>
@@ -242,7 +156,7 @@ const posibleEnviar = computed(() => {
   );
 });
 watch(keyword, () => {
-  searchKeywordSimple();
+  searchConsumibleKeywordSimple();
 });
 watch(
   () => productActual.value.id,
@@ -268,7 +182,7 @@ function abrirModalBuscaProductsNombre() {
   nextTick(() => {
     keywordRef.value.select();
   });
-  searchKeywordSimple();
+  searchConsumibleKeywordSimple();
 }
 function emptyValues() {
   codigo.value = "";
@@ -316,8 +230,8 @@ function searchProduct() {
       alert("Ha ocurrido un error");
     });
 }
-function searchKeywordSimple() {
-  Product.searchKeywordSimple(keyword.value)
+function searchConsumibleKeywordSimple() {
+  Product.searchConsumibleKeywordSimple(keyword.value)
     .then((response) => {
       products.value = response.data;
     })

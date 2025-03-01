@@ -1,22 +1,14 @@
 <template>
   <v-toolbar color="neutral200">
-    <v-toolbar-title class="text-primary_d500"
-      >Edicion Avanzada
-      <router-link
-        :to="{ name: 'ProductosIndex', query: { keyword: product.name } }"
-        class="text-primary text-decoration-underline text-subtitle-2"
-      >
+    <v-toolbar-title class="text-primary_d500">Edicion Avanzada
+      <router-link :to="{ name: 'ProductosIndex', query: { keyword: product.name } }"
+        class="text-primary text-decoration-underline text-subtitle-2">
         Regresar al catálogo
       </router-link>
     </v-toolbar-title>
     <template v-slot:extension>
       <v-tabs fixed-tabs color="primary">
-        <v-tab
-          v-for="item in items"
-          :key="item.title"
-          :text="item.title"
-          :to="{ name: item.to }"
-        ></v-tab>
+        <v-tab v-for="item in items" :key="item.title" :text="item.title" :to="{ name: item.to }"></v-tab>
       </v-tabs>
     </template>
   </v-toolbar>
@@ -54,7 +46,7 @@ onMounted(() => {
           to: "ProductosShowComponentes",
         });
       }
-      if (product.value.es_consumible_generico) {
+      if (product.value.consumible == 'generico') {
         items.value.push({
           title: "Consumibles",
           to: "ProductosShowConsumibles",
