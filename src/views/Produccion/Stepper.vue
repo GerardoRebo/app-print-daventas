@@ -29,13 +29,16 @@ const steps = ref([
   { value: 5, key: 'finished', label: 'Finalizado', requiresConsumibles: false },
   { value: 6, key: 'delivered', label: 'Entregado', requiresConsumibles: false },
 ]);
-const currentStep = computed(() => steps.value.findIndex((s) => s.key === props.order.status) + 1)
+const currentStep = ref(steps.value.findIndex((s) => s.key === props.order.status) + 1)
 const usesConsumable = computed(() => {
+  console.log('users');
+  console.log(props.order.uses_consumable, 'uses');
+
   return props.order.uses_consumable
 })
-const consumableDeducted = () => {
+const consumableDeducted = computed(() => {
   return props.order.consumable_deducted
-}
+})
 // const activeStep = computed(() => stages.findIndex((s) => s.key === currentStatus.value) + 1)
 
 
@@ -133,10 +136,11 @@ const updateStep = async (step) => {
             <h3>{{ step.label }}</h3>
 
             <!-- Botón para abrir el modal -->
-            <v-btn v-if="step.requiresConsumibles" color="primary" @click="openConsumiblesModal">
+            <v-btn v-if="usesConsumable && !consumableDeducted && step.key == 'production'" color="primary"
+              @click="openConsumiblesModal">
               Agregar Consumibles
             </v-btn>
-
+            <p v-if="consumableDeducted && step.key == 'production'">Consmibles asignados correctamente</p>
             <!-- <v-btn color="secondary" @click="openCommentsModal(step)">
               Agregar Comentarios/Documentos
             </v-btn> -->
