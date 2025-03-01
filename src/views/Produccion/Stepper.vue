@@ -58,8 +58,8 @@ const submitConsumibles = async () => {
 
     showConsumiblesModal.value = false;
     const { data } = await Production.storeConsumibleGenerico(props.order.id, payload);
-    snackSuccess('Proceso actualizado')
-    props.order.status = data
+    snackSuccess('Asignados correctamente')
+    props.order.consumable_deducted = true
     console.log(data, 'data');
     console.log('Step updated successfully');
   }, cargando, snackbar)
@@ -76,11 +76,10 @@ const goToStep = (step) => {
   }
   if (usesConsumable.value && !consumableDeducted.value) {
     snackError('Necesitas especificar los consumibles ')
+    currentStep.value=3
     return;
   }
   updateStep(step)
-
-
 }
 const productosConConsumibles = computed(() => {
   // return props.ventaticket_articulo;
@@ -107,7 +106,7 @@ const updateStep = async (step) => {
 
     // await axios.post('/api/production/step', payload);
     const { data } = await Production.updateState(props.order.id, payload);
-    snackSuccess('Proceso actualizado')
+    // snackSuccess('Proceso actualizado')
     props.order.status = data
     console.log(data, 'data');
     console.log('Step updated successfully');
@@ -140,7 +139,7 @@ const updateStep = async (step) => {
               @click="openConsumiblesModal">
               Agregar Consumibles
             </v-btn>
-            <p v-if="consumableDeducted && step.key == 'production'">Consmibles asignados correctamente</p>
+            <p v-if="consumableDeducted && step.key == 'production'">Consumibles asignados correctamente</p>
             <!-- <v-btn color="secondary" @click="openCommentsModal(step)">
               Agregar Comentarios/Documentos
             </v-btn> -->

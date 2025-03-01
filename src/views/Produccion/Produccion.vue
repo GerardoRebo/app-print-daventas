@@ -1,179 +1,14 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import Production from "../../apis/Production";
 import Stepper from "./Stepper.vue";
+import CardItem from "./CardItem.vue";
+
 const itemsPerPage = ref(4);
-const mice = ref([
-  {
-    name: "Logitech G Pro X",
-    color: "14, 151, 210",
-    dpi: 16000,
-    buttons: 8,
-    weight: "63g",
-    wireless: true,
-    price: 149.99,
-    description: "Logitech G Pro X",
-    src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/3.png",
-  },
-  {
-    name: "Razer DeathAdder V2",
-    color: "12, 146, 47",
-    dpi: 20000,
-    buttons: 8,
-    weight: "82g",
-    wireless: false,
-    price: 69.99,
-    description: "Razer DeathAdder V2",
-    src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/2.png",
-  },
-  {
-    name: "Corsair Dark Core RGB",
-    color: "107, 187, 226",
-    dpi: 18000,
-    buttons: 9,
-    weight: "133g",
-    wireless: true,
-    price: 89.99,
-    description: "Corsair Dark Core RGB",
-    src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/1.png",
-  },
-  {
-    name: "SteelSeries Rival 3",
-    color: "228, 196, 69",
-    dpi: 8500,
-    buttons: 6,
-    weight: "77g",
-    wireless: false,
-    price: 29.99,
-    description: "SteelSeries Rival 3",
-    src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/4.png",
-  },
-  {
-    name: "HyperX Pulsefire FPS Pro",
-    color: "156, 82, 251",
-    dpi: 16000,
-    buttons: 6,
-    weight: "95g",
-    wireless: false,
-    price: 44.99,
-    description: "HyperX Pulsefire FPS Pro",
-    src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/6.png",
-  },
-  {
-    name: "Zowie EC2",
-    color: "166, 39, 222",
-    dpi: 3200,
-    buttons: 5,
-    weight: "90g",
-    wireless: false,
-    price: 69.99,
-    description: "Zowie EC2",
-    src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/7.png",
-  },
-  {
-    name: "Roccat Kone AIMO",
-    color: "131, 9, 10",
-    dpi: 16000,
-    buttons: 10,
-    weight: "130g",
-    wireless: false,
-    price: 79.99,
-    description: "Roccat Kone AIMO",
-    src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/8.png",
-  },
-  {
-    name: "Logitech G903",
-    color: "232, 94, 102",
-    dpi: 12000,
-    buttons: 11,
-    weight: "110g",
-    wireless: true,
-    price: 129.99,
-    description: "Logitech G903",
-    src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/9.png",
-  },
-  {
-    name: "Cooler Master MM711",
-    color: "58, 192, 239",
-    dpi: 16000,
-    buttons: 6,
-    weight: "60g",
-    wireless: false,
-    price: 49.99,
-    description: "Cooler Master MM711",
-    src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/5.png",
-  },
-  {
-    name: "Glorious Model O",
-    color: "161, 252, 250",
-    dpi: 12000,
-    buttons: 6,
-    weight: "67g",
-    wireless: false,
-    price: 49.99,
-    description: "Glorious Model O",
-    src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/15.png",
-  },
-  {
-    name: "HP Omen Photon",
-    color: "201, 1, 2",
-    dpi: 16000,
-    buttons: 11,
-    weight: "128g",
-    wireless: true,
-    price: 99.99,
-    description: "HP Omen Photon",
-    src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/10.png",
-  },
-  {
-    name: "Asus ROG Chakram",
-    color: "10, 181, 19",
-    dpi: 16000,
-    buttons: 9,
-    weight: "121g",
-    wireless: true,
-    price: 159.99,
-    description: "Asus ROG Chakram",
-    src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/11.png",
-  },
-  {
-    name: "Razer Naga X",
-    color: "100, 101, 102",
-    dpi: 16000,
-    buttons: 16,
-    weight: "85g",
-    wireless: false,
-    price: 79.99,
-    description: "Razer Naga X",
-    src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/12.png",
-  },
-  {
-    name: "Mad Catz R.A.T. 8+",
-    color: "136, 241, 242",
-    dpi: 16000,
-    buttons: 11,
-    weight: "145g",
-    wireless: false,
-    price: 99.99,
-    description: "Mad Catz R.A.T. 8+",
-    src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/13.png",
-  },
-  {
-    name: "Alienware 610M",
-    color: "109, 110, 114",
-    dpi: 16000,
-    buttons: 7,
-    weight: "120g",
-    wireless: true,
-    price: 99.99,
-    description: "Alienware 610M",
-    src: "https://cdn.vuetifyjs.com/docs/images/graphics/mice/14.png",
-  },
-]);
 const orders = ref([]);
 
 const onClickSeeAll = () => {
-  itemsPerPage.value = itemsPerPage.value === 4 ? mice.value.length : 4;
+  itemsPerPage.value = itemsPerPage.value === 4 ? orders.value.length : 4;
 };
 const getProductionOrders = async () => {
   const { data } = await Production.index();
@@ -192,7 +27,7 @@ onMounted(() => {
 
           <div class="d-flex align-center">
             <v-btn class="me-8" variant="text" @click="onClickSeeAll">
-              <span class="text-decoration-underline text-none">See all</span>
+              <span class="text-decoration-underline text-none">Ver todo</span>
             </v-btn>
 
             <div class="d-inline-flex">
@@ -211,19 +46,19 @@ onMounted(() => {
           <v-col v-for="(item, i) in items" :key="i" cols="12">
             <v-sheet border>
               <!-- <v-img :src="item.raw.src" height="100" cover></v-img> -->
-              <v-img
-                :src="`https://cdn.autobild.es/sites/navi.axelspringer.es/public/media/image/2020/04/mejores-motos-honda-historia-1925125.jpg?tf=3840x`"
-                height="200" cover></v-img>
-              <v-list-item :title="item.raw.ventaticket_articulo?.product?.name" density="comfortable" lines="two"
-                subtitle="Lorem ipsum dil orei namdie dkaf">
-                <template v-slot:title>
-                  <strong class="text-h6">
-                    {{ item.raw.ventaticket_articulo?.product?.name }}
-                  </strong>
-                </template>
-              </v-list-item>
-              <!-- stepper -->
-              <Stepper :order="item.raw"></Stepper>
+              <v-row>
+                <v-col cols="12" md="6">
+                  <CardItem :order="item.raw"></CardItem>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-row align="start" style="height: 150px;">
+                    <v-col>
+                      <!-- stepper -->
+                      <Stepper :order="item.raw"></Stepper>
+                    </v-col>
+                  </v-row>
+                </v-col>
+              </v-row>
             </v-sheet>
           </v-col>
         </v-row>
@@ -231,7 +66,7 @@ onMounted(() => {
 
       <template v-slot:footer="{ page, pageCount }">
         <v-footer class="justify-space-between text-body-2 mt-4" color="surface-variant">
-          Total ordenes: {{ mice.length }}
+          Total ordenes: {{ orders.length }}
 
           <div>Página {{ page }} de {{ pageCount }}</div>
         </v-footer>
