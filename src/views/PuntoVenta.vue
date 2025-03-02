@@ -7,14 +7,8 @@
   <v-toolbar color="neutral200" density="compact">
     <v-icon color="primary" class="ml-2">mdi-network-pos</v-icon>
     <v-toolbar-title class="text-primary_d600">Punto de Venta</v-toolbar-title>
-    <v-btn
-      class="hidden-xs-only"
-      v-if="mdAndDown"
-      variant="outlined"
-      size="small"
-      append-icon="mdi-menu-down"
-      @click="drawer = true"
-    >
+    <v-btn class="hidden-xs-only" v-if="mdAndDown" variant="outlined" size="small" append-icon="mdi-menu-down"
+      @click="drawer = true">
       <!-- <v-icon >mdi-dots-vertical</v-icon> -->
       Ticket info
     </v-btn>
@@ -23,64 +17,24 @@
   <v-card v-if="lgAndUp">
     <v-container fluid>
       <v-row dense class="mb-2">
-        <v-btn
-          @click="setPendiente"
-          size="small"
-          class="mx-2"
-          prepend-icon="mdi-sort-clock-ascending"
-          variant="tonal"
-        >
+        <v-btn @click="setPendiente" size="small" class="mx-2" prepend-icon="mdi-sort-clock-ascending" variant="tonal">
           Pendiente
         </v-btn>
-        <v-btn
-          @click="abrirPendiente"
-          size="small"
-          class="mx-2"
-          prepend-icon="mdi-file-clock"
-          variant="tonal"
-        >
+        <v-btn @click="abrirPendiente" size="small" class="mx-2" prepend-icon="mdi-file-clock" variant="tonal">
           Tickets Pendientes
         </v-btn>
-        <v-btn
-          @click="abrirCliente"
-          size="small"
-          class="mx-2"
-          prepend-icon="mdi-account-multiple"
-          variant="tonal"
-        >
+        <v-btn @click="abrirCliente" size="small" class="mx-2" prepend-icon="mdi-account-multiple" variant="tonal">
           Clientes
         </v-btn>
-        <v-btn
-          v-if="showOffline"
-          @click="goOffline"
-          class="mx-2"
-          variant="tonal"
-          >Offline
+        <v-btn v-if="showOffline" @click="goOffline" class="mx-2" variant="tonal">Offline
         </v-btn>
-        <v-btn
-          @click="copyLinkToClipBoard"
-          size="small"
-          class="mx-2"
-          prepend-icon="mdi-link"
-          variant="tonal"
-          >Mi Tienda
+        <v-btn @click="copyLinkToClipBoard" size="small" class="mx-2" prepend-icon="mdi-link" variant="tonal">Mi Tienda
         </v-btn>
-        <v-btn
-          @click="printLastTicket"
-          size="small"
-          class="mx-2"
-          prepend-icon="mdi-printer-pos"
-          variant="tonal"
-          >Ultimo ticket
+        <v-btn @click="printLastTicket" size="small" class="mx-2" prepend-icon="mdi-printer-pos" variant="tonal">Ultimo
+          ticket
         </v-btn>
-        <v-select
-          :items="almacenItems"
-          v-if="ticketActual.miAlmacenId == null"
-          label="Almacenes"
-          @update:modelValue="asignarAlmacen"
-          max-width="300"
-          hide-details
-        ></v-select>
+        <v-select :items="almacenItems" v-if="ticketActual.miAlmacenId == null" label="Almacenes"
+          @update:modelValue="asignarAlmacen" max-width="300" hide-details></v-select>
         <div class="d-flex justify-space-around">
           <p class="mx-2">Folio: {{ ticketActual.consecutivo }}</p>
           <p v-if="ticketActual.cliente" class="mx-2">
@@ -93,137 +47,62 @@
             Nombre Ticket: {{ ticketActual.nombre }}
           </p>
         </div>
-        <v-progress-circular
-          color="primary"
-          indeterminate
-          v-if="cargando"
-          size="small"
-        ></v-progress-circular>
+        <v-progress-circular color="primary" indeterminate v-if="cargando" size="small"></v-progress-circular>
       </v-row>
       <v-row dense class="mb-2">
         <v-col>
-          <v-text-field
-            label="Codigo"
-            placeholder="Codigo + Enter"
-            @keydown.right.prevent="goPrimerArticulo"
-            @keydown.enter="searchProduct"
-            v-model="codigo"
-            hide-details
-            autocomplete="password"
-            ref="codigoRef"
-          />
+          <v-text-field label="Codigo" placeholder="Codigo + Enter" @keydown.right.prevent="goPrimerArticulo"
+            @keydown.enter="searchProduct" v-model="codigo" hide-details autocomplete="password" ref="codigoRef" />
         </v-col>
         <v-col>
           <v-tooltip :text="product_form.name" location="top">
             <template v-slot:activator="{ props }">
-              <v-text-field
-                label="Nombre"
-                id="name"
-                autocomplete="off"
-                placeholder=""
-                readonly
-                hide-details
-                v-model="product_form.name"
-                v-bind="props"
-              />
+              <v-text-field label="Nombre" id="name" autocomplete="off" placeholder="" readonly hide-details
+                v-model="product_form.name" v-bind="props" />
             </template>
           </v-tooltip>
         </v-col>
         <v-col cols="1">
-          <v-text-field
-            label="Cantidad"
-            id="cantidad"
-            autocomplete="off"
-            placeholder="Cantidad"
-            @keydown.stop.enter="enviarArticulo"
-            v-model="product_form.cantidad"
-            hide-details
-            type="number"
-          />
+          <v-text-field label="Cantidad" id="cantidad" autocomplete="off" placeholder="Cantidad"
+            @keydown.stop.enter="enviarArticulo" v-model="product_form.cantidad" hide-details type="number" />
         </v-col>
         <v-col cols="1">
-          <v-text-field
-            label="Precio"
-            id="precio"
-            autocomplete="off"
-            placeholder=""
-            @keydown.stop.enter="enviarArticulo"
-            v-model="product_form.pventa"
-            hide-details
-          />
+          <v-text-field label="Precio" id="precio" autocomplete="off" placeholder=""
+            @keydown.stop.enter="enviarArticulo" v-model="product_form.pventa" hide-details />
         </v-col>
         <v-col cols="1">
-          <v-text-field
-            label="Existencia"
-            id="existencia"
-            autocomplete="off"
-            placeholder=""
-            v-model="product_form.existencia"
-            readonly
-            hide-details
-          />
+          <v-text-field label="Existencia" id="existencia" autocomplete="off" placeholder=""
+            v-model="product_form.existencia" readonly hide-details />
         </v-col>
         <v-spacer />
         <v-col cols="1">
-          <v-btn
-            @click="enviarArticulo"
-            prepend-icon="mdi-arrow-right-bold"
-            variant="outlined"
-            color="primary"
-            >Agregar
+          <v-btn @click="enviarArticulo" prepend-icon="mdi-arrow-right-bold" variant="outlined" color="primary">Agregar
           </v-btn>
         </v-col>
         <v-col cols="1">
-          <v-btn
-            @click="abrirModalBuscaProductsNombre"
-            prepend-icon="mdi-magnify"
-            variant="outlined"
-            color="primary"
-            >Buscar
+          <v-btn @click="abrirModalBuscaProductsNombre" prepend-icon="mdi-magnify" variant="outlined"
+            color="primary">Buscar
           </v-btn>
         </v-col>
         <v-col cols="1">
-          <v-btn
-            @click="abrirExistencias"
-            prepend-icon="mdi-eye"
-            variant="outlined"
-            color="primary"
-            >Ver
+          <v-btn @click="abrirExistencias" prepend-icon="mdi-eye" variant="outlined" color="primary">Ver
           </v-btn>
         </v-col>
       </v-row>
       <!-- Cobrar -->
       <v-row dense>
         <v-col cols="1">
-          <v-btn
-            @click="borrarTicket"
-            prepend-icon="mdi-trash-can"
-            hide-details
-            variant="text"
-          >
+          <v-btn @click="borrarTicket" prepend-icon="mdi-trash-can" hide-details variant="text">
             Borrar
           </v-btn>
         </v-col>
         <v-col cols="1">
-          <v-btn
-            @click="abrirCobrarModal"
-            color="accent"
-            variant="flat"
-            prepend-icon="mdi-cash-register"
-            >Cobrar
+          <v-btn @click="abrirCobrarModal" color="accent" variant="flat" prepend-icon="mdi-cash-register">Cobrar
           </v-btn>
         </v-col>
         <v-col cols="2">
-          <v-text-field
-            label="Nombra ticket"
-            id="nombreT"
-            autocomplete="off"
-            placeholder="Nombra Ticket + Enter"
-            density="compact"
-            @keydown.stop.enter="setNombreTicket"
-            v-model="nombreT"
-            hide-details
-          />
+          <v-text-field label="Nombra ticket" id="nombreT" autocomplete="off" placeholder="Nombra Ticket + Enter"
+            density="compact" @keydown.stop.enter="setNombreTicket" v-model="nombreT" hide-details />
         </v-col>
         <v-col cols="1">
           <div>
@@ -259,37 +138,15 @@
       <!-- Codigo -->
       <v-row dense>
         <v-col cols="8">
-          <v-text-field
-            label="Codigo"
-            id="codigo"
-            autocomplete="off"
-            placeholder="Codigo + Enter"
-            @keydown.right.prevent="goPrimerArticulo"
-            @keydown.enter="searchProduct"
-            v-model="codigo"
-            density="compact"
-            variant="outlined"
-            hide-details
-            class="mb-3"
-            ref="codigoRef"
-          />
+          <v-text-field label="Codigo" id="codigo" autocomplete="off" placeholder="Codigo + Enter"
+            @keydown.right.prevent="goPrimerArticulo" @keydown.enter="searchProduct" v-model="codigo" density="compact"
+            variant="outlined" hide-details class="mb-3" ref="codigoRef" />
         </v-col>
         <v-col cols="4">
           <div class="d-flex around align-center">
-            <v-btn
-              @click="searchProduct"
-              density="compact"
-              icon="mdi-magnify"
-              class="mr-1"
-              color="primary"
-            >
+            <v-btn @click="searchProduct" density="compact" icon="mdi-magnify" class="mr-1" color="primary">
             </v-btn>
-            <v-btn
-              @click="abrirModalBuscaProductsNombre"
-              density="compact"
-              icon
-              class="mr-1"
-            >
+            <v-btn @click="abrirModalBuscaProductsNombre" density="compact" icon class="mr-1">
               <v-icon icon="mdi-binoculars"></v-icon>
             </v-btn>
             <v-btn @click="emptyValues" density="compact" icon="mdi-broom">
@@ -300,80 +157,36 @@
       <!-- Nombre -->
       <v-row no-gutters v-if="product_form.name">
         <v-col>
-          <v-text-field
-            v-model="product_form.name"
-            label="Nombre"
-            id="name"
-            autocomplete="off"
-            placeholder=""
-            readonly
-            density="compact"
-            variant="outlined"
-            hide-details
-          />
+          <v-text-field v-model="product_form.name" label="Nombre" id="name" autocomplete="off" placeholder="" readonly
+            density="compact" variant="outlined" hide-details />
         </v-col>
       </v-row>
       <!-- Cantidad -->
       <v-row dense v-if="product_form.name">
         <v-col cols="4">
-          <v-text-field
-            label="Cantidad"
-            id="cantidad"
-            autocomplete="off"
-            placeholder="Cantidad"
-            @keydown.stop.enter="enviarArticulo"
-            v-model="product_form.cantidad"
-            density="compact"
-            variant="outlined"
-            hide-details
-          />
+          <v-text-field label="Cantidad" id="cantidad" autocomplete="off" placeholder="Cantidad"
+            @keydown.stop.enter="enviarArticulo" v-model="product_form.cantidad" density="compact" variant="outlined"
+            hide-details />
         </v-col>
         <v-col cols="4">
-          <v-text-field
-            label="Precio"
-            id="precio"
-            autocomplete="off"
-            placeholder=""
-            @keydown.stop.enter="enviarArticulo"
-            v-model="product_form.pventa"
-            density="compact"
-            variant="outlined"
-            hide-details
-          />
+          <v-text-field label="Precio" id="precio" autocomplete="off" placeholder=""
+            @keydown.stop.enter="enviarArticulo" v-model="product_form.pventa" density="compact" variant="outlined"
+            hide-details />
         </v-col>
         <v-col cols="4">
-          <v-text-field
-            label="Existencia"
-            id="existencia"
-            autocomplete="off"
-            placeholder=""
-            v-model="product_form.existencia"
-            density="compact"
-            readonly
-            variant="outlined"
-          />
+          <v-text-field label="Existencia" id="existencia" autocomplete="off" placeholder=""
+            v-model="product_form.existencia" density="compact" readonly variant="outlined" />
         </v-col>
         <v-spacer />
       </v-row>
       <v-row dense v-if="product_form.name">
         <v-col>
-          <v-btn
-            @click="abrirExistencias"
-            density="compact"
-            prepend-icon="mdi-eye"
-            variant="tonal"
-          >
+          <v-btn @click="abrirExistencias" density="compact" prepend-icon="mdi-eye" variant="tonal">
             Existencias
           </v-btn>
         </v-col>
         <v-col>
-          <v-btn
-            @click="enviarArticulo"
-            density="compact"
-            prepend-icon="mdi-pencil-plus"
-            class="mr-1"
-            color="accent"
-          >
+          <v-btn @click="enviarArticulo" density="compact" prepend-icon="mdi-pencil-plus" class="mr-1" color="accent">
             Agregar
           </v-btn>
         </v-col>
@@ -381,40 +194,19 @@
     </v-container>
   </v-card>
   <!-- Mobile Navigation Drawer -->
-  <v-navigation-drawer
-    v-model="drawer"
-    :location="$vuetify.display.mobile ? 'bottom' : undefined"
-    temporary
-  >
+  <v-navigation-drawer v-model="drawer" :location="$vuetify.display.mobile ? 'bottom' : undefined" temporary>
     <v-card v-if="mdAndDown">
       <v-container>
         <v-row class="mb-3">
-          <v-btn
-            @click="abrirCobrarModal"
-            color="accent"
-            block
-            variant="elevated"
-            prepend-icon="mdi-cash-register"
-            class="mb-3"
-            >Cobrar
+          <v-btn @click="abrirCobrarModal" color="accent" block variant="elevated" prepend-icon="mdi-cash-register"
+            class="mb-3">Cobrar
           </v-btn>
-          <v-btn
-            @click="borrarTicket"
-            variant="tonal"
-            prepend-icon="mdi-trash-can"
-            block
-            class="mb-3"
-          >
+          <v-btn @click="borrarTicket" variant="tonal" prepend-icon="mdi-trash-can" block class="mb-3">
             Borrar
           </v-btn>
           <v-menu transition="scale-transition">
             <template v-slot:activator="{ props }">
-              <v-btn
-                variant="tonal"
-                v-bind="props"
-                block
-                append-icon="mdi-menu-down"
-              >
+              <v-btn variant="tonal" v-bind="props" block append-icon="mdi-menu-down">
                 Opciones
               </v-btn>
             </template>
@@ -424,60 +216,45 @@
                   <v-icon icon="mdi-sort-clock-ascending"></v-icon>
                 </template>
                 <v-list-item-title @click="setPendiente">
-                  Pendiente</v-list-item-title
-                >
+                  Pendiente</v-list-item-title>
               </v-list-item>
               <v-list-item>
                 <template v-slot:prepend>
                   <v-icon icon="mdi-file-clock"></v-icon>
                 </template>
                 <v-list-item-title @click="abrirPendiente">
-                  Tickets Pendientes</v-list-item-title
-                >
+                  Tickets Pendientes</v-list-item-title>
               </v-list-item>
               <v-list-item>
                 <template v-slot:prepend>
                   <v-icon icon="mdi-account-multiple"></v-icon>
                 </template>
                 <v-list-item-title @click="abrirCliente">
-                  Clientes</v-list-item-title
-                >
+                  Clientes</v-list-item-title>
               </v-list-item>
               <v-list-item v-if="showOffline">
                 <template v-slot:prepend>
                   <v-icon icon="mdi-account-multiple"></v-icon>
                 </template>
                 <v-list-item-title @click="goOffline">
-                  Offline</v-list-item-title
-                >
+                  Offline</v-list-item-title>
               </v-list-item>
               <v-list-item>
                 <template v-slot:prepend>
                   <v-icon icon="mdi-link"></v-icon>
                 </template>
                 <v-list-item-title @click="copyLinkToClipBoard">
-                  Mi Tienda</v-list-item-title
-                >
+                  Mi Tienda</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
         </v-row>
-        <v-select
-          :items="almacenItems"
-          v-if="ticketActual.miAlmacenId == null"
-          label="Almacenes"
-          @update:modelValue="asignarAlmacen"
-        ></v-select>
+        <v-select :items="almacenItems" v-if="ticketActual.miAlmacenId == null" label="Almacenes"
+          @update:modelValue="asignarAlmacen"></v-select>
         <!-- setNombreTicket -->
-        <v-text-field
-          label="Nombra ticket"
-          id="nombreT"
-          placeholder="Nombra Ticket + Enter"
-          @keydown.stop.enter="setNombreTicket"
-          v-model="nombreT"
-          append-inner-icon="mdi-check-circle"
-          @click:append-inner="setNombreTicket"
-        />
+        <v-text-field label="Nombra ticket" id="nombreT" placeholder="Nombra Ticket + Enter"
+          @keydown.stop.enter="setNombreTicket" v-model="nombreT" append-inner-icon="mdi-check-circle"
+          @click:append-inner="setNombreTicket" />
         <v-row no-gutters>
           <v-col cols="6">
             <p>Folio: {{ ticketActual.consecutivo }}</p>
@@ -526,17 +303,9 @@
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="(articulo, index) in articulos"
-          :key="index"
-          class="hover:bg-blue-200"
-        >
+        <tr v-for="(articulo, index) in articulos" :key="index" class="hover:bg-blue-200">
           <td>
-            <input
-              type="checkbox"
-              name="check"
-              class="articulosInputs"
-              @keydown.delete="destroyArticulo(articulo.id)"
+            <input type="checkbox" name="check" class="articulosInputs" @keydown.delete="destroyArticulo(articulo.id)"
               @keydown.enter="
                 abrirEdicion(
                   articulo.id,
@@ -544,27 +313,21 @@
                   articulo.precio_usado,
                   articulo.cantidad
                 )
-              "
-            />
+                " />
           </td>
           <td>{{ articulo.codigo }}</td>
           <td>
-            <router-link
-              :to="{
-                name: 'ProductosIndex',
-                query: {
-                  keyword: articulo.product_name ?? articulo.product.name,
-                },
-              }"
-              class="font-weight-bold"
-              :class="[
-                articulo.es_kit ? 'text-success' : 'text-primary',
-                articulo.product_id
-                  ? 'text-decoration-none'
-                  : 'text-decoration-line-through',
-              ]"
-              tabindex="-1"
-            >
+            <router-link :to="{
+              name: 'ProductosIndex',
+              query: {
+                keyword: articulo.product_name ?? articulo.product.name,
+              },
+            }" class="font-weight-bold" :class="[
+              articulo.es_kit ? 'text-success' : 'text-primary',
+              articulo.product_id
+                ? 'text-decoration-none'
+                : 'text-decoration-line-through',
+            ]" tabindex="-1">
               <p>
                 {{ articulo.product_name ?? articulo.product.name }}
                 <v-icon size="x-small">mdi-open-in-new</v-icon>
@@ -582,16 +345,13 @@
           </td>
           <td>${{ articulo.importe_descuento }}</td>
           <td>
-            <v-tooltip
-              :text="`Trasladado: $${articulo.impuesto_traslado}, Retenido: $${articulo.impuesto_retenido}`"
-              location="top"
-            >
+            <v-tooltip :text="`Trasladado: $${articulo.impuesto_traslado}, Retenido: $${articulo.impuesto_retenido}`"
+              location="top">
               <template v-slot:activator="{ props }">
                 <span v-bind="props">
                   ${{
                     articulo.impuesto_traslado - articulo.impuesto_retenido
-                  }}</span
-                >
+                  }}</span>
 
                 <!-- <v-text-field label="Nombre" id="name" autocomplete="off" placeholder="" readonly hide-details
                   v-model="product_form.name" v-bind="props" /> -->
@@ -601,38 +361,20 @@
           <td>{{ articulo.cantidad_actual }}</td>
           <td>
             <div class="flex flex-wrap sm:space-x-4">
-              <v-btn
-                @click="verImagenes(articulo?.product?.images)"
-                class="font-bold cursor-pointer text-gray-500"
-                v-if="articulo?.product?.images?.length"
-                icon="mdi-eye"
-                size="small"
-                tabindex="-1"
-              >
+              <v-btn @click="verImagenes(articulo?.product?.images)" class="font-bold cursor-pointer text-gray-500"
+                v-if="articulo?.product?.images?.length" icon="mdi-eye" size="small" tabindex="-1">
               </v-btn>
-              <v-btn
-                class="font-bold cursor-pointer text-indigo-600"
-                @click="
-                  abrirEdicion(
-                    articulo.id,
-                    articulo.product_name ?? articulo.product.name,
-                    articulo.precio_usado,
-                    articulo.cantidad
-                  )
-                "
-                v-if="articulo.product_id"
-                icon="mdi-pencil"
-                size="x-small"
-                tabindex="-1"
-              >
+              <v-btn class="font-bold cursor-pointer text-indigo-600" @click="
+                abrirEdicion(
+                  articulo.id,
+                  articulo.product_name ?? articulo.product.name,
+                  articulo.precio_usado,
+                  articulo.cantidad
+                )
+                " v-if="articulo.product_id" icon="mdi-pencil" size="x-small" tabindex="-1">
               </v-btn>
-              <v-btn
-                @click="destroyArticulo(articulo.id)"
-                class="font-bold cursor-pointer text-red-500"
-                icon="mdi-trash-can"
-                size="x-small"
-                tabindex="-1"
-              >
+              <v-btn @click="destroyArticulo(articulo.id)" class="font-bold cursor-pointer text-red-500"
+                icon="mdi-trash-can" size="x-small" tabindex="-1">
               </v-btn>
             </div>
           </td>
@@ -651,44 +393,19 @@
           {{ lastFetchTimeFormatted }}
         </p>
         <v-row dense class="mb-2">
-          <v-btn
-            @click.stop="getProductsNow"
-            @keydown.enter.stop="getProductsNow"
-            density="compact"
-            icon="mdi-reload"
-            class="mx-2"
-          >
+          <v-btn @click.stop="getProductsNow" @keydown.enter.stop="getProductsNow" density="compact" icon="mdi-reload"
+            class="mx-2">
           </v-btn>
-          <v-text-field
-            @input="makeUpdate"
-            label="Buscar Producto"
-            prepend-inner-icon="mdi-magnify"
-            hide-details
-            single-line
-            ref="keyw"
-          ></v-text-field>
+          <v-text-field @input="makeUpdate" label="Buscar Producto" prepend-inner-icon="mdi-magnify" hide-details
+            single-line ref="keyw"></v-text-field>
         </v-row>
-        <v-progress-linear
-          color="accent"
-          indeterminate
-          v-if="cargando"
-        ></v-progress-linear>
-        <v-data-table
-          :headers="headers"
-          :items="products"
-          items-per-page="100"
-          density="compact"
-          fixed-header
-          height="50vh"
-        >
+        <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
+        <v-data-table :headers="headers" :items="products" items-per-page="100" density="compact" fixed-header
+          height="50vh">
           <template v-slot:item.name="{ item }">
-            <a
-              href="#"
-              class="font-weight-bold text-decoration-none"
-              :class="[item.es_kit ? 'text-green' : 'text-primary']"
-              @keydown.enter.prevent="getProductById(item.id)"
-              @click.prevent="getProductById(item.id)"
-            >
+            <a href="#" class="font-weight-bold text-decoration-none"
+              :class="[item.es_kit ? 'text-green' : '', item.consumible == 'generico' ? 'text-warning' : '', item.consumible == 'regular' ? 'text-neutral700' : '', item.consumible === null && !!!item.es_kit ? 'text-primary' : '',]"
+              @keydown.enter.prevent="getProductById(item.id)" @click.prevent="getProductById(item.id)">
               <span>{{ item.name }}</span>
             </a>
           </template>
@@ -702,19 +419,14 @@
             <span>{{ item.es_kit ? "Sí" : "No" }}</span>
           </template>
           <template v-slot:item.actions="{ item }">
-            <v-icon
-              class="me-2"
-              size="small"
-              @click="
-                abrirEdicion(
-                  item.id,
-                  item.product_name ?? item.product.name,
-                  item.precio_usado,
-                  item.cantidad
-                )
-              "
-              v-if="item.product_id"
-            >
+            <v-icon class="me-2" size="small" @click="
+              abrirEdicion(
+                item.id,
+                item.product_name ?? item.product.name,
+                item.precio_usado,
+                item.cantidad
+              )
+              " v-if="item.product_id">
               mdi-pencil
             </v-icon>
             <v-icon size="small" @click="destroyArticulo(item.id)">
@@ -731,45 +443,20 @@
     <v-card>
       <v-card-title>Clientes</v-card-title>
       <v-card-text>
-        <v-text-field
-          v-model="keycliente"
-          label="Cliente"
-          prepend-inner-icon="mdi-magnify"
-          variant="outlined"
-          placeholder="Ingresa nombre del cliente"
-          hide-details
-          single-line
-          id="keycliente"
-        ></v-text-field>
+        <v-text-field v-model="keycliente" label="Cliente" prepend-inner-icon="mdi-magnify" variant="outlined"
+          placeholder="Ingresa nombre del cliente" hide-details single-line id="keycliente"></v-text-field>
       </v-card-text>
-      <v-progress-linear
-        color="accent"
-        indeterminate
-        v-if="cargando"
-      ></v-progress-linear>
-      <v-data-table
-        :headers="clienteHeaders"
-        :items="clients"
-        items-per-page="5"
-        show-select
-        select-strategy="single"
-      >
-        <template
-          v-slot:item.data-table-select="{
-            internalItem,
-            isSelected,
-            toggleSelect,
-            index,
-          }"
-        >
-          <v-checkbox-btn
-            :model-value="isSelected(internalItem)"
-            color="primary"
-            @update:model-value="toggleSelect(internalItem)"
-            class="articulosInputs"
-            @click="setCliente(internalItem.raw.id)"
-            @keydown.enter="setCliente(internalItem.raw.id)"
-          ></v-checkbox-btn>
+      <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
+      <v-data-table :headers="clienteHeaders" :items="clients" items-per-page="5" show-select select-strategy="single">
+        <template v-slot:item.data-table-select="{
+          internalItem,
+          isSelected,
+          toggleSelect,
+          index,
+        }">
+          <v-checkbox-btn :model-value="isSelected(internalItem)" color="primary"
+            @update:model-value="toggleSelect(internalItem)" class="articulosInputs"
+            @click="setCliente(internalItem.raw.id)" @keydown.enter="setCliente(internalItem.raw.id)"></v-checkbox-btn>
         </template>
         <!-- Dollar sign formatting for "Precio" column -->
 
@@ -788,34 +475,19 @@
     <v-card>
       <v-card-title>Pendientes</v-card-title>
       <v-card-text> </v-card-text>
-      <v-progress-linear
-        color="accent"
-        indeterminate
-        v-if="cargando"
-      ></v-progress-linear>
-      <v-data-table
-        :headers="pendientesHeaders"
-        :items="pendientes"
-        items-per-page="5"
-        show-select
-        select-strategy="single"
-      >
-        <template
-          v-slot:item.data-table-select="{
-            internalItem,
-            isSelected,
-            toggleSelect,
-            index,
-          }"
-        >
-          <v-checkbox-btn
-            :model-value="isSelected(internalItem)"
-            color="primary"
-            @update:model-value="toggleSelect(internalItem)"
-            class="articulosPendientesInputs"
+      <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
+      <v-data-table :headers="pendientesHeaders" :items="pendientes" items-per-page="5" show-select
+        select-strategy="single">
+        <template v-slot:item.data-table-select="{
+          internalItem,
+          isSelected,
+          toggleSelect,
+          index,
+        }">
+          <v-checkbox-btn :model-value="isSelected(internalItem)" color="primary"
+            @update:model-value="toggleSelect(internalItem)" class="articulosPendientesInputs"
             @keydown.enter="getSpecificVT(internalItem.raw.id)"
-            @click="getSpecificVT(internalItem.raw.id)"
-          ></v-checkbox-btn>
+            @click="getSpecificVT(internalItem.raw.id)"></v-checkbox-btn>
         </template>
         <template v-slot:item.cliente="{ item }">
           <span>{{ item.cliente?.name }}</span>
@@ -835,32 +507,17 @@
     <v-card>
       <v-card-title>Existencias</v-card-title>
       <v-card-text> </v-card-text>
-      <v-progress-linear
-        color="accent"
-        indeterminate
-        v-if="cargando"
-      ></v-progress-linear>
-      <v-data-table
-        :headers="existenciasHeaders"
-        :items="existencias"
-        items-per-page="5"
-        show-select
-        select-strategy="single"
-      >
-        <template
-          v-slot:item.data-table-select="{
-            internalItem,
-            isSelected,
-            toggleSelect,
-            index,
-          }"
-        >
-          <v-checkbox-btn
-            :model-value="isSelected(internalItem)"
-            color="primary"
-            @update:model-value="toggleSelect(internalItem)"
-            class="articulosInputs"
-          ></v-checkbox-btn>
+      <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
+      <v-data-table :headers="existenciasHeaders" :items="existencias" items-per-page="5" show-select
+        select-strategy="single">
+        <template v-slot:item.data-table-select="{
+          internalItem,
+          isSelected,
+          toggleSelect,
+          index,
+        }">
+          <v-checkbox-btn :model-value="isSelected(internalItem)" color="primary"
+            @update:model-value="toggleSelect(internalItem)" class="articulosInputs"></v-checkbox-btn>
         </template>
         <template v-slot:item.product_name="{ item }">
           <span>{{ item.product?.name }}</span>
@@ -883,36 +540,14 @@
     <v-card>
       <v-card-title>Edita Artículo</v-card-title>
       <v-card-text>
-        <v-text-field
-          label="Precio"
-          id="pventa"
-          autocomplete="off"
-          placeholder=""
-          v-model="articulo_form.pventa"
-          @keydown.stop.enter="editarArticulo"
-        />
-        <v-text-field
-          label="Cantidad"
-          id="cantidad"
-          autocomplete="off"
-          placeholder="Ingresa la cantidad"
-          density="compact"
-          v-model="articulo_form.cantidad"
-          @keydown.stop.enter="editarArticulo"
-          type="number"
-        />
+        <v-text-field label="Precio" id="pventa" autocomplete="off" placeholder="" v-model="articulo_form.pventa"
+          @keydown.stop.enter="editarArticulo" />
+        <v-text-field label="Cantidad" id="cantidad" autocomplete="off" placeholder="Ingresa la cantidad"
+          density="compact" v-model="articulo_form.cantidad" @keydown.stop.enter="editarArticulo" type="number" />
       </v-card-text>
       <v-card-actions>
-        <v-btn
-          @click="editarArticulo"
-          color="accent"
-          variant="outlined"
-          :loading="cargando"
-          >Confirmar</v-btn
-        >
-        <v-btn @click="edicion = false" variant="text" :loading="cargando"
-          >Cancelar</v-btn
-        >
+        <v-btn @click="editarArticulo" color="accent" variant="outlined" :loading="cargando">Confirmar</v-btn>
+        <v-btn @click="edicion = false" variant="text" :loading="cargando">Cancelar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -922,52 +557,18 @@
     <v-card>
       <v-card-title>Conversión Granel</v-card-title>
       <v-card-text>
-        <v-text-field
-          label="Precio Base"
-          id="precioBase"
-          autocomplete="off"
-          placeholder="Precio"
-          density="compact"
-          v-model="conversion_form.precioBase"
-          @input.stop="modificaPrecioBase"
-          @keydown.stop.enter="aceptarConversion"
-        />
-        <v-text-field
-          label="Peso KG:"
-          id="peso"
-          autocomplete="off"
-          placeholder=""
-          density="compact"
-          v-model="conversion_form.peso"
-          @input.stop="modificaPeso"
-          @keydown.stop.enter="aceptarConversion"
-          type="number"
-        />
-        <v-text-field
-          label="Total $"
-          id="total"
-          autocomplete="off"
-          placeholder=""
-          density="compact"
-          @input.stop="modificaTotal"
-          v-model="total"
-          @keydown.stop.enter="aceptarConversion"
-        />
+        <v-text-field label="Precio Base" id="precioBase" autocomplete="off" placeholder="Precio" density="compact"
+          v-model="conversion_form.precioBase" @input.stop="modificaPrecioBase"
+          @keydown.stop.enter="aceptarConversion" />
+        <v-text-field label="Peso KG:" id="peso" autocomplete="off" placeholder="" density="compact"
+          v-model="conversion_form.peso" @input.stop="modificaPeso" @keydown.stop.enter="aceptarConversion"
+          type="number" />
+        <v-text-field label="Total $" id="total" autocomplete="off" placeholder="" density="compact"
+          @input.stop="modificaTotal" v-model="total" @keydown.stop.enter="aceptarConversion" />
       </v-card-text>
       <v-card-actions>
-        <v-btn
-          @click="openConversion = false"
-          variant="text"
-          :loading="cargando"
-          >Cancelar</v-btn
-        >
-        <v-btn
-          @click="aceptarConversion"
-          color="accent"
-          variant="outlined"
-          :loading="cargando"
-          >Confirmar</v-btn
-        >
+        <v-btn @click="openConversion = false" variant="text" :loading="cargando">Cancelar</v-btn>
+        <v-btn @click="aceptarConversion" color="accent" variant="outlined" :loading="cargando">Confirmar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -983,163 +584,61 @@
         <v-tabs-window v-model="tab">
           <v-tabs-window-item value="basico">
             <v-container>
-              <v-text-field
-                label="Su cambio"
-                autocomplete="off"
-                placeholder=""
-                v-model="cambio"
-                readonly
-              />
-              <v-text-field
-                type="number"
-                @wheel.prevent
-                label="Paga Con"
-                id="pagocon"
-                autocomplete="off"
-                placeholder=""
-                v-model.number="pagocon"
-                @keydown.enter.exact="guardarVenta(false)"
-              />
-              <v-text-field
-                label="Telefono"
-                id="telefono"
-                autocomplete="off"
-                placeholder=""
-                v-model="telefono"
-                @keydown.enter="guardarVenta(false)"
-              />
+              <v-text-field label="Su cambio" autocomplete="off" placeholder="" v-model="cambio" readonly />
+              <v-text-field type="number" @wheel.prevent label="Paga Con" id="pagocon" autocomplete="off" placeholder=""
+                v-model.number="pagocon" @keydown.enter.exact="guardarVenta(false)" />
+              <v-text-field label="Telefono" id="telefono" autocomplete="off" placeholder="" v-model="telefono"
+                @keydown.enter="guardarVenta(false)" />
               <div v-if="ticketActual.clienteId">
-                <v-checkbox
-                  v-model="credito"
-                  :label="`Es venta a crédito?`"
-                  id="credito"
-                ></v-checkbox>
+                <v-checkbox v-model="credito" :label="`Es venta a crédito?`" id="credito"></v-checkbox>
               </div>
             </v-container>
           </v-tabs-window-item>
           <v-tabs-window-item value="avanzado">
             <v-container>
               <v-row dense>
-                <v-text-field
-                  label="Suma formas de pago"
-                  autocomplete="off"
-                  placeholder=""
-                  v-model="sumatoria"
-                  @keydown.enter="guardarVenta(false)"
-                  readonly
-                />
-                <v-text-field
-                  label="Su cambio"
-                  autocomplete="off"
-                  placeholder=""
-                  v-model="cambio"
-                  readonly
-                />
+                <v-text-field label="Suma formas de pago" autocomplete="off" placeholder="" v-model="sumatoria"
+                  @keydown.enter="guardarVenta(false)" readonly />
+                <v-text-field label="Su cambio" autocomplete="off" placeholder="" v-model="cambio" readonly />
               </v-row>
               <v-row dense>
-                <v-text-field
-                  label="Efectivo"
-                  autocomplete="off"
-                  v-model.number="pagocon"
-                  @keydown.enter="guardarVenta(false)"
-                  type="number"
-                  @wheel.prevent
-                />
-                <v-text-field
-                  label="Referencia"
-                  autocomplete="off"
-                  v-model.number="forma_pago.efectivo_ref"
-                  @keydown.enter="guardarVenta(false)"
-                />
+                <v-text-field label="Efectivo" autocomplete="off" v-model.number="pagocon"
+                  @keydown.enter="guardarVenta(false)" type="number" @wheel.prevent />
+                <v-text-field label="Referencia" autocomplete="off" v-model.number="forma_pago.efectivo_ref"
+                  @keydown.enter="guardarVenta(false)" />
               </v-row>
               <v-row dense>
-                <v-text-field
-                  label="Tarjeta de débito"
-                  autocomplete="off"
-                  v-model.number="forma_pago.tarjeta_debito"
-                  @keydown.enter="guardarVenta(false)"
-                  type="number"
-                  @wheel.prevent
-                />
-                <v-text-field
-                  label="Referencia"
-                  autocomplete="off"
-                  v-model.number="forma_pago.tarjeta_debito_ref"
-                  @keydown.enter="guardarVenta(false)"
-                />
+                <v-text-field label="Tarjeta de débito" autocomplete="off" v-model.number="forma_pago.tarjeta_debito"
+                  @keydown.enter="guardarVenta(false)" type="number" @wheel.prevent />
+                <v-text-field label="Referencia" autocomplete="off" v-model.number="forma_pago.tarjeta_debito_ref"
+                  @keydown.enter="guardarVenta(false)" />
               </v-row>
               <v-row dense>
-                <v-text-field
-                  label="Tarjeta de crédito"
-                  autocomplete="off"
-                  v-model.number="forma_pago.tarjeta_credito"
-                  @keydown.enter="guardarVenta(false)"
-                  type="number"
-                  @wheel.prevent
-                />
-                <v-text-field
-                  label="Referencia"
-                  autocomplete="off"
-                  v-model.number="forma_pago.tarjeta_credito_ref"
-                  @keydown.enter="guardarVenta(false)"
-                />
+                <v-text-field label="Tarjeta de crédito" autocomplete="off" v-model.number="forma_pago.tarjeta_credito"
+                  @keydown.enter="guardarVenta(false)" type="number" @wheel.prevent />
+                <v-text-field label="Referencia" autocomplete="off" v-model.number="forma_pago.tarjeta_credito_ref"
+                  @keydown.enter="guardarVenta(false)" />
               </v-row>
               <v-row dense>
-                <v-text-field
-                  label="Transferencia"
-                  autocomplete="off"
-                  v-model.number="forma_pago.transferencia"
-                  @keydown.enter="guardarVenta(false)"
-                  type="number"
-                  @wheel.prevent
-                />
-                <v-text-field
-                  label="Referencia"
-                  autocomplete="off"
-                  v-model.number="forma_pago.transferencia_ref"
-                  @keydown.enter="guardarVenta(false)"
-                />
+                <v-text-field label="Transferencia" autocomplete="off" v-model.number="forma_pago.transferencia"
+                  @keydown.enter="guardarVenta(false)" type="number" @wheel.prevent />
+                <v-text-field label="Referencia" autocomplete="off" v-model.number="forma_pago.transferencia_ref"
+                  @keydown.enter="guardarVenta(false)" />
               </v-row>
               <v-row dense>
-                <v-text-field
-                  label="Cheque"
-                  autocomplete="off"
-                  v-model.number="forma_pago.cheque"
-                  @keydown.enter="guardarVenta(false)"
-                  type="number"
-                  @wheel.prevent
-                />
-                <v-text-field
-                  label="Referencia"
-                  autocomplete="off"
-                  v-model.number="forma_pago.cheque_ref"
-                  @keydown.enter="guardarVenta(false)"
-                />
+                <v-text-field label="Cheque" autocomplete="off" v-model.number="forma_pago.cheque"
+                  @keydown.enter="guardarVenta(false)" type="number" @wheel.prevent />
+                <v-text-field label="Referencia" autocomplete="off" v-model.number="forma_pago.cheque_ref"
+                  @keydown.enter="guardarVenta(false)" />
               </v-row>
               <v-row dense>
-                <v-text-field
-                  label="Vales de despensa"
-                  autocomplete="off"
-                  v-model.number="forma_pago.vales_de_despensa"
-                  @keydown.enter="guardarVenta(false)"
-                  type="number"
-                  @wheel.prevent
-                />
-                <v-text-field
-                  label="Referencia"
-                  autocomplete="off"
-                  v-model.number="forma_pago.vales_de_despensa_ref"
-                  @keydown.enter="guardarVenta(false)"
-                />
+                <v-text-field label="Vales de despensa" autocomplete="off" v-model.number="forma_pago.vales_de_despensa"
+                  @keydown.enter="guardarVenta(false)" type="number" @wheel.prevent />
+                <v-text-field label="Referencia" autocomplete="off" v-model.number="forma_pago.vales_de_despensa_ref"
+                  @keydown.enter="guardarVenta(false)" />
               </v-row>
-              <v-text-field
-                label="Telefono"
-                id="telefono"
-                autocomplete="off"
-                placeholder=""
-                v-model="telefono"
-                @keydown.enter="guardarVenta(false)"
-              />
+              <v-text-field label="Telefono" id="telefono" autocomplete="off" placeholder="" v-model="telefono"
+                @keydown.enter="guardarVenta(false)" />
             </v-container>
           </v-tabs-window-item>
         </v-tabs-window>
@@ -1151,60 +650,28 @@
         <template v-if="mdAndUp">
           <v-tooltip text="Vender" location="top">
             <template v-slot:activator="{ props }">
-              <v-btn
-                @click="guardarVenta(false)"
-                size="small"
-                variant="outlined"
-                color="accent"
-                prepend-icon="mdi-cash"
-                class="ring"
-                >Vender</v-btn
-              >
+              <v-btn @click="guardarVenta(false)" size="small" variant="outlined" color="accent" prepend-icon="mdi-cash"
+                class="ring">Vender</v-btn>
             </template>
           </v-tooltip>
           <v-tooltip text="Vender e imprimir" location="top">
             <template v-slot:activator="{ props }">
-              <v-btn
-                @click="guardarVenta(true)"
-                size="small"
-                variant="outlined"
-                color="accent"
-                prepend-icon="mdi-printer-pos"
-                class="ring"
-                v-bind="props"
-                >Vender</v-btn
-              >
+              <v-btn @click="guardarVenta(true)" size="small" variant="outlined" color="accent"
+                prepend-icon="mdi-printer-pos" class="ring" v-bind="props">Vender</v-btn>
             </template>
           </v-tooltip>
           <v-tooltip text="Vender y mandar whatsapp" location="top">
             <template v-slot:activator="{ props }">
-              <v-btn
-                @click="guardarVentaWha(false)"
-                size="small"
-                variant="outlined"
-                color="accent"
-                prepend-icon="mdi-whatsapp"
-                class="ring"
-                v-bind="props"
-                >Vender</v-btn
-              >
+              <v-btn @click="guardarVentaWha(false)" size="small" variant="outlined" color="accent"
+                prepend-icon="mdi-whatsapp" class="ring" v-bind="props">Vender</v-btn>
             </template>
           </v-tooltip>
         </template>
         <v-btn @click="openCobrar = false" size="small">Cancelar</v-btn>
 
-        <v-menu
-          transition="scale-transition"
-          class="ma-2 pa-2"
-          v-if="smAndDown"
-        >
+        <v-menu transition="scale-transition" class="ma-2 pa-2" v-if="smAndDown">
           <template v-slot:activator="{ props }">
-            <v-btn
-              color="accent"
-              v-bind="props"
-              append-icon="mdi-menu-down"
-              :loading="cargando"
-            >
+            <v-btn color="accent" v-bind="props" append-icon="mdi-menu-down" :loading="cargando">
               Vender
             </v-btn>
           </template>
@@ -1238,11 +705,7 @@
       <v-card-title>Imágenes</v-card-title>
       <v-card-text>
         <v-carousel>
-          <v-carousel-item
-            v-for="image in imagenes"
-            :src="image.url"
-            cover
-          ></v-carousel-item>
+          <v-carousel-item v-for="image in imagenes" :src="image.url" cover></v-carousel-item>
         </v-carousel>
       </v-card-text>
       <v-card-actions>
@@ -1887,7 +1350,7 @@ function getAllProducts() {
   if (!productsData.value[keyword.value] || isDataStale) {
     // Fetch new data from the server
     // Update store state and last fetch time
-    Product.searchKeyWord(keyword.value, almacen.id)
+    Product.searchKeyWord(keyword.value, almacen.id, false)
       .then((response) => {
         products.value = response.data;
         productsData.value[keyword.value] = response.data;
@@ -1898,7 +1361,7 @@ function getAllProducts() {
         handleOpException(error);
         alert("Ha ocurrido un error" + error.message);
       })
-      .finally(() => {});
+      .finally(() => { });
   } else {
     products.value = productsData.value[keyword.value];
     lastFetchTimeLocal.value = lastFetchTime;
@@ -1906,7 +1369,7 @@ function getAllProducts() {
 }
 function getProductsNow() {
   const currentTime = new Date().getTime();
-  Product.searchKeyWord(keyword.value, almacen.id)
+  Product.searchKeyWord(keyword.value, almacen.id, false)
     .then((response) => {
       products.value = response.data;
       productsData.value[keyword.value] = response.data;
@@ -1917,7 +1380,7 @@ function getProductsNow() {
       handleOpException(error);
       alert("Ha ocurrido un error" + error.message);
     })
-    .finally(() => {});
+    .finally(() => { });
 }
 function getAllPendientes() {
   if (cargando.value) return;
@@ -1977,7 +1440,7 @@ function enviarArticulo() {
   ) {
     alert(
       "Revisar!! Precio Menor del Sugerido, Precio Sugerido: $" +
-        pventa_porcentaje.value
+      pventa_porcentaje.value
     );
   }
   PuntoVenta.register(productActualId.value, ticketActual.id, product_form)
@@ -2006,7 +1469,7 @@ function destroyArticulo(articulo) {
       handleOpException(error);
       alert("Ha ocurrido un error");
     })
-    .finally(() => {});
+    .finally(() => { });
 }
 function abrirModalBuscaProductsNombre() {
   isVisible.value = true;
@@ -2076,7 +1539,7 @@ function setCliente(cliente) {
         if (
           confirm(
             "Se aplicaran las siguientes reglas de retencion: " +
-              response.data.retentionRules
+            response.data.retentionRules
           ) == true
         ) {
           cargando.value = false;

@@ -152,11 +152,12 @@ export default {
       },
     });
   },
-  searchKeyWord(keyword, almacenActualId) {
+  searchKeyWord(keyword, almacenActualId, consumibles=true) {
     return Api().get(`/products/searchkeyword`, {
       params: {
         codigo: keyword,
         almacenActualId: almacenActualId,
+        consumibles: consumibles,
       },
     });
   },
