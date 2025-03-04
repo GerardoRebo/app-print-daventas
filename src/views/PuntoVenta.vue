@@ -66,11 +66,11 @@
           <v-text-field label="Cantidad" id="cantidad" autocomplete="off" placeholder="Cantidad"
             @keydown.stop.enter="enviarArticulo" v-model="product_form.cantidad" hide-details type="number" />
         </v-col>
-        <v-col cols="1">
+        <v-col cols="1" v-if="product_form.usa_medidas">
           <v-text-field label="Ancho" autocomplete="off" placeholder="Ancho"
             @keydown.stop.enter="enviarArticulo" v-model="product_form.ancho" hide-details type="number" />
         </v-col>
-        <v-col cols="1">
+        <v-col cols="1" v-if="product_form.usa_medidas">
           <v-text-field label="Alto" autocomplete="off" placeholder="Alto"
             @keydown.stop.enter="enviarArticulo" v-model="product_form.alto" hide-details type="number" />
         </v-col>
@@ -1238,6 +1238,7 @@ function emptyValues() {
   product_form.pventa = "";
   product_form.precio_mayoreo = "";
   product_form.existencia = "";
+  product_form.usa_medidas = false;
   drawer.value = false;
 }
 function aceptarConversion() {
@@ -1334,9 +1335,12 @@ async function rellenaTicket(response) {
 }
 function rellenaProductForm(response) {
   productActualId.value = response.data.id;
+  product_form.usa_medidas = response.data.usa_medidas;
   product_form.name = response.data.name;
   product_form.codigo = response.data.codigo;
   product_form.cantidad = 1;
+  product_form.ancho = 1;
+  product_form.alto = 1;
   product_form.pventa = response.data.precio;
   product_form.pcosto = response.data.pcosto;
   product_form.porcentaje_ganancia = response.data.porcentaje_ganancia;
@@ -1451,6 +1455,10 @@ function getAllClientes() {
 function enviarArticulo() {
   if (cargando.value) return;
   cargando.value = true;
+  if (product_form.usa_medidas && ( !product_form.ancho || !product_form.alto)) {
+    cargando.value = false;
+    return snackWarning("Falta determinar: ancho o alto ");
+  }
   if (
     productActualId.value == null ||
     ticketActual.id == null ||
