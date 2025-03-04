@@ -67,6 +67,14 @@
             @keydown.stop.enter="enviarArticulo" v-model="product_form.cantidad" hide-details type="number" />
         </v-col>
         <v-col cols="1">
+          <v-text-field label="Ancho" autocomplete="off" placeholder="Ancho"
+            @keydown.stop.enter="enviarArticulo" v-model="product_form.ancho" hide-details type="number" />
+        </v-col>
+        <v-col cols="1">
+          <v-text-field label="Alto" autocomplete="off" placeholder="Alto"
+            @keydown.stop.enter="enviarArticulo" v-model="product_form.alto" hide-details type="number" />
+        </v-col>
+        <v-col cols="1">
           <v-text-field label="Precio" id="precio" autocomplete="off" placeholder=""
             @keydown.stop.enter="enviarArticulo" v-model="product_form.pventa" hide-details />
         </v-col>
@@ -166,6 +174,16 @@
         <v-col cols="4">
           <v-text-field label="Cantidad" id="cantidad" autocomplete="off" placeholder="Cantidad"
             @keydown.stop.enter="enviarArticulo" v-model="product_form.cantidad" density="compact" variant="outlined"
+            hide-details />
+        </v-col>
+        <v-col cols="4">
+          <v-text-field label="Ancho" autocomplete="off" placeholder="Ancho"
+            @keydown.stop.enter="enviarArticulo" v-model="product_form.ancho" density="compact" variant="outlined"
+            hide-details />
+        </v-col>
+        <v-col cols="4">
+          <v-text-field label="Alto" autocomplete="off" placeholder="Alto"
+            @keydown.stop.enter="enviarArticulo" v-model="product_form.alto" density="compact" variant="outlined"
             hide-details />
         </v-col>
         <v-col cols="4">
@@ -311,7 +329,10 @@
                   articulo.id,
                   articulo.product_name ?? articulo.product.name,
                   articulo.precio_usado,
-                  articulo.cantidad
+                  articulo.cantidad,
+                  articulo.ancho,
+                  articulo.alto,
+
                 )
                 " />
           </td>
@@ -335,6 +356,8 @@
             </router-link>
           </td>
           <td>{{ articulo.cantidad }}</td>
+          <td>{{ articulo.ancho }}</td>
+          <td>{{ articulo.alto }}</td>
           <td>
             <div :title="`Descuento aplicado: $${articulo.descuento}`">
               ${{ articulo.precio_usado }}
@@ -544,6 +567,10 @@
           @keydown.stop.enter="editarArticulo" />
         <v-text-field label="Cantidad" id="cantidad" autocomplete="off" placeholder="Ingresa la cantidad"
           density="compact" v-model="articulo_form.cantidad" @keydown.stop.enter="editarArticulo" type="number" />
+        <v-text-field label="Ancho"  autocomplete="off" placeholder="Ancho"
+          density="compact" v-model="articulo_form.ancho" @keydown.stop.enter="editarArticulo" type="number" />
+        <v-text-field label="Alto"  autocomplete="off" placeholder="Alto"
+          density="compact" v-model="articulo_form.alto" @keydown.stop.enter="editarArticulo" type="number" />
       </v-card-text>
       <v-card-actions>
         <v-btn @click="editarArticulo" color="accent" variant="outlined" :loading="cargando">Confirmar</v-btn>
@@ -774,6 +801,8 @@ const articulo_form = reactive({
   name: "",
   cantidadActual: null,
   cantidad: null,
+  ancho: null,
+  alto: null,
   pcosto: null,
   pventa: null,
 });
@@ -851,6 +880,8 @@ const tHeaders = ref([
   "Código",
   "Nombre",
   "Cantidad",
+  "Ancho",
+  "Alto",
   "Precio",
   "Importe",
   "Descuento",
@@ -1202,6 +1233,8 @@ function emptyValues() {
   product_form.name = "";
   product_form.codigo = "";
   product_form.cantidad = "";
+  product_form.ancho = "";
+  product_form.alto = "";
   product_form.pventa = "";
   product_form.precio_mayoreo = "";
   product_form.existencia = "";
@@ -1311,12 +1344,14 @@ function rellenaProductForm(response) {
   product_form.precio_mayoreo = response.data.precio_mayoreo;
   product_form.existencia = response.data.cantidad_actual;
 }
-function abrirEdicion(id, name, pventa, cantidad) {
+function abrirEdicion(id, name, pventa, cantidad, ancho,alto ) {
   blurPrimerArticulo();
   articuloActualId.value = id;
   articulo_form.name = name;
   articulo_form.pventa = pventa;
   articulo_form.cantidad = cantidad;
+  articulo_form.ancho = ancho;
+  articulo_form.alto = alto;
   edicion.value = true;
   nextTick(() => document.getElementById("pventa").select());
 }
