@@ -85,12 +85,12 @@ export default {
   },
   update(articulo, ventaticket, articulo_form) {
     return Api().post("/puntoventa/update", {
-      params: {
         articulo,
         ventaticket,
         precio: articulo_form.pventa,
         cantidad: articulo_form.cantidad,
-      },
+        ancho: articulo_form.ancho,
+        alto: articulo_form.alto,
     });
   },
   borrarTicket(ventaticket) {

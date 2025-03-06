@@ -358,6 +358,7 @@
           <td>{{ articulo.cantidad }}</td>
           <td>{{ articulo.ancho }}</td>
           <td>{{ articulo.alto }}</td>
+          <td>{{ articulo.area_total }}</td>
           <td>
             <div :title="`Descuento aplicado: $${articulo.descuento}`">
               ${{ articulo.precio_usado }}
@@ -392,7 +393,9 @@
                   articulo.id,
                   articulo.product_name ?? articulo.product.name,
                   articulo.precio_usado,
-                  articulo.cantidad
+                  articulo.cantidad, 
+                  articulo.ancho, 
+                  articulo.alto, 
                 )
                 " v-if="articulo.product_id" icon="mdi-pencil" size="x-small" tabindex="-1">
               </v-btn>
@@ -882,6 +885,7 @@ const tHeaders = ref([
   "Cantidad",
   "Ancho",
   "Alto",
+  "Área",
   "Precio",
   "Importe",
   "Descuento",
