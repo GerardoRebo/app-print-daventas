@@ -67,12 +67,12 @@
             @keydown.stop.enter="enviarArticulo" v-model="product_form.cantidad" hide-details type="number" />
         </v-col>
         <v-col cols="1" v-if="product_form.usa_medidas">
-          <v-text-field label="Ancho" autocomplete="off" placeholder="Ancho"
-            @keydown.stop.enter="enviarArticulo" v-model="product_form.ancho" hide-details type="number" />
+          <v-text-field label="Ancho" autocomplete="off" placeholder="Ancho" @keydown.stop.enter="enviarArticulo"
+            v-model="product_form.ancho" hide-details type="number" />
         </v-col>
         <v-col cols="1" v-if="product_form.usa_medidas">
-          <v-text-field label="Alto" autocomplete="off" placeholder="Alto"
-            @keydown.stop.enter="enviarArticulo" v-model="product_form.alto" hide-details type="number" />
+          <v-text-field label="Alto" autocomplete="off" placeholder="Alto" @keydown.stop.enter="enviarArticulo"
+            v-model="product_form.alto" hide-details type="number" />
         </v-col>
         <v-col cols="1">
           <v-text-field label="Precio" id="precio" autocomplete="off" placeholder=""
@@ -177,14 +177,12 @@
             hide-details />
         </v-col>
         <v-col cols="4">
-          <v-text-field label="Ancho" autocomplete="off" placeholder="Ancho"
-            @keydown.stop.enter="enviarArticulo" v-model="product_form.ancho" density="compact" variant="outlined"
-            hide-details />
+          <v-text-field label="Ancho" autocomplete="off" placeholder="Ancho" @keydown.stop.enter="enviarArticulo"
+            v-model="product_form.ancho" density="compact" variant="outlined" hide-details />
         </v-col>
         <v-col cols="4">
-          <v-text-field label="Alto" autocomplete="off" placeholder="Alto"
-            @keydown.stop.enter="enviarArticulo" v-model="product_form.alto" density="compact" variant="outlined"
-            hide-details />
+          <v-text-field label="Alto" autocomplete="off" placeholder="Alto" @keydown.stop.enter="enviarArticulo"
+            v-model="product_form.alto" density="compact" variant="outlined" hide-details />
         </v-col>
         <v-col cols="4">
           <v-text-field label="Precio" id="precio" autocomplete="off" placeholder=""
@@ -386,16 +384,22 @@
           <td>
             <div class="flex flex-wrap sm:space-x-4">
               <v-btn @click="verImagenes(articulo?.product?.images)" class="font-bold cursor-pointer text-gray-500"
-                v-if="articulo?.product?.images?.length" icon="mdi-eye" size="small" tabindex="-1">
+                v-if="articulo?.product?.images?.length" icon="mdi-eye" size="x-small" tabindex="-1">
+              </v-btn>
+              <v-btn class="font-bold cursor-pointer text-indigo-600" @click="
+                openDetalles(
+                  articulo
+                )
+                " v-if="articulo.product_id" icon="mdi mdi-dots-horizontal" size="x-small" tabindex="-1">
               </v-btn>
               <v-btn class="font-bold cursor-pointer text-indigo-600" @click="
                 abrirEdicion(
                   articulo.id,
                   articulo.product_name ?? articulo.product.name,
                   articulo.precio_usado,
-                  articulo.cantidad, 
-                  articulo.ancho, 
-                  articulo.alto, 
+                  articulo.cantidad,
+                  articulo.ancho,
+                  articulo.alto,
                 )
                 " v-if="articulo.product_id" icon="mdi-pencil" size="x-small" tabindex="-1">
               </v-btn>
@@ -570,10 +574,10 @@
           @keydown.stop.enter="editarArticulo" />
         <v-text-field label="Cantidad" id="cantidad" autocomplete="off" placeholder="Ingresa la cantidad"
           density="compact" v-model="articulo_form.cantidad" @keydown.stop.enter="editarArticulo" type="number" />
-        <v-text-field label="Ancho"  autocomplete="off" placeholder="Ancho"
-          density="compact" v-model="articulo_form.ancho" @keydown.stop.enter="editarArticulo" type="number" />
-        <v-text-field label="Alto"  autocomplete="off" placeholder="Alto"
-          density="compact" v-model="articulo_form.alto" @keydown.stop.enter="editarArticulo" type="number" />
+        <v-text-field label="Ancho" autocomplete="off" placeholder="Ancho" density="compact"
+          v-model="articulo_form.ancho" @keydown.stop.enter="editarArticulo" type="number" />
+        <v-text-field label="Alto" autocomplete="off" placeholder="Alto" density="compact" v-model="articulo_form.alto"
+          @keydown.stop.enter="editarArticulo" type="number" />
       </v-card-text>
       <v-card-actions>
         <v-btn @click="editarArticulo" color="accent" variant="outlined" :loading="cargando">Confirmar</v-btn>
@@ -729,6 +733,81 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+  <v-dialog v-model="isDetallesOpen">
+    <v-card>
+      <v-card-title>
+        Archivos
+      </v-card-title>
+      <v-card-text>
+        <v-row>
+          <v-col cols="12" md="3">
+            <v-row>
+              <v-col cols="12">
+                <v-file-input multiple label="Upload Files" accept="image/*,application/pdf,application/photoshop"
+                  @change="handleFiles" :loading="cargando" color="primary" ref="fileInput"></v-file-input>
+                <v-col v-for="(file, index) in selectedFiles" :key="index" class="position-relative" cols="12">
+                  <div v-if="file.type.startsWith('image/')">
+                    <v-img :src="previewImages[index]" class="rounded-md" height="128px" contain />
+                  </div>
+                  <div v-else>
+                    <v-icon large>mdi-file</v-icon>
+                    <div>{{ file.name }}</div>
+                  </div>
+                  <v-btn icon size="small" class="absolute top-0 right-0" @click="removeImage(index)" color="error">
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
+                </v-col>
+                <v-btn color="primary" type="submit" class="mt-4" @click="submitForm">Subir</v-btn>
+              </v-col>
+              <v-col cols="12">
+                <v-textarea label="Descripción" v-model="articuloDescription" rows="2" color="primary"
+                  variant="outlined"></v-textarea>
+                <v-btn color="primary" @click="updateArticuloDescription">Guardar</v-btn>
+              </v-col>
+            </v-row>
+          </v-col>
+          <v-col cols="12" md="9">
+            <v-card>
+              <v-card-text>
+                <!-- <v-btn text @click="isVisible = true" class="ma-2">Ver Todas</v-btn> -->
+                <v-data-table :headers="filesHeaders" :items="files" items-per-page="5">
+                  <template v-slot:item.image="{ item, index }">
+                    <v-img :src="item.url" height="56px" contain @click="openCarousel(index)"
+                      class="cursor-pointer"></v-img>
+                  </template>
+                  <template v-slot:item.actions="{ item }">
+                    <v-btn icon="mdi-trash-can" size="small" color="error" @click="eliminarFile(item.id)"></v-btn>
+                  </template>
+                </v-data-table>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn text @click="isDetallesOpen = false">Cerrar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+  <!-- Modal Carousel Files-->
+  <v-dialog v-model="isCarouselFilesOpen">
+    <v-card>
+      <v-card-title>
+        Archivos
+      </v-card-title>
+      <v-card-text>
+        <v-carousel v-model="selectedIndex">
+          <v-carousel-item v-for="image in files" :src="image.url"></v-carousel-item>
+        </v-carousel>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn text @click="isCarouselFilesOpen = false">Cerrar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
   <!-- Imagenes -->
   <v-dialog v-model="isOpenImagenes">
     <v-card>
@@ -777,6 +856,7 @@ import { WebviewWindow } from "@tauri-apps/api/window";
 
 const store = useUserStore();
 import Organizacion from "../apis/Organizacion";
+import Articulo from "../apis/Articulo";
 import { useSnackBar } from "../composables/SnackBar";
 import DynamicSnack from "../components/DynamicSnack.vue";
 import { useDisplay } from "vuetify";
@@ -800,6 +880,7 @@ const conversion_form = reactive({
   precioBase: null,
   peso: 1,
 });
+
 const articulo_form = reactive({
   name: "",
   cantidadActual: null,
@@ -847,6 +928,7 @@ const telefono = ref("");
 const codigo = ref("");
 const codigoRef = ref(null);
 const isBannerOpen = ref(false);
+const isDetallesOpen = ref(false);
 const cargando = ref(false);
 const credito = ref(false);
 const edicion = ref(false);
@@ -877,7 +959,14 @@ const nombreT = ref("");
 const pagocon = ref(0);
 // const isQrOpen = ref(false)
 const qrString = ref("");
+const selectedFiles = ref([]);
+const articuloDescription = ref('');
+const previewImages = ref([]);
+const fileInput = ref(null);
 const timeOut = ref("");
+const files = ref([]);
+const isCarouselFilesOpen = ref(false);
+const selectedIndex = ref(0);
 const tHeaders = ref([
   "-",
   "Código",
@@ -904,6 +993,12 @@ const headers = ref([
     sortable: false,
   },
   { title: "Es kit", key: "es_kit", align: "start", sortable: false },
+]);
+const filesHeaders = ref([
+  { title: "Imagen", key: "image", align: "start", sortable: false },
+  { title: "Nombre", key: "filename", align: "start", sortable: false },
+  { title: "Formato", key: "mime_type", align: "start", sortable: false },
+  { title: "Acciones", key: "actions", align: "start", sortable: false },
 ]);
 const clienteHeaders = ref([
   { title: "Id", key: "id", align: "start", sortable: false },
@@ -1352,7 +1447,7 @@ function rellenaProductForm(response) {
   product_form.precio_mayoreo = response.data.precio_mayoreo;
   product_form.existencia = response.data.cantidad_actual;
 }
-function abrirEdicion(id, name, pventa, cantidad, ancho,alto ) {
+function abrirEdicion(id, name, pventa, cantidad, ancho, alto) {
   blurPrimerArticulo();
   articuloActualId.value = id;
   articulo_form.name = name;
@@ -1362,6 +1457,41 @@ function abrirEdicion(id, name, pventa, cantidad, ancho,alto ) {
   articulo_form.alto = alto;
   edicion.value = true;
   nextTick(() => document.getElementById("pventa").select());
+}
+function openDetalles(articulo) {
+  // blurPrimerArticulo();
+  articuloActualId.value = articulo.id;
+  articulo_form.name = articulo.name;
+  articulo_form.pventa = articulo.pventa;
+  articulo_form.cantidad = articulo.cantidad;
+  articulo_form.ancho = articulo.ancho;
+  articulo_form.alto = articulo.alto;
+  articuloDescription.value = articulo.description;
+  isDetallesOpen.value = true;
+  getFiles()
+  // nextTick(() => document.getElementById("pventa").select());
+}
+function getFiles() {
+  Articulo.getFiles(articuloActualId.value)
+    .then((response) => {
+      files.value = response.data.images
+      // console.log(imagenes.value);
+    })
+    .catch((error) => {
+      // handleOpException(error);
+      alert("Ha ocurrido un error")
+    });
+}
+function updateArticuloDescription() {
+  Articulo.updateArticuloDescription(articuloActualId.value, articuloDescription.value)
+    .then((response) => {
+      getSpecificVT(ticketActual.id);
+      alert("Descripción Actualizada")
+    })
+    .catch((error) => {
+      // handleOpException(error);
+      alert("Ha ocurrido un error")
+    });
 }
 function editarArticulo() {
   if (cargando.value) return;
@@ -1459,7 +1589,7 @@ function getAllClientes() {
 function enviarArticulo() {
   if (cargando.value) return;
   cargando.value = true;
-  if (product_form.usa_medidas && ( !product_form.ancho || !product_form.alto)) {
+  if (product_form.usa_medidas && (!product_form.ancho || !product_form.alto)) {
     cargando.value = false;
     return snackWarning("Falta determinar: ancho o alto ");
   }
@@ -1858,6 +1988,81 @@ function goPrimerPendiente() {
     // }
   });
 }
+const removeImage = (index) => {
+  selectedFiles.value.splice(index, 1);
+  previewImages.value.splice(index, 1);
+};
+const openCarousel = (index) => {
+  selectedIndex.value = index;
+  isCarouselFilesOpen.value = true;
+};
+const eliminarFile = async (articulo) => {
+  if (cargando.value) return;
+  try {
+    const response = await Articulo.deleteFile(articulo);
+    cargando.value = true;
+
+    if (response.status === 200) {
+      getFiles();
+      // alert('Archivos borrado exitosamente');
+    } else {
+      console.error('Failed to upload files');
+      alert('Error al borrar archivos');
+    }
+  } catch (error) {
+    console.error('An error occurred', error);
+  }finally{
+    cargando.value = false;
+  }
+
+}
+const handleFiles = (event) => {
+  cargando.value = true;
+  const files = Array.from(event.target.files);
+  selectedFiles.value.push(...files);
+
+  // Generate image previews
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewImages.value.push(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  });
+  cargando.value = false;
+};
+const submitForm = async () => {
+  if (!selectedFiles.value.length) {
+    alert("No hay archivos seleccionados");
+    return;
+  }
+  cargando.value = true;
+  const formData = new FormData();
+  selectedFiles.value.forEach(file => {
+    formData.append('files[]', file);
+  });
+
+  try {
+    const response = await Articulo.attachFiles(articuloActualId.value, formData);
+    cargando.value = false;
+
+    if (response.status === 201) {
+      selectedFiles.value = [];
+      selectedFiles.value = []; // limpia tus datos
+      previewImages.value = []; // si estás usando previews
+      fileInput.value.reset(); // limpia el input de Vuetify
+      getFiles();
+      console.log('Files uploaded successfully');
+      // alert('Archivos subidos exitosamente');
+    } else {
+      console.error('Failed to upload files');
+      alert('Error al subir archivos');
+    }
+  } catch (error) {
+    console.error('An error occurred', error);
+  }
+};
+
 function verImagenes(images) {
   console.log(images);
 
