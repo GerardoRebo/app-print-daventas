@@ -11,6 +11,8 @@ const fileInput = ref(null);
 const cargando = ref(false);
 const previewImages = ref([]);
 const articuloDescription = ref('');
+const isCarouselFilesOpen = ref(false);
+const selectedIndex = ref(0);
 const filesHeaders = ref([
   { title: "Imagen", key: "image", align: "start", sortable: false },
   { title: "Nombre", key: "filename", align: "start", sortable: false },
@@ -113,6 +115,10 @@ const firstImageUrl = computed(() => {
   const imageFile = files.value.find(file => file.mime_type?.startsWith('image/'));
   return imageFile ? imageFile.url : null;
 });
+const openCarousel = (index) => {
+  selectedIndex.value = index;
+  isCarouselFilesOpen.value = true;
+};
 
 getFiles();
 
@@ -149,6 +155,7 @@ getFiles();
             </template>
           </v-list-item>
           <v-img
+          @click="openCarousel(0)"
             :src="firstImageUrl"
             height="200" cover></v-img>
         </v-card-text>
@@ -212,6 +219,22 @@ getFiles();
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click="isDetallesOpen = false">Cerrar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+  <v-dialog v-model="isCarouselFilesOpen">
+    <v-card>
+      <v-card-title>
+        Archivos
+      </v-card-title>
+      <v-card-text>
+        <v-carousel v-model="selectedIndex">
+          <v-carousel-item v-for="image in files" :src="image.url"></v-carousel-item>
+        </v-carousel>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn text @click="isCarouselFilesOpen = false">Cerrar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

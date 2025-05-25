@@ -3,18 +3,10 @@
   <br />
   .
   <br />
-  <v-img
-    :src="`${ventaticket?.organization?.image?.url}?v=${ventaticket?.organization?.image?.updated_at}`"
-    class="my-2 mx-auto"
-    height="150px"
-    width="150px"
-    v-if="ventaticket?.organization?.image?.url"
-    @load="onImageLoaded"
-  />
-  <p
-    class="mb-1"
-    v-if="ventaticket?.organization?.facturacion_info?.razon_social"
-  >
+  <v-img :src="`${ventaticket?.organization?.image?.url}?v=${ventaticket?.organization?.image?.updated_at}`"
+    class="my-2 mx-auto" height="150px" width="150px" v-if="ventaticket?.organization?.image?.url"
+    @load="onImageLoaded" />
+  <p class="mb-1" v-if="ventaticket?.organization?.facturacion_info?.razon_social">
     <strong>Razón Soc:</strong>
     {{ ventaticket?.organization?.facturacion_info?.razon_social }}
   </p>
@@ -33,8 +25,7 @@
   <p><strong>Ticket:</strong>#{{ ventaticket?.consecutivo }}</p>
   <p class="mb-1"><strong>Cajero:</strong> {{ ventaticket?.user?.name }}</p>
   <p v-if="ventaticket?.pagado_en">
-    <strong>Fecha: </strong
-    >{{ moment(ventaticket?.pagado_en).format("DD-MM-YYYY h:mm:ssa") }}
+    <strong>Fecha: </strong>{{ moment(ventaticket?.pagado_en).format("DD-MM-YYYY h:mm:ssa") }}
   </p>
   <p class="mb-1" v-else>Fecha: {{ moment().format("DD-MM-YYYY h:mm:ssa") }}</p>
 
@@ -75,16 +66,16 @@
       </tr>
     </tbody>
   </v-table> -->
-  <span
-    v-for="(item, index) in ventaticket?.ventaticket_articulos"
-    :key="index"
-  >
+  <span v-for="(item, index) in ventaticket?.ventaticket_articulos" :key="index">
     {{ item?.product?.name ?? item.product_name }}
     <br />
     {{
       item?.cantidad +
-      " x $" +
-      item?.precio_usado +
+      " (" +
+      item?.ancho +
+      "x" +
+      item?.alto +
+      ") " +
       " = " +
       "$" +
       item?.precio_final
@@ -94,11 +85,7 @@
       Devolución -{{ item?.cantidad_devuelta }}
       <br />
     </span>
-    <v-divider
-      class="my-1"
-      length="40"
-      v-if="!(index == ventaticket?.ventaticket_articulos.length - 1)"
-    ></v-divider>
+    <v-divider class="my-1" length="40" v-if="!(index == ventaticket?.ventaticket_articulos.length - 1)"></v-divider>
   </span>
   <hr style="border: 1px dashed black; opacity: 0.33" class="my-2" />
   <p class="mb-1"><strong>Subtotal: </strong>${{ ventaticket?.subtotal }}</p>
@@ -114,12 +101,26 @@
   <p class="mb-1">
     <strong>Total: ${{ ventaticket?.total }}</strong>
   </p>
-  <p><strong>Pagó con:</strong> ${{ ventaticket?.pago_con }}</p>
-  <p class="mb-1">
-    <strong>Su cambio:</strong> ${{
-      ventaticket?.total - ventaticket?.pago_con
-    }}
-  </p>
+  <div v-if="!ventaticket?.deuda">
+    <p><strong>Pagó con:</strong> ${{ ventaticket?.pago_con }}</p>
+    <p class="mb-1">
+      <strong>Su cambio:</strong> ${{
+        ventaticket?.total - ventaticket?.pago_con
+      }}
+    </p>
+  </div>
+
+  <div v-if="ventaticket?.deuda">
+    <p class="mb-1">
+      <strong>Venta a crédito:</strong>
+    </p>
+    <p class="mb-1" v-if="!ventaticket?.deuda?.liquidado">
+      <strong>Saldo:</strong> ${{ ventaticket?.deuda?.saldo }}
+    </p>
+    <p class="mb-1" v-if="ventaticket?.deuda?.liquidado">
+      <strong>Liquidado</strong>
+    </p>
+  </div>
 
   <p class="text-caption font-italic">Gracias por tu compra</p>
 
