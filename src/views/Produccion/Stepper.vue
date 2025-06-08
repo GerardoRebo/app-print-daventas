@@ -31,9 +31,6 @@ const steps = ref([
 ]);
 const currentStep = ref(steps.value.findIndex((s) => s.key === props.order.status) + 1)
 const usesConsumable = computed(() => {
-  console.log('users');
-  console.log(props.order.uses_consumable, 'uses');
-
   return props.order.uses_consumable
 })
 const consumableDeducted = computed(() => {
