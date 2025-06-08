@@ -131,7 +131,9 @@ getFiles();
         <v-card-text>
           <p><span class="font-weight-bold">Fecha:</span>
             {{ `${moment(order.ventaticket?.created_at).format('DD-MM-YYYY h:mm:ss a')}` }} </p>
-          <p><span class="font-weight-bold">Ticket:</span> {{ `${order.ventaticket?.id}` }} </p>
+          <RouterLink :to="{ name: 'VentasShow', params: { ventaId: order.ventaticket?.id } }" target="_blank" rel="noopener">
+            <p><span class="font-weight-bold">Ticket:</span> {{ `${order.ventaticket?.id}` }} </p>
+          </RouterLink>
           <p><span class="font-weight-bold">Generó:</span> {{ `${order.ventaticket?.almacen?.name}` }} </p>
           <p><span class="font-weight-bold">Vendio:</span> {{ `${order.ventaticket.user?.name}` }} </p>
           <p><span class="font-weight-bold">Medidas</span><span class="text-caption"> (Ancho x Alto) </span>: {{
