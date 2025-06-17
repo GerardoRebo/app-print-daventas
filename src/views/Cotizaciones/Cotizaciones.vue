@@ -33,17 +33,28 @@
       </v-row>
       <v-row dense class="mb-2">
         <v-col>
-          <v-text-field label="Codigo" autocomplete="password" placeholder="Codigo + Enter"
-            @keydown.right.prevent="goPrimerArticulo" @keydown.enter="searchProduct" ref="codigoRef" v-model="codigo"
-            hide-details />
+          <v-text-field label="Codigo" placeholder="Codigo + Enter" @keydown.right.prevent="goPrimerArticulo"
+            @keydown.enter="searchProduct" v-model="codigo" hide-details autocomplete="password" ref="codigoRef" />
         </v-col>
         <v-col>
-          <v-text-field label="Nombre" id="name" autocomplete="off" placeholder="" v-model="product_form.name" readonly
-            hide-details />
+          <v-tooltip :text="product_form.name" location="top">
+            <template v-slot:activator="{ props }">
+              <v-text-field label="Nombre" id="name" autocomplete="off" placeholder="" readonly hide-details
+                v-model="product_form.name" v-bind="props" />
+            </template>
+          </v-tooltip>
         </v-col>
         <v-col cols="1">
           <v-text-field label="Cantidad" id="cantidad" autocomplete="off" placeholder="Cantidad"
-            @keydown.stop.enter="enviarArticulo" v-model="product_form.cantidad" hide-details />
+            @keydown.stop.enter="enviarArticulo" v-model="product_form.cantidad" hide-details type="number" />
+        </v-col>
+        <v-col cols="1" v-if="product_form.usa_medidas">
+          <v-text-field label="Ancho" autocomplete="off" placeholder="Ancho" @keydown.stop.enter="enviarArticulo"
+            v-model="product_form.ancho" hide-details type="number" />
+        </v-col>
+        <v-col cols="1" v-if="product_form.usa_medidas">
+          <v-text-field label="Alto" autocomplete="off" placeholder="Alto" @keydown.stop.enter="enviarArticulo"
+            v-model="product_form.alto" hide-details type="number" />
         </v-col>
         <v-col cols="1">
           <v-text-field label="Precio" id="precio" autocomplete="off" placeholder=""
@@ -53,18 +64,18 @@
           <v-text-field label="Existencia" id="existencia" autocomplete="off" placeholder=""
             v-model="product_form.existencia" readonly hide-details />
         </v-col>
-        <!-- <InfoVue v-if="showInfo" @click="openInfoAgregarExistencia" class="animate-bounce" /> -->
         <v-spacer />
         <v-col cols="1">
-          <v-btn @click="abrirModalBuscaProductsNombre" prepend-icon="mdi-magnify">Buscar
+          <v-btn @click="enviarArticulo" prepend-icon="mdi-arrow-right-bold" variant="outlined" color="primary">Agregar
           </v-btn>
         </v-col>
         <v-col cols="1">
-          <v-btn @click="enviarArticulo" prepend-icon="mdi-arrow-right-bold">Agregar
+          <v-btn @click="abrirModalBuscaProductsNombre" prepend-icon="mdi-magnify" variant="outlined"
+            color="primary">Buscar
           </v-btn>
         </v-col>
         <v-col cols="1">
-          <v-btn @click="abrirExistencias" prepend-icon="mdi-eye">Ver
+          <v-btn @click="abrirExistencias" prepend-icon="mdi-eye" variant="outlined" color="primary">Ver
           </v-btn>
         </v-col>
       </v-row>
@@ -167,6 +178,14 @@
         <v-col cols="4">
           <v-text-field label="Cantidad" id="cantidad" autocomplete="off" placeholder="Cantidad"
             @keydown.stop.enter="enviarArticulo" v-model="product_form.cantidad" density="compact" />
+        </v-col>
+        <v-col cols="4" v-if="product_form.usa_medidas">
+          <v-text-field label="Ancho" autocomplete="off" placeholder="Ancho" @keydown.stop.enter="enviarArticulo"
+            v-model="product_form.ancho" hide-details type="number" />
+        </v-col>
+        <v-col cols="4" v-if="product_form.usa_medidas">
+          <v-text-field label="Alto" autocomplete="off" placeholder="Alto" @keydown.stop.enter="enviarArticulo"
+            v-model="product_form.alto" hide-details type="number" />
         </v-col>
         <v-col cols="4">
           <v-text-field label="Precio" id="precio" autocomplete="off" placeholder=""
@@ -635,6 +654,9 @@ const tHeaders = ref([
   { title: 'Código', key: 'codigo', align: 'start', sortable: false },
   { title: 'Nombre', key: 'product_name', align: 'start', sortable: false },
   { title: 'Cantidad', key: 'cantidad', align: 'start', sortable: false },
+  { title: 'Ancho', key: 'ancho', align: 'start', sortable: false },
+  { title: 'Alto', key: 'alto', align: 'start', sortable: false },
+  { title: 'Area', key: 'area', align: 'start', sortable: false },
   { title: 'Precio', key: 'precio_usado', align: 'start', sortable: false },
   { title: 'Importe', key: 'precio_final', align: 'start', sortable: false },
   { title: 'Descuento', key: 'importe_descuento', align: 'start', sortable: false },
@@ -968,11 +990,21 @@ async function rellenaTicket(response) {
     }
   }
 }
+function blurPrimerArticulo() {
+  const elementos = document.getElementsByClassName("articulosInputs");
+  const firstCheckbox = elementos[0].querySelector("input");
+  if (firstCheckbox) {
+    firstCheckbox.blur();
+  }
+}
 function rellenaProductForm(response) {
   productActualId.value = response.data.id;
+  product_form.usa_medidas = response.data.usa_medidas;
   product_form.name = response.data.name;
   product_form.codigo = response.data.codigo;
   product_form.cantidad = 1;
+  product_form.ancho = 1;
+  product_form.alto = 1;
   product_form.pventa = response.data.precio;
   product_form.pcosto = response.data.pcosto;
   product_form.porcentaje_ganancia = response.data.porcentaje_ganancia;
@@ -980,12 +1012,15 @@ function rellenaProductForm(response) {
   product_form.precio_mayoreo = response.data.precio_mayoreo;
   product_form.existencia = response.data.cantidad_actual;
 }
-function abrirEdicion(id, name, pventa, cantidad) {
-  edicion.value = true;
+function abrirEdicion(id, name, pventa, cantidad, ancho, alto) {
+  blurPrimerArticulo();
   articuloActualId.value = id;
   articulo_form.name = name;
   articulo_form.pventa = pventa;
   articulo_form.cantidad = cantidad;
+  articulo_form.ancho = ancho;
+  articulo_form.alto = alto;
+  edicion.value = true;
   nextTick(() => document.getElementById("pventa").select());
 }
 function editarArticulo() {
@@ -1080,6 +1115,10 @@ function getAllClientes() {
 function enviarArticulo() {
   if (cargando.value) return;
   cargando.value = true;
+  if (product_form.usa_medidas && (!product_form.ancho || !product_form.alto)) {
+    cargando.value = false;
+    return toasterStore.warning("Falta determinar: ancho o alto ");
+  }
   if (
     productActualId.value == null ||
     ticketActual.id == null ||
@@ -1278,6 +1317,8 @@ function getSpecificVT(ventaticket) {
 function archivar(imprimir) {
   if (cargando.value) return;
   cargando.value = true;
+  console.log('qwer');
+  
   Cotizacion.archivar(ticketActual.id)
     .then((response) => {
       init();
@@ -1304,16 +1345,18 @@ async function guardarVenta(imprimir) {
   cargando.value = true;
   Cotizacion.guardarVenta(ticketActual.id)
     .then((response) => {
+      console.log(response, 'response');
+      
       openFinalizar.value = false;
       if (window.__TAURI_METADATA__ && imprimir) {
         const webview = new WebviewWindow('ImprimirVenta', {
-          url: `ventatickets/imprimir/${ticketActual.id}`,
+          url: `ventatickets/imprimir/${response.data.id}`,
           title: 'Imprimir Venta'
         });
 
       } else if (imprimir) {
         window.open(
-          `${import.meta.env.VITE_APP_URL}/ventatickets/imprimir/${ticketActual.id}`,
+          `${import.meta.env.VITE_APP_URL}/ventatickets/imprimir/${response.data.id}`,
           "_blank",
           "noreferrer"
         );

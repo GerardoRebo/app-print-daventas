@@ -39,8 +39,8 @@ export default {
     },
     setCliente(cliente, cotizacion) {
         return Api().post(`/${baseRoute}/setcliente`, {
-                cliente,
-                cotizacion
+            cliente,
+            cotizacion
         })
 
     },
@@ -52,10 +52,10 @@ export default {
         })
     },
     archivar(cotizacion) {
-        return Api().post(`/${baseRoute}/archivar/`+cotizacion)
+        return Api().post(`/${baseRoute}/archivar/` + cotizacion)
     },
     enviarCopia(cotizacion) {
-        return Api().post(`/${baseRoute}/enviarCopia`+cotizacion, {
+        return Api().post(`/${baseRoute}/enviarCopia` + cotizacion, {
             telefono
         })
     },
@@ -84,12 +84,12 @@ export default {
     },
     register(productActualId, ticketActual, product_form) {
         return Api().post(`/${baseRoute}/register`, {
-            params: {
-                productActualId: productActualId,
-                ticketActual: ticketActual,
-                precio: product_form.pventa,
-                cantidad: product_form.cantidad,
-            }
+            productActualId: productActualId,
+            ticketActual: ticketActual,
+            precio: product_form.pventa,
+            cantidad: product_form.cantidad,
+            ancho: product_form.ancho,
+            alto: product_form.alto,
         })
 
     },
