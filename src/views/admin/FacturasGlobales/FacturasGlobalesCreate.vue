@@ -46,14 +46,14 @@ import { ref, reactive } from "@vue/reactivity";
 import { watch } from "@vue/runtime-core";
 import { computed, onMounted } from "vue";
 import Organizacion from "../../../apis/Organizacion";
-import { useToasterStore } from "../../../s/toaster";
+import { useMessagesStore } from "../../../s/messages";
 import { useRoute, useRouter } from "vue-router";
 import useMisFechas from "../../../composables/useMisFechas";
 import { useUserStore } from "@js/s";
 const s = useUserStore();
 const { handleOpException } = s;
 
-const toasterStore = useToasterStore();
+const messages = useMessagesStore();
 
 const cargando = ref(false);
 const ventatickets = ref([]);
@@ -109,7 +109,7 @@ const getVentatickets = async () => {
     if (error?.response?.status === 422) {
       console.log(error.response.data.errors);
       for (const [key, value] of Object.entries(error.response.data.errors)) {
-        toasterStore.warning({ text: value, title: "" })
+        messages.add({ text: value, color: "error" })
       }
       return;
     }
@@ -135,7 +135,7 @@ const preProcesar = async () => {
     if (error?.response?.status === 422) {
       console.log(error.response.data.errors);
       for (const [key, value] of Object.entries(error.response.data.errors)) {
-        toasterStore.warning({ text: value, title: "" })
+        messages.add({ text: value, title: "error" })
       }
     }
     handleOpException(error);

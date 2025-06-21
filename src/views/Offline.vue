@@ -404,14 +404,14 @@ import Product from "../apis/Product";
 import PuntoVenta from "../apis/PuntoVenta";
 import { useUserStore } from "../s";
 import { storeToRefs } from "pinia";
-import { useToasterStore } from "../s/toaster";
+import { useMessagesStore } from "../s/messages";
 import sqlite from '../sqlite/Index'
 import Load from '../sqlite/Load'
 import Offline from '../sqlite/Offline'
 import { WebviewWindow } from '@tauri-apps/api/window';
 
 const store = useUserStore();
-const toasterStore = useToasterStore();
+const messages = useMessagesStore();
 const { productsData, lastFetchTimes } = storeToRefs(store);
 const router = useRouter();
 const product_form = reactive({
@@ -979,7 +979,7 @@ async function guardarVenta(imprimir) {
       });
     }
     await init();
-    toasterStore.success({ text: "La venta ha sido agregada exitosamente", title: "" })
+    messages.add({ text: "La venta ha sido agregada exitosamente", color: "success" })
   } catch (error) {
     console.log(error);
     alert("Ha ocurrido un error")

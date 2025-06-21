@@ -545,7 +545,7 @@
     </v-card>
   </v-dialog>
 
-<DynamicSnack :snackbar="snackbar" />
+<!-- <DynamicSnack :snackbar="snackbar" /> -->
 </template>
 <script setup>
 import {
@@ -558,7 +558,7 @@ import {
   computed,
 } from "vue";
 
-import DynamicSnack from "../../components/DynamicSnack.vue";
+// import DynamicSnack from "../../components/DynamicSnack.vue";
 import { useRouter } from "vue-router";
 import Product from "@js/apis/Product";
 import Cotizacion from "@js/apis/Cotizacion";
@@ -571,11 +571,9 @@ import User from "@js/apis/User";
 import { WebviewWindow } from '@tauri-apps/api/window';
 
 const store = useUserStore();
-import { useToasterStore } from "@js/s/toaster";
+import { useMessagesStore } from "@js/s/messages";
 import { useDisplay } from "vuetify";
-import { useSnackBar } from "../../composables/SnackBar";
-const toasterStore = useToasterStore();
-const { snackbar, snackSuccess, snackError, snackWarning } = useSnackBar();
+const messages = useMessagesStore();
 const { productsData, lastFetchTimes } = storeToRefs(store);
 const { isOpException, getExceptionMsg, handleOpException } = store;
 const router = useRouter();
@@ -867,12 +865,12 @@ function searchProduct() {
   cargando.value = true;
   if (codigo.value == "") {
     cargando.value = false;
-    toasterStore.warning({ text: "Campo Código Vacio", title: "" })
+    messages.add({ text: "Campo Código Vacio", color: "warning" })
     return;
   }
   if (almacen.id == null) {
     cargando.value = false;
-    toasterStore.warning({ text: 'No has seleccionado almacen', title: "" })
+    messages.add({ text: 'No has seleccionado almacen', color: "warning" })
 
     return;
   }
@@ -880,7 +878,7 @@ function searchProduct() {
     .then((response) => {
       console.log(response, 'res');
       if (response.data == "Producto No Encontrado") {
-        snackWarning("Producto No Encontrado")
+        messages.add({ text: "Producto No Encontrado", color: "warning" })
         codigo.value = "";
         return;
       }
@@ -1035,7 +1033,7 @@ function editarArticulo() {
   Cotizacion.update(articuloActualId.value, ticketActual.id, articulo_form)
     .then((response) => {
       if (response.data == "No inventario") {
-        return toasterStore.warning({ text: 'No hay suficiente inventario', title: "" })
+        return messages.add({ text: 'No hay suficiente inventario', color: "warning" })
       }
       edicion.value = false;
       getSpecificVT(ticketActual.id);
@@ -1122,7 +1120,7 @@ function enviarArticulo() {
   cargando.value = true;
   if (product_form.usa_medidas && (!product_form.ancho || !product_form.alto)) {
     cargando.value = false;
-    return toasterStore.warning("Falta determinar: ancho o alto ");
+    return messages.add({text:"Falta determinar: ancho o alto ", color: 'warning'});
   }
   if (
     productActualId.value == null ||
@@ -1133,13 +1131,13 @@ function enviarArticulo() {
     product_form.cantidad == ""
   ) {
     cargando.value = false;
-    return toasterStore.info({ text: "Falta determinar: precio o cantidad ", title: "" })
+    return messages.add({ text: "Falta determinar: precio o cantidad ", color: "info" })
   }
   if (product_form.existencia == null || product_form.existencia == "0.00") {
     cargando.value = false;
     nextTick(() => codigoRef.value.select());
 
-    return toasterStore.warning({ text: "Producto sin existencia", title: "" })
+    return messages.add({ text: "Producto sin existencia", color: "warning" })
   }
   if (+product_form.pventa <= +product_form.pcosto) {
     alert("Revisar Precio Menor Que Costo");
@@ -1327,7 +1325,7 @@ function archivar(imprimir) {
   Cotizacion.archivar(ticketActual.id)
     .then((response) => {
       init();
-      toasterStore.success({ text: "La cotizacion se ha generado con exito", title: "" })
+      messages.add({ text: "La cotizacion se ha generado con exito", color: "success" })
     })
     .catch((error) => {
 
@@ -1341,7 +1339,7 @@ function archivar(imprimir) {
 async function guardarVenta(imprimir) {
 
   if (!almacen.id) {
-    toasterStore.error({ text: "Elige un almacen", title: "" })
+    messages.add({ text: "Elige un almacen", color: "error" })
     return
   }
   let conf = await confirm("Estas Seguro?");
@@ -1353,11 +1351,11 @@ async function guardarVenta(imprimir) {
       console.log(response.data, "res");
       router.push({ name: "CotizacionesShow", params: { cotizacionId: response.data.id } })
 
-      toasterStore.success({ text: "La cotizacion se ha generado con exito", title: "" })
+      messages.add({ text: "La cotizacion se ha generado con exito", color: "success" })
     })
     .catch((error) => {
       if (isOpException(error) && getExceptionMsg(error).includes('No has habilitado la caja')) {
-        toasterStore.error({ text: getExceptionMsg(error), title: "" })
+        messages.add({ text: getExceptionMsg(error), color: "error" })
         setTimeout(() => {
           router.push({ name: "Cortes" });
         }, 2000);
@@ -1374,7 +1372,7 @@ function guardarVentaWha() {
   if (cargando.value) return;
   cargando.value = true;
   if (!telefono.value || telefono.value.length < 10) {
-    toasterStore.warning({ text: "Introduce un telefono valido", title: "" });
+    messages.add({ text: "Introduce un telefono valido", color: "warning" });
     return;
   }
   Cotizacion.guardarVenta(ticketActual.id, pagocon.value, credito.value)
@@ -1394,7 +1392,7 @@ function guardarVentaWha() {
     })
     .catch((error) => {
       if (isOpException(error) && getExceptionMsg(error).includes('No has habilitado la caja')) {
-        toasterStore.error({ text: getExceptionMsg(error), title: "" })
+        messages.add({ text: getExceptionMsg(error), color: "error" })
         setTimeout(() => {
           router.push({ name: "Cortes" });
         }, 2000);

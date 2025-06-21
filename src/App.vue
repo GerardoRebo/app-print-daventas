@@ -1,10 +1,13 @@
 <template>
   <router-view></router-view>
+    <v-snackbar-queue v-model="messages.queue" timeout="2500" closable close-text="cerrar"></v-snackbar-queue>
 </template>
 <script setup>
 import { onMounted } from 'vue';
 import Offline from './sqlite/Offline'
 import PuntoVenta from './apis/PuntoVenta'
+import { useMessagesStore } from "@js/s/messages";
+const messages = useMessagesStore();
 
 const syncLocalVentas = async () => {
   if (!navigator.onLine) {

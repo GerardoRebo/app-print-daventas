@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
-import { useToasterStore } from "../s/toaster";
+import { useMessagesStore } from "./messages";
 import { computed, ref, watch } from 'vue'
 import User from "../apis/User";
 
 
 export const useUserStore = defineStore('index', () => {
-  const toasterStore = useToasterStore();
+  const messages = useMessagesStore();
 
   const myAlmacens = ref([]);
   const proveedors = ref([]);
@@ -47,7 +47,7 @@ export const useUserStore = defineStore('index', () => {
   }
   const handleOpException = (error) => {
     if (isOpException(error)) {
-      toasterStore.error({ text: getExceptionMsg(error), title: "" })
+      messages.add({ text: getExceptionMsg(error), color: "error" })
       alert(getExceptionMsg(error));
       throw new Error('Operational exception');
     }

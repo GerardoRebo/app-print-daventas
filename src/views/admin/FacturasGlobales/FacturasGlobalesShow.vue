@@ -177,14 +177,14 @@ import { watch } from "@vue/runtime-core";
 import { computed, onMounted } from "vue";
 import moment from 'moment-timezone';
 import Organizacion from "../../../apis/Organizacion";
-import { useToasterStore } from "../../../s/toaster";
+import { useMessagesStore } from "../../../s/messages";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@js/s";
 import { useDisplay } from "vuetify";
 const { xs, mdAndUp, mdAndDown, smAndDown } = useDisplay()
 const s = useUserStore();
 const { handleOpException } = s;
-const toasterStore = useToasterStore();
+const messages = useMessagesStore();
 const route = useRoute();
 const router = useRouter();
 const facturaId = ref(route.params.facturaId);
@@ -342,7 +342,7 @@ const timbrarFacturaGlobal = async () => {
     if (error?.response?.status === 422) {
       console.log(error.response.data.errors);
       for (const [key, value] of Object.entries(error.response.data.errors)) {
-        toasterStore.warning({ text: value, title: "" })
+        messages.add({ text: value, title: "error" })
       }
     }
   } finally {
@@ -363,7 +363,7 @@ const deleteFacturaGlobal = async () => {
     if (error?.response?.status === 422) {
       console.log(error.response.data.errors);
       for (const [key, value] of Object.entries(error.response.data.errors)) {
-        toasterStore.warning({ text: value, title: "" })
+        messages.add({ text: value, title: "error" })
       }
     }
   } finally {
