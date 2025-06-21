@@ -31,7 +31,7 @@
           !ticketActual.latest_pre_factura?.facturado_en &&
           !ticketActual.ventaticket_id
         " @click="finzalizeCotization" class="mx-2" color="primary" variant="elevated"
-          prepend-icon="mdi-check-circle">Generar venta</v-btn>
+          prepend-icon="mdi-check-circle" :loading="cargando">Generar venta</v-btn>
         <div v-else>
           <router-link :to="{ name: 'VentasShow', params:{ventaId: ticketActual.ventaticket_id} }">
             <p>Ticket Venta: {{ ticketActual?.ventaticket?.consecutivo }}</p>
@@ -107,7 +107,7 @@
             !devuelto &&
             !ticketActual.facturado_en &&
             !ticketActual.latest_pre_factura?.facturado_en
-          " @click="finzalizeCotization" class="my-1" color="primary" variant="elevated" block>Generar venta</v-btn>
+          " @click="finzalizeCotization" class="my-1" color="primary" variant="elevated" block :loading="cargando">Generar venta</v-btn>
           
           <div>
             <p>Almacén: {{ ticketActual.miAlmacenName }}</p>

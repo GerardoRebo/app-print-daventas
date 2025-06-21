@@ -4,15 +4,14 @@ let baseRoute = "cotizacion";
 
 export default {
     getAll() {
-        return Api().get(`/${baseRoute}/cotizacion`);
+        return Api().get(`/${baseRoute}`);
     },
     getSpecificVT(cotizacion) {
 
-        return Api().get(`/${baseRoute}/specific`, {
-            params: {
-                cotizacion
-            }
-        });
+        return Api().get(`/${baseRoute}/${cotizacion}`);
+    },
+    finalize(cotizacion) {
+        return Api().post(`/${baseRoute}/${cotizacion}/finalize`)
     },
     getMisVentas(page, dfecha, hfecha) {
 
