@@ -431,8 +431,8 @@
         </v-row>
         <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
         <v-data-table :headers="headers" :items="products" items-per-page="100" density="compact" fixed-header
-          height="50vh">
-          <template v-slot:item.name="{ item }">
+          keyboard-navigation="false" height="50vh">
+          <template v-slot:item.name="{ item }" tabindex="-1">
             <a href="#" class="font-weight-bold text-decoration-none"
               :class="[item.es_kit ? 'text-green' : '', item.consumible == 'generico' ? 'text-warning' : '', item.consumible == 'regular' ? 'text-neutral700' : '', item.consumible === null && !!!item.es_kit ? 'text-primary' : '',]"
               @keydown.enter.prevent="getProductById(item.id)" @click.prevent="getProductById(item.id)">
@@ -851,6 +851,7 @@ import Cliente from "../apis/Cliente";
 import { useUserStore } from "../s";
 import { storeToRefs } from "pinia";
 import User from "../apis/User";
+import { removeVuetifyTableTabIndexes } from "../utils";
 
 import { WebviewWindow } from "@tauri-apps/api/window";
 
@@ -1529,6 +1530,9 @@ function getAllProducts() {
         productsData.value[keyword.value] = response.data;
         lastFetchTimes.value[keyword.value] = currentTime;
         lastFetchTimeLocal.value = currentTime;
+        nextTick(() => {
+          removeVuetifyTableTabIndexes()
+        })
       })
       .catch((error) => {
         handleOpException(error);
@@ -1538,6 +1542,9 @@ function getAllProducts() {
   } else {
     products.value = productsData.value[keyword.value];
     lastFetchTimeLocal.value = lastFetchTime;
+    nextTick(() => {
+      removeVuetifyTableTabIndexes()
+    })
   }
 }
 function getProductsNow() {
@@ -1648,10 +1655,12 @@ function destroyArticulo(articulo) {
     })
     .finally(() => { });
 }
-function abrirModalBuscaProductsNombre() {
+async function abrirModalBuscaProductsNombre() {
   isVisible.value = true;
   getAllProducts();
-  nextTick(() => keyw.value.focus());
+  await nextTick(() => {
+    keyw.value.focus()
+  });
 }
 function asignarAlmacen(almacenId) {
   if (cargando.value) return;
@@ -2011,7 +2020,7 @@ const eliminarFile = async (articulo) => {
     }
   } catch (error) {
     console.error('An error occurred', error);
-  }finally{
+  } finally {
     cargando.value = false;
   }
 
@@ -2083,6 +2092,7 @@ onMounted(() => {
   document.addEventListener("keydown", onEscape);
   nextTick(() => codigoRef.value.select());
   init();
+
 });
 
 onUnmounted(() => {
