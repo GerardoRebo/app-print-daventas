@@ -24,6 +24,7 @@
   </p>
   <p><strong>Ticket:</strong>#{{ ventaticket?.consecutivo }}</p>
   <p class="mb-1"><strong>Cajero:</strong> {{ ventaticket?.user?.name }}</p>
+  <p class="mb-1" v-if="ventaticket?.cliente"><strong>Cliente:</strong> {{ ventaticket?.cliente?.name }}</p>
   <p v-if="ventaticket?.pagado_en">
     <strong>Fecha: </strong>{{ moment(ventaticket?.pagado_en).format("DD-MM-YYYY h:mm:ssa") }}
   </p>
@@ -33,39 +34,7 @@
     <strong>Ticket Cancelado</strong>
   </p>
   <hr style="border: 1px dashed black; opacity: 0.33" class="my-2" />
-  <!-- <v-table density="compact" overflow-hidden>
-    <thead>
-      <tr>
-        <th class="text-left">Nombre</th>
-        <th class="text-left">Cant</th>
-        <th class="text-left">Precio</th>
-        <th class="text-left">Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        v-for="(item, index) in ventaticket?.ventaticket_articulos"
-        :key="index"
-      >
-        <td>
-          {{ item?.product?.name ?? item.product_name }}
-        </td>
-        <td>
-          {{ item?.cantidad }}
-          <span v-if="item.fue_devuelto">
-            <br />
-            Devolución -{{ item?.cantidad_devuelta }}
-          </span>
-        </td>
-        <td>
-          {{ item?.precio_usado }}
-        </td>
-        <td>
-          {{ item?.precio_final }}
-        </td>
-      </tr>
-    </tbody>
-  </v-table> -->
+  
   <span v-for="(item, index) in ventaticket?.ventaticket_articulos" :key="index">
     {{ item?.product?.name ?? item.product_name }}
     <br />
@@ -112,8 +81,11 @@
 
   <div v-if="ventaticket?.deuda">
     <p class="mb-1">
-      <strong>Venta a crédito:</strong>
+      <strong>Abonos venta a crédito:</strong>
     </p>
+    <div v-for="abono in ventaticket?.deuda?.abonos">
+      {{ moment(abono.fecha).format("DD-MM-YYYY h:mm:ssa") }} - ${{ abono.abono.toLocaleString() }} 
+    </div>
     <p class="mb-1" v-if="!ventaticket?.deuda?.liquidado">
       <strong>Saldo:</strong> ${{ ventaticket?.deuda?.saldo }}
     </p>

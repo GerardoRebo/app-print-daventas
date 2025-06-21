@@ -13,7 +13,7 @@
     </v-card-text>
   </v-card>
   <!-- Tabla -->
-  <v-container>
+  <v-container fluid>
     <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
     <v-table density="compact" color="primary_d700">
       <thead>
@@ -24,8 +24,8 @@
         </tr>
       </thead>
       <tbody>
-        <TableRow v-for="venta in misventas.data" :key="venta.id" :venta="venta" @imprimir-venta="imprimirVenta"
-          @cancelar-venta="cancelarVenta" @create-devolucion="createDevolucion">
+        <TableRow v-for="venta in misventas.data" :key="venta.id" :cotization="venta" @imprimir-venta="imprimirVenta"
+          @cancelar-venta="cancelarVenta" >
         </TableRow>
       </tbody>
     </v-table>
@@ -55,11 +55,12 @@ const tHeaders = ref([
   'Id',
   'Consecutivo',
   'Corte',
-  'Nombre',
   'Fecha',
   'Cliente',
   'Almacén',
   'Total',
+  'Status',
+  '',
 ]);
 
 const { dfecha, hfecha } = useMisFechas();

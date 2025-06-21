@@ -70,10 +70,8 @@ import { ref, reactive } from "@vue/reactivity";
 import { watch } from "@vue/runtime-core";
 import { computed, onMounted } from "vue";
 import Organizacion from "../../../apis/Organizacion";
-import { useToasterStore } from "../../../s/toaster";
 import useMisFechas from '../../../composables/useMisFechas';
 import { useRoute, useRouter } from 'vue-router';
-const toasterStore = useToasterStore();
 
 const cargando = ref(false);
 const facturas = ref([]);

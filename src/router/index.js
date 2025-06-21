@@ -33,6 +33,7 @@ const CreditosIndex = () => import("../views/Creditos/CreditosIndex.vue");
 const PuntoVenta = () => import("../views/PuntoVenta.vue");
 const Produccion = () => import("../views/Produccion/Produccion.vue");
 const Cotizaciones = () => import("../views/Cotizaciones/Cotizaciones.vue");
+const CotizacionesShow = () => import('../views/Cotizaciones/CotizacionesShow.vue')
 const CotizacionesIndex = () =>
   import("../views/Cotizaciones/CotizacionesIndex.vue");
 const Proveedores = () => import("../views/Proveedores.vue");
@@ -325,6 +326,7 @@ const frontRoutes = [
         component: CotizacionesIndex,
         meta: { hasOrganization: true, requiresAuth: true },
       },
+      { path: ':cotizacionId', name: 'CotizacionesShow', component: CotizacionesShow, meta: { hasOrganization: true, requiresAuth: true } },
       {
         path: "create",
         name: "Cotizaciones",

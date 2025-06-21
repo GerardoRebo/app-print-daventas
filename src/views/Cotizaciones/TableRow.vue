@@ -1,40 +1,33 @@
 <script setup>
 import { toRef, toRefs } from 'vue';
 import moment from "moment-timezone"
-const props = defineProps(['venta']);
-defineEmits(['imprimirVenta', 'cancelarVenta', 'createDevolucion'])
-const { venta } = toRefs(props);
+const props = defineProps(['cotization']);
+defineEmits(['imprimircotization', 'cancelarcotization', 'createDevolucion'])
+const { cotization } = toRefs(props);
 
 </script>
 <template>
     <tr>
-        <td>{{ venta.id }}</td>
-        <td>{{ venta.consecutivo }}</td>
-        <td>{{ venta.turno_id }}</td>
-        <td>{{ venta.nombre }}</td>
-        <td>{{ moment(venta.pagado_en).format('DD-MM-YYYY h:mm:ssa') }}</td>
-        <td>{{ venta?.cliente?.name }}</td>
-        <td>{{ venta?.almacen?.name }}</td>
-        <td>{{ venta.total }}</td>
+        <td>{{ cotization.id }}</td>
+        <td>{{ cotization.consecutivo }}</td>
+        <td>{{ cotization.turno_id }}</td>
+        <td>{{ moment(cotization.pagado_en).format('DD-MM-YYYY h:mm:ssa') }}</td>
+        <td>{{ cotization?.cliente?.name }}</td>
+        <td>{{ cotization?.almacen?.name }}</td>
+        <td>{{ cotization.total }}</td>
         <td>
-            {{ venta.total_devuelto > 0 ? "Sí" : "No" }}
-        </td>
-        <td>
-            {{ venta.esta_cancelado ? "Cancelada" : "Activa" }}
+            {{ cotization.total_devuelto > 0 ? "Sí" : "No" }}
         </td>
         <td>
             <router-link :to="{
-                name: 'SpecificVenta',
-                params: { ventaId: venta.id },
+                name: 'CotizacionesShow',
+                params: { cotizacionId: cotization.id },
             }">
-                <v-btn>ver</v-btn>
+                <v-btn prepend-icon="mdi-eye" size="small">ver</v-btn>
             </router-link>
-        <td>
-            <v-btn @click="imprimirVenta(venta.id)">
-                <v-icon>mdi-print-pos</v-icon>
+            <v-btn @click="imprimircotization(cotization.id)" prepend-icon="mdi-print-pos" size="small">
+                Imprimir
             </v-btn>
-
-        </td>
         </td>
     </tr>
 </template>

@@ -15,7 +15,7 @@
           Pendiente
         </v-btn>
         <v-btn @click="abrirPendiente" size="small" class="mx-2" prepend-icon="mdi-file-clock">
-          Tickets Pendientes
+          Cotizaciones Pendientes
         </v-btn>
         <v-btn @click="abrirCliente" size="small" class="mx-2" prepend-icon="mdi-account-multiple">
           Clientes
@@ -85,23 +85,23 @@
             Borrar
           </v-btn>
         </v-col>
-        <v-col cols="1">
+        <!-- <v-col cols="1">
           <v-btn @click="imprimirVenta" prepend-icon="mdi-printer-pos">
             Imprimir
           </v-btn>
-        </v-col>
-        <v-col cols="1">
+        </v-col> -->
+        <!-- <v-col cols="1">
           <v-btn @click="archivar" prepend-icon="mdi-archive">
             Archivar
           </v-btn>
-        </v-col>
+        </v-col> -->
         <v-col cols="1">
-          <v-btn @click="guardarVenta" prepend-icon="mdi-check-circle" variant="elevated" color="accent">
-            Finalizar
+          <v-btn @click="guardarVenta" prepend-icon="mdi-check-circle" variant="elevated" color="primary">
+            Guardar
           </v-btn>
         </v-col>
         <v-col cols="2">
-          <v-text-field label="Nombra ticket" id="nombreT" autocomplete="off" placeholder="Nombra Ticket + Enter"
+          <v-text-field label="Nombra cotización" id="nombreT" autocomplete="off" placeholder="Nombra Ticket + Enter"
             density="compact" @keydown.stop.enter="setNombreTicket" v-model="nombreT" hide-details />
         </v-col>
         <v-col cols="1">
@@ -230,20 +230,20 @@
               </v-btn>
             </template>
             <v-list>
-              <v-list-item @click="imprimirVenta">
+              <!-- <v-list-item @click="imprimirVenta">
                 <template v-slot:prepend>
                   <v-icon icon="mdi-printer-pos"></v-icon>
                 </template>
                 <v-list-item-title>
                   Imprimir</v-list-item-title>
-              </v-list-item>
-              <v-list-item @click="archivar">
+              </v-list-item> -->
+              <!-- <v-list-item @click="archivar">
                 <template v-slot:prepend>
                   <v-icon icon="mdi-archive"></v-icon>
                 </template>
                 <v-list-item-title>
                   Archivar</v-list-item-title>
-              </v-list-item>
+              </v-list-item> -->
               <v-list-item @click="setPendiente">
                 <template v-slot:prepend>
                   <v-icon icon="mdi-sort-clock-ascending"></v-icon>
@@ -256,7 +256,7 @@
                   <v-icon icon="mdi-file-clock"></v-icon>
                 </template>
                 <v-list-item-title>
-                  Tickets Pendientes</v-list-item-title>
+                  Cotizaciones Pendientes</v-list-item-title>
               </v-list-item>
               <v-list-item @click="abrirCliente">
                 <template v-slot:prepend>
@@ -323,7 +323,7 @@
           tabindex="-1" class="text-decoration-none">
           <span class="text-primary cursor-pointer font-weight-bold">{{ item.product_name ??
             item.product?.name
-            }} <v-icon size="x-small">mdi-open-in-new</v-icon></span>
+          }} <v-icon size="x-small">mdi-open-in-new</v-icon></span>
         </router-link>
       </template>
       <!-- Dollar sign formatting for "Precio" column -->
@@ -377,7 +377,7 @@
             <a href="#" @keydown.enter.prevent="getProductById(item.id)" @click.prevent="getProductById(item.id)"
               class="font-weight-bold text-decoration-none" :class="[item.es_kit ? 'text-green' : 'text-primary']">
               <span>{{ item.name
-                }}</span>
+              }}</span>
             </a>
           </template>
 
@@ -431,29 +431,29 @@
   </v-dialog>
 
   <!-- Pendientes -->
-  <v-dialog v-model="openPendiente">
+  <v-dialog v-model="openPendiente" max-width="1200">
     <v-card>
       <v-card-title>Pendientes</v-card-title>
       <v-card-text>
+        <v-data-table :headers="pendientesHeaders" :items="pendientes" items-per-page="5" show-select
+          select-strategy="single">
+          <template v-slot:item.data-table-select="{ internalItem, isSelected, toggleSelect, index }">
+            <v-checkbox-btn :model-value="isSelected(internalItem)" color="primary"
+              @update:model-value="toggleSelect(internalItem)" class="articulosPendientesInputs"
+              @keydown.enter="getSpecificVT(internalItem.raw.id)"
+              @click="getSpecificVT(internalItem.raw.id)"></v-checkbox-btn>
+          </template>
+          <template v-slot:item.cliente="{ item }">
+            <span>{{ item.cliente?.name }}</span>
+          </template>
+          <template v-slot:item.almacen="{ item }">
+            <span>{{ item.almacen?.name }}</span>
+          </template>
+          <template v-slot:item.total="{ item }">
+            <span>${{ item.total }}</span>
+          </template>
+        </v-data-table>
       </v-card-text>
-      <v-data-table :headers="pendientesHeaders" :items="pendientes" items-per-page="5" show-select
-        select-strategy="single">
-        <template v-slot:item.data-table-select="{ internalItem, isSelected, toggleSelect, index }">
-          <v-checkbox-btn :model-value="isSelected(internalItem)" color="primary"
-            @update:model-value="toggleSelect(internalItem)" class="articulosPendientesInputs"
-            @keydown.enter="getSpecificVT(internalItem.raw.id)"
-            @click="getSpecificVT(internalItem.raw.id)"></v-checkbox-btn>
-        </template>
-        <template v-slot:item.cliente="{ item }">
-          <span>{{ item.cliente?.name }}</span>
-        </template>
-        <template v-slot:item.almacen="{ item }">
-          <span>{{ item.almacen?.name }}</span>
-        </template>
-        <template v-slot:item.total="{ item }">
-          <span>${{ item.total }}</span>
-        </template>
-      </v-data-table>
     </v-card>
   </v-dialog>
 
@@ -874,6 +874,7 @@ function searchProduct() {
   }
   Product.searchCode(codigo.value, almacen.id)
     .then((response) => {
+      console.log(response, 'res');
       if (response.data == "Producto No Encontrado") {
         toasterStore.warning({ text: "Producto No Encontrado", title: "" })
         codigo.value = "";
@@ -1318,7 +1319,7 @@ function archivar(imprimir) {
   if (cargando.value) return;
   cargando.value = true;
   console.log('qwer');
-  
+
   Cotizacion.archivar(ticketActual.id)
     .then((response) => {
       init();
@@ -1345,23 +1346,9 @@ async function guardarVenta(imprimir) {
   cargando.value = true;
   Cotizacion.guardarVenta(ticketActual.id)
     .then((response) => {
-      console.log(response, 'response');
-      
-      openFinalizar.value = false;
-      if (window.__TAURI_METADATA__ && imprimir) {
-        const webview = new WebviewWindow('ImprimirVenta', {
-          url: `ventatickets/imprimir/${response.data.id}`,
-          title: 'Imprimir Venta'
-        });
+      console.log(response.data, "res");
+      router.push({ name: "CotizacionesShow", params: { cotizacionId: response.data.id } })
 
-      } else if (imprimir) {
-        window.open(
-          `${import.meta.env.VITE_APP_URL}/ventatickets/imprimir/${response.data.id}`,
-          "_blank",
-          "noreferrer"
-        );
-      }
-      init();
       toasterStore.success({ text: "La cotizacion se ha generado con exito", title: "" })
     })
     .catch((error) => {
