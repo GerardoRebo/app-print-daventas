@@ -545,6 +545,7 @@
     </v-card>
   </v-dialog>
 
+<DynamicSnack :snackbar="snackbar" />
 </template>
 <script setup>
 import {
@@ -557,6 +558,7 @@ import {
   computed,
 } from "vue";
 
+import DynamicSnack from "../../components/DynamicSnack.vue";
 import { useRouter } from "vue-router";
 import Product from "@js/apis/Product";
 import Cotizacion from "@js/apis/Cotizacion";
@@ -571,7 +573,9 @@ import { WebviewWindow } from '@tauri-apps/api/window';
 const store = useUserStore();
 import { useToasterStore } from "@js/s/toaster";
 import { useDisplay } from "vuetify";
+import { useSnackBar } from "../../composables/SnackBar";
 const toasterStore = useToasterStore();
+const { snackbar, snackSuccess, snackError, snackWarning } = useSnackBar();
 const { productsData, lastFetchTimes } = storeToRefs(store);
 const { isOpException, getExceptionMsg, handleOpException } = store;
 const router = useRouter();
@@ -876,7 +880,7 @@ function searchProduct() {
     .then((response) => {
       console.log(response, 'res');
       if (response.data == "Producto No Encontrado") {
-        toasterStore.warning({ text: "Producto No Encontrado", title: "" })
+        snackWarning("Producto No Encontrado")
         codigo.value = "";
         return;
       }
