@@ -105,15 +105,13 @@ const updateStep = async (step) => {
     const { data } = await Production.updateState(props.order.id, payload);
     // snackSuccess('Proceso actualizado')
     props.order.status = data
-    console.log(data, 'data');
-    console.log('Step updated successfully');
   }, cargando, snackbar)
 };
 
 </script>
 <template>
   <v-container>
-    <v-stepper v-model="currentStep" editable>
+    <v-stepper v-model="currentStep" editable class="mt-4">
       <v-stepper-header>
         <!-- {{ order.ventaticket_articulo.product.product_components[0].product_hijo }} -->
         <template v-for="(step, index) in steps" :key="index">
@@ -128,8 +126,8 @@ const updateStep = async (step) => {
 
       <v-stepper-window>
         <v-stepper-window-item v-for="(step, index) in steps" :key="index" :value="step.value">
-          <v-card class="p-4">
-            <h3>{{ step.label }}</h3>
+          <div class="p-4">
+            <h3>Estado: {{ step.label }}</h3>
 
             <!-- Botón para abrir el modal -->
             <v-btn v-if="usesConsumable && !consumableDeducted && step.key == 'production'" color="primary"
@@ -145,7 +143,7 @@ const updateStep = async (step) => {
               @click="completeStep(step)">
               Marcar como Completado
             </v-btn> -->
-          </v-card>
+          </div>
         </v-stepper-window-item>
       </v-stepper-window>
     </v-stepper>

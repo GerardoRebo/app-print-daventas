@@ -48,11 +48,11 @@ const statusOptions = computed(() => {
     { title: "Entregado", value: "delivered" },
   ];
 });
-watch(()=>queryItems.value.cliente_id, (newQuery) => {
-  getProductionOrders({page: 1});
+watch(() => queryItems.value.cliente_id, (newQuery) => {
+  getProductionOrders({ page: 1 });
 }, { deep: true });
-watch(()=>queryItems.value.statuses, (newQuery) => {
-  getProductionOrders({page: 1});
+watch(() => queryItems.value.statuses, (newQuery) => {
+  getProductionOrders({ page: 1 });
 }, { deep: true });
 
 onMounted(() => {
@@ -78,8 +78,8 @@ onMounted(() => {
               <v-btn :disabled="queryItems.page == 1" class="me-2" icon="mdi-arrow-left" size="small" variant="tonal"
                 @click="getProductionOrders({ page: +queryItems.page - 1 })"></v-btn>
 
-              <v-btn :disabled="queryItems.page == orders.last_page" icon="mdi-arrow-right" size="small"
-                variant="tonal" @click="getProductionOrders({ page: +queryItems.page + 1 })"></v-btn>
+              <v-btn :disabled="queryItems.page == orders.last_page" icon="mdi-arrow-right" size="small" variant="tonal"
+                @click="getProductionOrders({ page: +queryItems.page + 1 })"></v-btn>
             </div>
           </div>
         </h1>
@@ -99,22 +99,17 @@ onMounted(() => {
       <template v-slot:default="{ items }">
         <v-row>
           <v-col v-for="(item, i) in items" :key="i" cols="12">
-            <v-sheet border>
+            <v-card border>
               <!-- <v-img :src="item.raw.src" height="100" cover></v-img> -->
               <v-row>
                 <v-col cols="12" md="6">
                   <CardItem :order="item.raw"></CardItem>
                 </v-col>
                 <v-col cols="12" md="6">
-                  <v-row align="start" style="height: 150px;">
-                    <v-col>
-                      <!-- stepper -->
-                      <Stepper :order="item.raw"></Stepper>
-                    </v-col>
-                  </v-row>
+                  <Stepper :order="item.raw"></Stepper>
                 </v-col>
               </v-row>
-            </v-sheet>
+            </v-card>
           </v-col>
         </v-row>
       </template>

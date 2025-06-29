@@ -84,7 +84,7 @@ const eliminarFile = async (articulo) => {
     }
   } catch (error) {
     console.error('An error occurred', error);
-  }finally {
+  } finally {
     cargando.value = false;
   }
 
@@ -128,21 +128,30 @@ getFiles();
   <v-row>
     <v-col cols="12" sm="4" class="pa-4">
       <v-card variant="flat">
+        <v-list-item :title="order.ventaticket_articulo?.product?.name" density="comfortable" lines="one">
+          <template v-slot:title>
+            <strong class="text-h6">
+              {{ order.ventaticket_articulo?.product?.name }}
+            </strong>
+          </template>
+        </v-list-item>
         <v-card-text>
           <p><span class="font-weight-bold">Fecha:</span>
             {{ `${moment(order.ventaticket?.created_at).format('DD-MM-YYYY h:mm:ss a')}` }} </p>
-          <RouterLink :to="{ name: 'VentasShow', params: { ventaId: order.ventaticket?.id } }" target="_blank" rel="noopener">
+          <RouterLink :to="{ name: 'VentasShow', params: { ventaId: order.ventaticket?.id } }" target="_blank"
+            rel="noopener">
             <p><span class="font-weight-bold">Ticket:</span> {{ `${order.ventaticket?.id}` }} </p>
           </RouterLink>
-          <p><span class="font-weight-bold">Cliente:</span> {{ `${order.ventaticket?.cliente?.name  ?? ''}` }} </p>
+          <p><span class="font-weight-bold">Cliente:</span> {{ `${order.ventaticket?.cliente?.name ?? ''}` }} </p>
           <p><span class="font-weight-bold">Generó:</span> {{ `${order.ventaticket?.almacen?.name}` }} </p>
           <p><span class="font-weight-bold">Vendio:</span> {{ `${order.ventaticket.user?.name}` }} </p>
           <p><span class="font-weight-bold">Medidas</span><span class="text-caption"> (Ancho x Alto) </span>: {{
             `${order.ventaticket_articulo.ancho ?? ''}x${order.ventaticket_articulo.alto ?? ''}` }} </p>
           <p><span class="font-weight-bold">Cantidad:</span> {{ `${order.ventaticket_articulo.cantidad}` }} </p>
-          <p><span class="font-weight-bold">Descripción:</span> {{ `${order.ventaticket_articulo.description ?? ''}` }} </p>
+          <p><span class="font-weight-bold">Descripción:</span> {{ `${order.ventaticket_articulo.description ?? ''}` }}
+          </p>
           <v-btn class="font-bold cursor-pointer text-indigo-600" @click="isDetallesOpen = true"
-             icon="mdi mdi-dots-horizontal" size="x-small" tabindex="-1">
+            icon="mdi mdi-dots-horizontal" size="x-small" tabindex="-1">
           </v-btn>
         </v-card-text>
       </v-card>
@@ -150,17 +159,7 @@ getFiles();
     <v-col cols="12" sm="8">
       <v-card variant="flat">
         <v-card-text>
-          <v-list-item :title="order.ventaticket_articulo?.product?.name" density="comfortable" lines="one">
-            <template v-slot:title>
-              <strong class="text-h6">
-                {{ order.ventaticket_articulo?.product?.name }}
-              </strong>
-            </template>
-          </v-list-item>
-          <v-img
-          @click="openCarousel(0)"
-            :src="firstImageUrl"
-            height="200" cover></v-img>
+          <v-img v-if="firstImageUrl" @click="openCarousel(0)" :src="firstImageUrl" height="200" cover></v-img>
         </v-card-text>
       </v-card>
 
