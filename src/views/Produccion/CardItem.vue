@@ -134,12 +134,13 @@ getFiles();
           <RouterLink :to="{ name: 'VentasShow', params: { ventaId: order.ventaticket?.id } }" target="_blank" rel="noopener">
             <p><span class="font-weight-bold">Ticket:</span> {{ `${order.ventaticket?.id}` }} </p>
           </RouterLink>
+          <p><span class="font-weight-bold">Cliente:</span> {{ `${order.ventaticket?.cliente?.name  ?? ''}` }} </p>
           <p><span class="font-weight-bold">Generó:</span> {{ `${order.ventaticket?.almacen?.name}` }} </p>
           <p><span class="font-weight-bold">Vendio:</span> {{ `${order.ventaticket.user?.name}` }} </p>
           <p><span class="font-weight-bold">Medidas</span><span class="text-caption"> (Ancho x Alto) </span>: {{
             `${order.ventaticket_articulo.ancho ?? ''}x${order.ventaticket_articulo.alto ?? ''}` }} </p>
           <p><span class="font-weight-bold">Cantidad:</span> {{ `${order.ventaticket_articulo.cantidad}` }} </p>
-          <p><span class="font-weight-bold">Descripción:</span> {{ `${order.ventaticket_articulo.description}` }} </p>
+          <p><span class="font-weight-bold">Descripción:</span> {{ `${order.ventaticket_articulo.description ?? ''}` }} </p>
           <v-btn class="font-bold cursor-pointer text-indigo-600" @click="isDetallesOpen = true"
              icon="mdi mdi-dots-horizontal" size="x-small" tabindex="-1">
           </v-btn>
