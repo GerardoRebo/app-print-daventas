@@ -34,7 +34,7 @@
     <strong>Ticket Cancelado</strong>
   </p>
   <hr style="border: 1px dashed black; opacity: 0.33" class="my-2" />
-  
+
   <span v-for="(item, index) in ventaticket?.ventaticket_articulos" :key="index">
     {{ item?.product?.name ?? item.product_name }}
     <br />
@@ -84,7 +84,7 @@
       <strong>Abonos venta a crédito:</strong>
     </p>
     <div v-for="abono in ventaticket?.deuda?.abonos">
-      {{ moment(abono.fecha).format("DD-MM-YYYY h:mm:ssa") }} - ${{ abono.abono.toLocaleString() }} 
+      {{ moment(abono.fecha).format("DD-MM-YYYY h:mm:ssa") }} - ${{ abono.abono.toLocaleString() }}
     </div>
     <p class="mb-1" v-if="!ventaticket?.deuda?.liquidado">
       <strong>Saldo:</strong> ${{ ventaticket?.deuda?.saldo }}

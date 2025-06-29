@@ -358,7 +358,7 @@
   </v-container>
 
   <!-- Busca Producto Nombre-->
-  <v-dialog v-model="isVisible">
+  <v-dialog v-model="isVisible" max-width="1200">
     <v-card>
       <v-card-title>Busca producto por nombre</v-card-title>
       <v-card-text>
@@ -404,27 +404,29 @@
     </v-card>
   </v-dialog>
   <!-- Clientes -->
-  <v-dialog v-model="openCliente">
+  <v-dialog v-model="openCliente" max-width="1200">
     <v-card>
       <v-card-title>Clientes</v-card-title>
       <v-card-text>
         <v-text-field v-model="keycliente" label="Cliente" prepend-inner-icon="mdi-magnify" variant="outlined"
           placeholder="Ingresa nombre del cliente" hide-details single-line id="keycliente"></v-text-field>
       </v-card-text>
-      <v-data-table :headers="clienteHeaders" :items="clients" items-per-page="5" show-select select-strategy="single">
-        <template v-slot:item.data-table-select="{ internalItem, isSelected, toggleSelect, index }">
-          <v-checkbox-btn :model-value="isSelected(internalItem)" color="primary"
-            @update:model-value="toggleSelect(internalItem)" class="articulosInputs"
-            @click="setCliente(internalItem.raw.id)" @keydown.enter="setCliente(internalItem.raw.id)"></v-checkbox-btn>
-        </template>
-        <!-- Dollar sign formatting for "Precio" column -->
-
+      <v-data-table :headers="clienteHeaders" :items="clients" items-per-page="5" >
+        <template v-slot:item.name="{ item }" tabindex="-1">
+            <a href="#" class="font-weight-bold text-decoration-none text-primary text-decoration-underline"
+              @keydown.enter.prevent="setCliente(item.id)" @click.prevent="setCliente(item.id)">
+              <span>{{ item.name }}</span>
+            </a>
+          </template>
         <!-- Dollar sign formatting for "Importe" column -->
         <template v-slot:item.saldo_actual="{ item }">
           <span>${{ item.saldo_actual }}</span>
         </template>
         <template v-slot:item.limite_credito="{ item }">
           <span>${{ item.limite_credito }}</span>
+        </template>
+        <template v-slot:item.actions="{ item }">
+          <v-btn @click="setCliente(item.id)" size="small">Seleccionar</v-btn>
         </template>
       </v-data-table>
     </v-card>
@@ -435,13 +437,12 @@
     <v-card>
       <v-card-title>Pendientes</v-card-title>
       <v-card-text>
-        <v-data-table :headers="pendientesHeaders" :items="pendientes" items-per-page="5" show-select
-          select-strategy="single">
-          <template v-slot:item.data-table-select="{ internalItem, isSelected, toggleSelect, index }">
-            <v-checkbox-btn :model-value="isSelected(internalItem)" color="primary"
-              @update:model-value="toggleSelect(internalItem)" class="articulosPendientesInputs"
-              @keydown.enter="getSpecificVT(internalItem.raw.id)"
-              @click="getSpecificVT(internalItem.raw.id)"></v-checkbox-btn>
+        <v-data-table :headers="pendientesHeaders" :items="pendientes" items-per-page="5">
+          <template v-slot:item.consecutivo="{ item }" tabindex="-1">
+            <a href="#" class="font-weight-bold text-decoration-none text-primary text-decoration-underline"
+              @keydown.enter.prevent="getSpecificVT(item.id)" @click.prevent="getSpecificVT(item.id)">
+              <span>{{ item.consecutivo }}</span>
+            </a>
           </template>
           <template v-slot:item.cliente="{ item }">
             <span>{{ item.cliente?.name }}</span>
@@ -629,7 +630,6 @@ const pagocon = ref(null);
 const edicion = ref(false);
 const keyword = ref("");
 const keycliente = ref("");
-const temp = ref(null);
 const almacens = ref([]);
 const existencias = ref([]);
 const productActualId = ref(null);
@@ -639,7 +639,6 @@ const pendientes = ref([]);
 const articuloActualId = ref(null);
 const articulos = ref([]);
 const clients = ref([]);
-const errors = ref([]);
 const isVisible = ref(false);
 const isInfoAgregarExistenciaOpen = ref(false);
 const openEdit = ref(false);
@@ -649,8 +648,6 @@ const openCliente = ref(false);
 const openPendiente = ref(false);
 const openConversion = ref(false);
 const nombreT = ref("");
-const isQrOpen = ref(false)
-const qrString = ref('')
 const timeOut = ref("");
 const tHeaders = ref([
   { title: 'Código', key: 'codigo', align: 'start', sortable: false },
@@ -680,6 +677,7 @@ const clienteHeaders = ref([
   { title: 'Límite de Crédito', key: 'limite_credito', align: 'start', sortable: false },
   { title: 'Teléfono', key: 'telefono', align: 'start', sortable: false },
   { title: 'Email', key: 'email', align: 'start', sortable: false },
+  { title: 'Acciones', key: 'actions', align: 'start', sortable: false },
 ])
 const pendientesHeaders = ref([
   { title: 'Folio', key: 'consecutivo', align: 'start', sortable: false },

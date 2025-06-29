@@ -414,8 +414,8 @@
   </v-container>
 
   <!-- Busca Producto Nombre-->
-  <v-dialog v-model="isVisible">
-    <v-card max-height="500">
+  <v-dialog v-model="isVisible" max-width="1200">
+    <v-card max-height="500" >
       <v-card-title>Busca producto por nombre</v-card-title>
       <v-card-text :scrollable="false">
         <p class="text-caption">

@@ -24,6 +24,7 @@
     </p>
     <p><strong>Ticket:</strong>#{{ ventaticket?.consecutivo }}</p>
     <p class="mb-1"><strong>Cajero:</strong> {{ ventaticket?.user?.name }}</p>
+    <p class="mb-1" v-if="ventaticket?.cliente"><strong>Cliente:</strong> {{ ventaticket?.cliente?.name }}</p>
     <p v-if="ventaticket?.pagado_en">
         <strong>Fecha: </strong>{{ moment(ventaticket?.pagado_en).format("DD-MM-YYYY h:mm:ssa") }}
     </p>
@@ -33,39 +34,6 @@
         <strong>Ticket Cancelado</strong>
     </p>
     <hr style="border: 1px dashed black; opacity: 0.33" class="my-2" />
-    <!-- <v-table density="compact" overflow-hidden>
-    <thead>
-      <tr>
-        <th class="text-left">Nombre</th>
-        <th class="text-left">Cant</th>
-        <th class="text-left">Precio</th>
-        <th class="text-left">Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        v-for="(item, index) in ventaticket?.ventaticket_articulos"
-        :key="index"
-      >
-        <td>
-          {{ item?.product?.name ?? item.product_name }}
-        </td>
-        <td>
-          {{ item?.cantidad }}
-          <span v-if="item.fue_devuelto">
-            <br />
-            Devolución -{{ item?.cantidad_devuelta }}
-          </span>
-        </td>
-        <td>
-          {{ item?.precio_usado }}
-        </td>
-        <td>
-          {{ item?.precio_final }}
-        </td>
-      </tr>
-    </tbody>
-  </v-table> -->
     <span v-for="(item, index) in ventaticket?.articulos" :key="index">
         {{ item?.product?.name ?? item.product_name }}
         <br />
@@ -132,9 +100,11 @@ function getSpecificVT(vt) {
     Cotizacion.getSpecificVTForPrinting(vt)
         .then((response) => {
             ventaticket.value = response.data;
-            nextTick(() => {
-                window.print()
-            })
+            if (!ventaticket.value?.organization?.image?.url) {
+                nextTick(() => {
+                    window.print();
+                });
+            }
         })
         .catch((error) => {
             handleOpException(error);
@@ -193,12 +163,21 @@ const route = useRoute();
 onMounted(() => {
 
     ventaticketId.value = route.params.id;
-    // addEventListener("afterprint", (event) => {
-    //     window.close()
-    //     if(window.__TAURI__){
-    //     appWindow.close();
-    //     return;
-    //   }
-    // });
+    addEventListener("afterprint", (event) => {
+        window.close()
+        if (window.__TAURI__) {
+            appWindow.close();
+            return;
+        }
+    });
 });
+// Image load event handler
+function onImageLoaded() {
+    setTimeout(() => {
+        nextTick(() => {
+            console.log("ther");
+            window.print();
+        });
+    }, 200);
+}
 </script>
