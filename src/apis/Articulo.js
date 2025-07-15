@@ -1,4 +1,5 @@
 import Api from "./Api";
+import ApiBlob from "./ApiBlob";
 
 export default {
   attachFiles(articuloId, formData) {
@@ -12,5 +13,8 @@ export default {
   },
   getFiles(articuloId) {
     return Api().get(`/articulos/${articuloId}/files/`);
+  },
+  downloadFile(fileId) {
+    return ApiBlob().get(`/articulos/files/${fileId}/download`);
   },
 }

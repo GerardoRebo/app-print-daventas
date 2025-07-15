@@ -111,6 +111,25 @@ function getFiles() {
       alert("Ha ocurrido un error")
     });
 }
+
+const downloadFile = async (fileId, filename) => {
+  try {
+    const response = await Articulo.downloadFile(fileId);
+    const blob = await response.data;
+    const link = document.createElement('a');
+    const blobUrl = window.URL.createObjectURL(blob);
+    link.href = blobUrl;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+  } catch (error) {
+    console.error('Error downloading the file:', error);
+    alert('Error al descargar el archivo');
+  }
+};
+
 const firstImageUrl = computed(() => {
   const imageFile = files.value.find(file => file.mime_type?.startsWith('image/'));
   return imageFile ? imageFile.url : null;
@@ -209,6 +228,7 @@ getFiles();
                       class="cursor-pointer"></v-img>
                   </template>
                   <template v-slot:item.actions="{ item }">
+                    <v-btn icon="mdi-download" size="small" color="primary" class="mr-2" @click="downloadFile(item.id, item.filename)"></v-btn>
                     <v-btn icon="mdi-trash-can" size="small" color="error" @click="eliminarFile(item.id)"></v-btn>
                   </template>
                 </v-data-table>
@@ -235,6 +255,7 @@ getFiles();
         </v-carousel>
       </v-card-text>
       <v-card-actions>
+        <v-btn text @click="downloadFile(files[selectedIndex].id, files[selectedIndex].filename)">Descargar</v-btn>
         <v-spacer></v-spacer>
         <v-btn text @click="isCarouselFilesOpen = false">Cerrar</v-btn>
       </v-card-actions>
