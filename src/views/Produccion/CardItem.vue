@@ -20,6 +20,26 @@ const filesHeaders = ref([
   { title: "Acciones", key: "actions", align: "start", sortable: false },
 ]);
 
+const retocarImagen = async (fileId) => {
+  try {
+    await Articulo.retocarImagen(fileId);
+    alert('La imagen se está retocando');
+  } catch (error) {
+    console.error('Error retocando la imagen:', error);
+    alert('Error al retocar la imagen');
+  }
+};
+
+const crearAnimacion = async (fileId) => {
+  try {
+    await Articulo.crearAnimacion(fileId);
+    // alert('La animación se está creando');
+  } catch (error) {
+    console.error('Error creando la animación:', error);
+    alert('Error al crear la animación');
+  }
+};
+
 const handleFiles = (event) => {
   cargando.value = true;
   const files = Array.from(event.target.files);
@@ -181,9 +201,7 @@ getFiles();
           <v-img v-if="firstImageUrl" @click="openCarousel(0)" :src="firstImageUrl" height="200" cover></v-img>
         </v-card-text>
       </v-card>
-
     </v-col>
-
   </v-row>
   <v-dialog v-model="isDetallesOpen">
     <v-card>
@@ -228,6 +246,19 @@ getFiles();
                       class="cursor-pointer"></v-img>
                   </template>
                   <template v-slot:item.actions="{ item }">
+                    <v-menu>
+                      <template v-slot:activator="{ props }">
+                        <v-btn icon="mdi-dots-vertical" size="small" class="mx-2" v-bind="props"></v-btn>
+                      </template>
+                      <v-list>
+                        <!-- <v-list-item @click="retocarImagen(item.id)">
+                          <v-list-item-title>Retocar Imagen</v-list-item-title>
+                        </v-list-item> -->
+                        <v-list-item @click="crearAnimacion(item.id)">
+                          <v-list-item-title>Crear Animación</v-list-item-title>
+                        </v-list-item>
+                      </v-list>
+                    </v-menu>
                     <v-btn icon="mdi-download" size="small" color="primary" class="mr-2" @click="downloadFile(item.id, item.filename)"></v-btn>
                     <v-btn icon="mdi-trash-can" size="small" color="error" @click="eliminarFile(item.id)"></v-btn>
                   </template>
@@ -236,7 +267,6 @@ getFiles();
             </v-card>
           </v-col>
         </v-row>
-
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>

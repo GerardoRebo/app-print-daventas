@@ -17,4 +17,10 @@ export default {
   downloadFile(fileId) {
     return ApiBlob().get(`/articulos/files/${fileId}/download`);
   },
+  retocarImagen(fileId) {
+    return Api().post(`/articulos/files/${fileId}/retocar`);
+  },
+  crearAnimacion(fileId) {
+    return Api().post(`/articulos/files/${fileId}/animate`);
+  },
 }
