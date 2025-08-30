@@ -23,4 +23,7 @@ export default {
   crearAnimacion(fileId) {
     return Api().post(`/articulos/files/${fileId}/animate`);
   },
+  checkStatusAnimations(fileId) {
+    return Api().post(`/articulos/files/${fileId}/checkStatusAnimations`);
+  },
 }

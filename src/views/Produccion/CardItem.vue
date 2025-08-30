@@ -31,13 +31,30 @@ const retocarImagen = async (fileId) => {
 };
 
 const crearAnimacion = async (fileId) => {
+  cargando.value = true;
   try {
     await Articulo.crearAnimacion(fileId);
     // alert('La animación se está creando');
   } catch (error) {
     console.error('Error creando la animación:', error);
     alert('Error al crear la animación');
+  }finally{
+    cargando.value = false;
   }
+
+};
+const animationCheckStatus = async (fileId) => {
+  cargando.value = true;
+  try {
+    await Articulo.checkStatusAnimations(fileId);
+    // alert('La animación se está creando');
+  } catch (error) {
+    console.error('Error creando la animación:', error);
+    alert('Error al crear la animación');
+  }finally{
+    cargando.value = false;
+  }
+
 };
 
 const handleFiles = (event) => {
@@ -256,6 +273,9 @@ getFiles();
                         </v-list-item> -->
                         <v-list-item @click="crearAnimacion(item.id)">
                           <v-list-item-title>Crear Animación</v-list-item-title>
+                        </v-list-item>
+                        <v-list-item @click="animationCheckStatus(item.id)">
+                          <v-list-item-title>Checar status</v-list-item-title>
                         </v-list-item>
                       </v-list>
                     </v-menu>
