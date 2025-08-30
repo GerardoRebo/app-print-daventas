@@ -61,7 +61,7 @@ const links = computed(() => {
           { icon: "", title: "Ventas", href: "VentasIndex" },
           { icon: "", title: "Devoluciones", href: "DevolucionesIndex" },
           { icon: "", title: "Movimientos", href: "MovimientosIndex" },
-          { icon: "", title: "Cotizaciones", href: "CotizacionesIndex" },
+          { icon: "", title: "Cotizaciones.", href: "CotizacionesIndex" },
         ],
       },
       {
@@ -93,7 +93,7 @@ const links = computed(() => {
         children: [
           { icon: "", title: "Ventas", href: "VentasIndex" },
           { icon: "", title: "Movimientos", href: "MovimientosIndex" },
-          { icon: "", title: "Cotizaciones", href: "CotizacionesIndex" },
+          { icon: "", title: "Cotizaciones.", href: "CotizacionesIndex" },
         ],
       },
       {
@@ -102,7 +102,7 @@ const links = computed(() => {
         href: "CreditosIndex",
       },
       { icon: "mdi-cash-check", title: "Cortes", href: "Cortes" },
-      { icon: "mdi-account-cash", title: "Refiere y Gana", href: "distribuidores" },
+      // { icon: "mdi-account-cash", title: "Refiere y Gana", href: "distribuidores" },
     ];
   } else {
     return [];
@@ -218,7 +218,7 @@ if (permanentDrawer.value) {
       <v-divider></v-divider>
       <v-list nav color="primary">
         <!-- Loop through the main links array -->
-        <div v-for="(link, index) in links" :key="index" :prepend-icon="link.icon" :value="link.title">
+        <div v-for="(link, index) in links" :key="link.title + index" :prepend-icon="link.icon" :value="link.title">
           <!-- Handle nested children with v-list-group -->
           <v-list-group v-if="link.children" @click="rail = false">
             <template v-slot:activator="{ props }" v-if="rail">
