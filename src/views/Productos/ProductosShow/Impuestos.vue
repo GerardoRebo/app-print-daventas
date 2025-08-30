@@ -109,16 +109,16 @@
     <v-card>
       <v-card-title>{{ title }}</v-card-title>
       <v-card-text>
-        <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
+        <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
         <v-select :items="impuestoItems" label="Impuesto" v-model="impuestoSelect"></v-select>
         <v-checkbox v-model="venta" :label="`Venta`" density="compact"></v-checkbox hide-details>
         <v-checkbox v-model="compra" :label="`Compra`" density="compact"></v-checkbox hide-details>
       </v-card-text>
       <v-card-actions>
         <v-btn @click="isVisible = false" variant="text" :loading="cargando">Cancelar</v-btn>
-        <v-btn @click="agregarImpuesto" color="accent" variant="outlined" :loading="cargando" prepend-icon="mdi-update"
+        <v-btn @click="agregarImpuesto" color="primary" variant="outlined" :loading="cargando" prepend-icon="mdi-update"
           v-if="impuestoActualId">Actualiza</v-btn>
-        <v-btn @click="agregarImpuesto" color="accent" variant="outlined" :loading="cargando" prepend-icon="mdi-plus"
+        <v-btn @click="agregarImpuesto" color="primary" variant="outlined" :loading="cargando" prepend-icon="mdi-plus"
           v-else>Agregar</v-btn>
       </v-card-actions>
     </v-card>
