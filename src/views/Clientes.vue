@@ -1,56 +1,76 @@
 <template>
-  <v-card class="mb-2">
-    <v-card-text>
-      <v-card-title>Catálogo clientes</v-card-title>
-      <v-row dense class="mt-4">
-        <v-btn prepend-icon="mdi-check-circle" variant="outlined" color="primary" class="mx-2"
-          @click="openCreateCliente" v-model="keyword">Crear Cliente
-        </v-btn>
-      </v-row>
-    </v-card-text>
-  </v-card>
-  <v-card>
-    <v-card-text>
-      <v-text-field label="Cliente" id="keyword" autocomplete="password" v-model="keyword" hide-details class="mx-2" />
-      <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
-      <v-data-table :headers="tHeaders" :items="clientes">
-        <template v-slot:item.regimen_fiscal="{ item }">
-          {{ item.regimen_fiscal }} {{ getRegimen(item.regimen_fiscal) }}
-        </template>
-        <template v-slot:item.actions="{ item }">
-          <v-btn icon="mdi-pencil" size="small" color="primary" @click="openEditCliente(item.id)"></v-btn>
-          <v-btn icon="mdi-trash-can" size="small" color="error" @click="destroyCliente(item.id)"></v-btn>
-        </template>
-      </v-data-table>
-    </v-card-text>
-  </v-card>
+  <v-container fluid class="py-0 mt-2">
+    <v-card class="mb-2">
+      <v-card-text>
+        <v-card-title>Catálogo clientes</v-card-title>
+        <v-row dense class="mt-4">
+          <v-btn prepend-icon="mdi-check-circle" variant="outlined" color="primary" class="mx-2"
+            @click="openCreateCliente" v-model="keyword">Crear Cliente
+          </v-btn>
+        </v-row>
+      </v-card-text>
+    </v-card>
+  </v-container>
+  <v-container fluid>
+    <v-card>
+      <v-card-text>
+        <v-text-field label="Cliente" id="keyword" autocomplete="password" v-model="keyword" hide-details
+          class="mx-2" />
+        <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
+        <v-data-table :headers="tHeaders" :items="clientes">
+          <template v-slot:item.regimen_fiscal="{ item }">
+            {{ item.regimen_fiscal }} {{ getRegimen(item.regimen_fiscal) }}
+          </template>
+          <template v-slot:item.actions="{ item }">
+            <v-btn icon="mdi-pencil" size="small" color="primary" @click="openEditCliente(item.id)"></v-btn>
+            <v-btn icon="mdi-trash-can" size="small" color="error" @click="destroyCliente(item.id)"></v-btn>
+          </template>
+        </v-data-table>
+      </v-card-text>
+    </v-card>
+  </v-container>
   <v-dialog v-model="isVisible" max-width="1000">
     <v-card>
       <v-card-title>{{ title }}</v-card-title>
       <v-card-text>
         <v-text-field v-model="cliente_form.name" label="Nombre"
           :error-messages="errors.name ? errors.name[0] : null"></v-text-field>
-        <v-text-field v-model="cliente_form.telefono" label="Telefono" density="compact"
-          :error-messages="errors.telefono ? errors.telefono[0] : null"></v-text-field>
-        <v-text-field v-model="cliente_form.email" label="Email" density="compact"
-          :error-messages="errors.email ? errors.email[0] : null"></v-text-field>
-        <v-text-field v-model="cliente_form.domicilio" label="Domicilio" density="compact"
-          :error-messages="errors.domicilio ? errors.domicilio[0] : null"></v-text-field>
-        <v-text-field v-model="cliente_form.limite_credito" label="Límite de crédito" density="compact"
-          :error-messages="errors.limite_credito ? errors.limite_credito[0] : null"></v-text-field>
-        <v-text-field v-model="cliente_form.codigo_postal" label="Código Postal" density="compact"
-          :error-messages="errors.codigo_postal ? errors.codigo_postal[0] : null"></v-text-field>
+        <v-row dense>
+          <v-col cols="12" md="6">
+            <v-text-field v-model="cliente_form.telefono" label="Telefono" density="compact"
+              :error-messages="errors.telefono ? errors.telefono[0] : null"></v-text-field>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field v-model="cliente_form.email" label="Email" density="compact"
+              :error-messages="errors.email ? errors.email[0] : null"></v-text-field>
+          </v-col>
+        </v-row>
+        <v-row dense>
+          <v-col cols="12" md="6">
+            <v-text-field v-model="cliente_form.domicilio" label="Domicilio" density="compact"
+              :error-messages="errors.domicilio ? errors.domicilio[0] : null"></v-text-field>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field v-model="cliente_form.codigo_postal" label="Código Postal" density="compact"
+              :error-messages="errors.codigo_postal ? errors.codigo_postal[0] : null"></v-text-field>
+          </v-col>
+        </v-row>
         <v-text-field v-model="cliente_form.rfc" label="Rfc" density="compact"
           :error-messages="errors.rfc ? errors.rfc[0] : null"></v-text-field>
         <v-text-field v-model="cliente_form.razon_social" label="Razon social" density="compact"
           :error-messages="errors.razon_social ? errors.razon_social[0] : null"></v-text-field>
         <v-select :items="fiscalRegimenes" label="Régimen Fiscal" v-model="cliente_form.regimen_fiscal"></v-select>
-        <v-text-field v-model="cliente_form.rfc" label="Rfc" density="compact"
-          :error-messages="errors.rfc ? errors.rfc[0] : null"></v-text-field>
+        <v-text-field v-model="cliente_form.limite_credito" label="Límite de crédito" density="compact"
+          :error-messages="errors.limite_credito ? errors.limite_credito[0] : null"></v-text-field>
+        <v-radio-group v-model="cliente_form.price_type" mandatory label="Cliente usa precio">
+          <v-radio label="Normal" value="normal"></v-radio>
+          <v-radio label="Medio Mayoreo" value="medio_mayoreo"></v-radio>
+          <v-radio label="Mayoreo" value="mayoreo"></v-radio>
+        </v-radio-group>
       </v-card-text>
       <v-card-actions>
         <v-btn @click="isVisible = false" :loading="cargando">Cancelar</v-btn>
-        <v-btn @click="handleSubmit" :loading="cargando" color="accent" variant="outlined">Confirmar</v-btn>
+        <v-btn @click="handleSubmit" :loading="cargando" color="primary" variant="outlined">Confirmar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -76,6 +96,7 @@ const cliente_form = reactive({
   razon_social: null,
   regimen_fiscal: 612,
   codigo_postal: null,
+  price_type: '',
 });
 const tHeaders = ref([
   { title: 'Nombre', key: 'name', align: 'start', sortable: false },
@@ -87,6 +108,7 @@ const tHeaders = ref([
   { title: 'Razón Social', key: 'razon_social', align: 'start', sortable: false },
   { title: 'Regimen Fiscal', key: 'regimen_fiscal', align: 'start', sortable: false },
   { title: 'Límite de crédito', key: 'limite_credito', align: 'start', sortable: false },
+  { title: 'Tipo de precio', key: 'price_type', align: 'start', sortable: false },
   { title: 'Acciones', key: 'actions', align: 'start', sortable: false },
 ]);
 const modalType = ref('create');
@@ -149,6 +171,7 @@ function openEditCliente(clienteId) {
   cliente_form.regimen_fiscal = cl.regimen_fiscal;
   cliente_form.razon_social = cl.razon_social;
   cliente_form.codigo_postal = cl.codigo_postal;
+  cliente_form.price_type = cl.price_type;
 }
 function openCreateCliente() {
   limpiarCampos();
@@ -166,6 +189,7 @@ function limpiarCampos() {
   cliente_form.regimen_fiscal = null;
   cliente_form.codigo_postal = null;
   cliente_form.rfc = null;
+  cliente_form.price_type = 'normal';
 }
 const getRegimen = (id) => {
   const regimen = fiscalRegimenes.value.find((item) => {
