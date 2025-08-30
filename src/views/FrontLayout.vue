@@ -19,7 +19,84 @@ const countNotfComputed = computed(() => {
   }
   return countNotf.value;
 });
-
+const links = computed(() => {
+  if (isAdmin.value) {
+    return [
+      { icon: "mdi-network-pos", title: "Punto de Venta", href: "PuntoVenta" },
+      { icon: "mdi-factory", title: "Producción", href: "Produccion" },
+      {
+        icon: "mdi-file-presentation-box",
+        title: "Cotizaciones",
+        href: "Cotizaciones",
+      },
+      { icon: "mdi-truck", title: "Movimientos", href: "MovimientosCreate" },
+      {
+        icon: "mdi-format-list-bulleted-type",
+        title: "Catalogos",
+        href: "#",
+        children: [
+          { icon: "", title: "Productos", href: "ProductosIndex" },
+          { icon: "", title: "Proveedores", href: "Proveedores" },
+          { icon: "", title: "Clientes", href: "Clientes" },
+          { icon: "", title: "Conceptos", href: "Conceptos" },
+          { icon: "", title: "Almacenes", href: "Almacens" },
+          { icon: "", title: "Departamentos", href: "Departamentos" },
+        ],
+      },
+      {
+        icon: "mdi-view-list",
+        title: "Historial",
+        href: "#",
+        children: [
+          { icon: "", title: "Ventas", href: "VentasIndex" },
+          { icon: "", title: "Devoluciones", href: "DevolucionesIndex" },
+          { icon: "", title: "Movimientos", href: "MovimientosIndex" },
+          { icon: "", title: "Cotizaciones", href: "CotizacionesIndex" },
+        ],
+      },
+      {
+        icon: "mdi-account-credit-card",
+        title: "Créditos",
+        href: "CreditosIndex",
+      },
+      { icon: "mdi-cash-check", title: "Cortes", href: "Cortes" },
+    ];
+  } else if (isLoggedIn.value) {
+    return [
+      { icon: "mdi-network-pos", title: "Punto de Venta", href: "PuntoVenta" },
+      {
+        icon: "mdi-file-presentation-box",
+        title: "Cotizaciones",
+        href: "Cotizaciones",
+      },
+      { icon: "mdi-truck", title: "Movimientos", href: "MovimientosCreate" },
+      {
+        icon: "mdi-format-list-bulleted-type",
+        title: "Catalogos",
+        href: "#",
+        children: [{ icon: "", title: "Productos", href: "ProductosIndex" }],
+      },
+      {
+        icon: "mdi-view-list",
+        title: "Historial",
+        href: "#",
+        children: [
+          { icon: "", title: "Ventas", href: "VentasIndex" },
+          { icon: "", title: "Movimientos", href: "MovimientosIndex" },
+          { icon: "", title: "Cotizaciones", href: "CotizacionesIndex" },
+        ],
+      },
+      {
+        icon: "mdi-account-credit-card",
+        title: "Créditos",
+        href: "CreditosIndex",
+      },
+      { icon: "mdi-cash-check", title: "Cortes", href: "Cortes" },
+    ];
+  } else {
+    return [];
+  }
+});
 const isLoggedIn = computed(() => s.isLoggedIn);
 
 const isAdmin = computed(() => {
@@ -105,157 +182,47 @@ const progressColor = computed(() => {
 
 const drawer = ref(false);
 
-const links = computed(() => {
-  if (isAdmin.value) {
-    return [
-      { icon: "mdi-network-pos", title: "Punto de Venta", href: "PuntoVenta" },
-      { icon: "mdi-factory", title: "Producción", href: "Produccion" },
-      {
-        icon: "mdi-file-presentation-box",
-        title: "Cotizaciones",
-        href: "Cotizaciones",
-      },
-      { icon: "mdi-truck", title: "Movimientos", href: "MovimientosCreate" },
-      {
-        icon: "mdi-format-list-bulleted-type",
-        title: "Catalogos",
-        href: "#",
-        children: [
-          { icon: "", title: "Productos", href: "ProductosIndex" },
-          { icon: "", title: "Proveedores", href: "Proveedores" },
-          { icon: "", title: "Clientes", href: "Clientes" },
-          { icon: "", title: "Conceptos", href: "Conceptos" },
-          { icon: "", title: "Almacenes", href: "Almacens" },
-          { icon: "", title: "Departamentos", href: "Departamentos" },
-        ],
-      },
-      {
-        icon: "mdi-view-list",
-        title: "Historial",
-        href: "#",
-        children: [
-          { icon: "", title: "Ventas", href: "VentasIndex" },
-          { icon: "", title: "Devoluciones", href: "DevolucionesIndex" },
-          { icon: "", title: "Movimientos", href: "MovimientosIndex" },
-          { icon: "", title: "Cotizaciones", href: "CotizacionesIndex" },
-        ],
-      },
-      {
-        icon: "mdi-account-credit-card",
-        title: "Créditos",
-        href: "CreditosIndex",
-      },
-      { icon: "mdi-cash-check", title: "Cortes", href: "Cortes" },
-    ];
-  } else if (isLoggedIn.value) {
-    return [
-      { icon: "mdi-network-pos", title: "Punto de Venta", href: "PuntoVenta" },
-      {
-        icon: "mdi-file-presentation-box",
-        title: "Cotizaciones",
-        href: "Cotizaciones",
-      },
-      { icon: "mdi-truck", title: "Movimientos", href: "MovimientosCreate" },
-      {
-        icon: "mdi-format-list-bulleted-type",
-        title: "Catalogos",
-        href: "#",
-        children: [{ icon: "", title: "Productos", href: "ProductosIndex" }],
-      },
-      {
-        icon: "mdi-view-list",
-        title: "Historial",
-        href: "#",
-        children: [
-          { icon: "", title: "Ventas", href: "VentasIndex" },
-          { icon: "", title: "Movimientos", href: "MovimientosIndex" },
-          { icon: "", title: "Cotizaciones", href: "CotizacionesIndex" },
-        ],
-      },
-      {
-        icon: "mdi-account-credit-card",
-        title: "Créditos",
-        href: "CreditosIndex",
-      },
-      { icon: "mdi-cash-check", title: "Cortes", href: "Cortes" },
-    ];
-  } else {
-    return [];
-  }
-});
+
 </script>
 <template>
   <v-app>
-    
 
-    <v-navigation-drawer
-      v-model="drawer"
-      :location="$vuetify.display.mobile ? 'bottom' : undefined">
+
+    <v-navigation-drawer v-model="drawer" :location="$vuetify.display.mobile ? 'bottom' : undefined">
       <v-list nav color="primary">
         <!-- Loop through the main links array -->
-        <div
-          v-for="(link, index) in links"
-          :key="index"
-          :prepend-icon="link.icon"
-          :value="link.title"
-        >
+        <div v-for="(link, index) in links" :key="index" :prepend-icon="link.icon" :value="link.title">
           <!-- Handle nested children with v-list-group -->
 
           <v-list-group v-if="link.children">
             <template v-slot:activator="{ props }">
-              <v-list-item
-                v-bind="props"
-                :title="link.title"
-                :prepend-icon="link.icon"
-              ></v-list-item>
+              <v-list-item v-bind="props" :title="link.title" :prepend-icon="link.icon"></v-list-item>
             </template>
 
             <!-- Loop through the children of the current link -->
-            <v-list-item
-              v-for="(child, childIndex) in link.children"
-              v-if="link.children"
-              :key="childIndex"
-              :prepend-icon="child.icon"
-              :title="child.title"
-              :to="{ name: child.href }"
-              exact
-            ></v-list-item>
+            <v-list-item v-for="(child, childIndex) in link.children" v-if="link.children" :key="childIndex"
+              :prepend-icon="child.icon" :title="child.title" :to="{ name: child.href }" exact></v-list-item>
           </v-list-group>
-          <v-list-item
-            :prepend-icon="link.icon"
-            :title="link.title"
-            :to="{ name: link.href }"
-            v-else
-          ></v-list-item>
+          <v-list-item :prepend-icon="link.icon" :title="link.title" :to="{ name: link.href }" v-else></v-list-item>
         </div>
       </v-list>
     </v-navigation-drawer>
     <v-app-bar color="secondary">
       <template v-slot:prepend>
         <v-container>
-          <v-app-bar-nav-icon
-            variant="text"
-            @click.stop="drawer = !drawer"
-            color="white"
-            v-if="isLoggedIn"
-          ></v-app-bar-nav-icon>
+          <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer" color="white"
+            v-if="isLoggedIn"></v-app-bar-nav-icon>
         </v-container>
       </template>
       <!-- <v-img src="https://cdn.vuetifyjs.com/images/cards/docks.jpg" height="128px" class="mr-3" max-width="50"
           contain></v-img> -->
       <v-app-bar-title v-if="isLoggedIn">
-        <router-link
-          :to="{ name: 'Home' }"
-          class="text-decoration-none text-white"
-        >
+        <router-link :to="{ name: 'Home' }" class="text-decoration-none text-white">
           Daventas
         </router-link>
       </v-app-bar-title>
       <v-app-bar-title v-else>
-        <router-link
-          :to="{ name: 'Login' }"
-          class="text-decoration-none text-white"
-        >
+        <router-link :to="{ name: 'Login' }" class="text-decoration-none text-white">
           Daventas
         </router-link>
       </v-app-bar-title>
@@ -267,12 +234,7 @@ const links = computed(() => {
         <v-container>
           <v-menu min-width="200px" rounded v-if="isLoggedIn">
             <template v-slot:activator="{ props }">
-              <v-btn
-                icon
-                color="primary_l800"
-                @click="getNotifications"
-                v-bind="props"
-              >
+              <v-btn icon color="primary_l800" @click="getNotifications" v-bind="props">
                 <v-badge color="primary_l100" :content="countNotf">
                   <v-icon> mdi-bell</v-icon>
                 </v-badge>
@@ -283,7 +245,7 @@ const links = computed(() => {
                 <v-list>
                   <v-list-item v-for="(notification, index) in notifications">{{
                     notification.data.data
-                  }}</v-list-item>
+                    }}</v-list-item>
                 </v-list>
               </v-card-text>
             </v-card>
@@ -309,32 +271,17 @@ const links = computed(() => {
                     {{ email }}
                   </p>
                   <v-divider class="my-3"></v-divider>
-                  <v-btn
-                    variant="text"
-                    rounded
-                    prepend-icon="mdi-account-edit"
-                    :to="{ name: 'UserSettings' }"
-                  >
+                  <v-btn variant="text" rounded prepend-icon="mdi-account-edit" :to="{ name: 'UserSettings' }">
                     Editar Cuenta
                   </v-btn>
                   <v-btn variant="text" rounded prepend-icon="mdi-bell">
                     Notificaciones
                   </v-btn>
-                  <v-btn
-                    variant="text"
-                    rounded
-                    prepend-icon="mdi-account-tie"
-                    :to="{ name: 'MiOrganizacion' }"
-                  >
+                  <v-btn variant="text" rounded prepend-icon="mdi-account-tie" :to="{ name: 'MiOrganizacion' }">
                     Administración
                   </v-btn>
                   <v-divider class="my-3"></v-divider>
-                  <v-btn
-                    variant="text"
-                    rounded
-                    prepend-icon="mdi-logout"
-                    @click="logout"
-                  >
+                  <v-btn variant="text" rounded prepend-icon="mdi-logout" @click="logout">
                     Cerrar session
                   </v-btn>
                 </div>
@@ -346,10 +293,7 @@ const links = computed(() => {
       <v-spacer></v-spacer>
     </v-app-bar>
     <v-main>
-      <v-progress-linear
-        :color="progressColor"
-        model-value="100"
-      ></v-progress-linear>
+      <v-progress-linear :color="progressColor" model-value="100"></v-progress-linear>
       <slot></slot>
     </v-main>
   </v-app>
