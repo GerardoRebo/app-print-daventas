@@ -3,6 +3,8 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useUserStore } from "../s";
 import { useRoute, useRouter } from "vue-router";
 import User from "../apis/User";
+import { useDisplay } from "vuetify";
+const { mobile } = useDisplay();
 
 const s = useUserStore();
 const router = useRouter();
