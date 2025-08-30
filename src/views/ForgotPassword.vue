@@ -8,7 +8,7 @@
           :error="errors.email ? errors.email[0] : null" append-inner-icon="mdi-email" />
       </v-card-text>
       <v-card-actions>
-        <v-btn color="accent" class="mt-3" block @click.prevent="forgotPassword" variant="elevated">
+        <v-btn color="primary" class="mt-3" block @click.prevent="forgotPassword" variant="elevated">
           Enviar
         </v-btn>
       </v-card-actions>

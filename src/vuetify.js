@@ -17,44 +17,20 @@ export default createVuetify({
     themes: {
       light: {
         colors: {
-          primary: '#1964cc',  // Blue - Trust
-          accent: '#ea580c',   // Orange - Dynamism
-          primary_l100: '#337de6',  // Blue - Trust
-          primary_l200: '#498ce9',  // Blue - Trust
-          primary_l300: '#609aeb',  // Blue - Trust
-          primary_l400: '#77a9ee',  // Blue - Trust
-          primary_l500: '#8eb7f1',  // Blue - Trust
-          primary_l600: '#a4c5f4',  // Blue - Trust
-          primary_l700: '#bbd4f7',  // Blue - Trust
-          primary_l800: '#d2e2f9',  // Blue - Trust
-          primary_l900: '#e8f1fc',  // Blue - Trust
+          primary: '#3084f2',  // Blue - Trust
+          accent: '#f2b90f',   // Orange - Dynamism
+          secondary: '#102540',  // Blue - Trust
 
-          primary_d100: '#1964cc',  // Blue - Trust
-          primary_d200: '#1659b6',  // Blue - Trust
-          primary_d300: '#144e9f',  // Blue - Trust
-          primary_d400: '#114388',  // Blue - Trust
-          primary_d500: '#0e3872',  // Blue - Trust
-          primary_d600: '#0b2c5b',  // Blue - Trust
-          primary_d700: '#082144',  // Blue - Trust
-          primary_d800: '#06162d',  // Blue - Trust
-          primary_d900: '#030b17',  // Blue - Trust
+          gray: '#cacbcc',
 
-          neutral100: '#f3f4f6',  // Blue - Trust
-          neutral200: '#e2e8f0',  // Blue - Trust
-          neutral300: '#cbd5e1',  // Blue - Trust
-          neutral400: '#94a3b8',  // Blue - Trust
-          neutral500: '#64748b',  // Blue - Trust
-          neutral600: '#475569',  // Blue - Trust
-          neutral700: '#334155',  // Blue - Trust
+          white: '#fcfdff',
+          black: '#0d0d0d',
 
-          black: '#030b17',
           success: '#43A047',   // Green - Success
           warning: '#FB8C00',   // Amber - Warnings
           error: '#E53935',     // Red - Errors
           background: '#FFFFFF', // White background for light theme
           surface: '#F2F2F2',    // Light grey surface
-          'on-background': "#06162d",
-          'on-surface': "#06162d",
         },
 
       },
@@ -68,32 +44,32 @@ export default createVuetify({
   defaults: {
     VBtn: {
       variant: 'tonal', // Set your preferred default variant here
-      color: 'primary_d600',
+      color: 'secondary',
     },
     VCardActions: {
-      VBtn: { variant: 'tonal', color: 'primary_d600', },
+      VBtn: { variant: 'tonal', color: 'secondary', },
     },
     VToolBar: {
-      VBtn: { variant: 'tonal', color: 'primary_d600', }
+      VBtn: { variant: 'tonal', color: 'secondary', }
     },
     VDialog: {
-      VBtn: { variant: 'tonal', color: 'primary_d600', }
+      VBtn: { variant: 'tonal', color: 'secondary', }
     },
     VCard: {
       VTextField: {
-        color: 'primary_d600',
+        color: 'secondary',
         density: 'compact',
         variant: 'outlined',
 
       },
       // VCardTitle: {
-      //   class: 'text-primary_d600',
+      //   class: 'text-secondary',
       // },
       VCheckbox: {
-        color: 'primary_d600',
+        color: 'secondary',
       },
       VRadioGroup: {
-        color: 'primary_d600',
+        color: 'secondary',
       },
       VDateInput: {
         density: 'compact',
@@ -101,12 +77,12 @@ export default createVuetify({
       }
     },
     VTextField: {
-      color: 'primary_d600',
+      color: 'secondary',
       density: 'compact',
       variant: 'outlined',
     },
     VSelect: {
-      color: 'primary_d600',
+      color: 'secondary',
       density: 'compact',
       variant: 'outlined',
     },

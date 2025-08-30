@@ -184,7 +184,51 @@ const links = computed(() => {
 </script>
 <template>
   <v-app>
-    <v-app-bar color="primary_d800">
+    
+
+    <v-navigation-drawer
+      v-model="drawer"
+      :location="$vuetify.display.mobile ? 'bottom' : undefined">
+      <v-list nav color="primary">
+        <!-- Loop through the main links array -->
+        <div
+          v-for="(link, index) in links"
+          :key="index"
+          :prepend-icon="link.icon"
+          :value="link.title"
+        >
+          <!-- Handle nested children with v-list-group -->
+
+          <v-list-group v-if="link.children">
+            <template v-slot:activator="{ props }">
+              <v-list-item
+                v-bind="props"
+                :title="link.title"
+                :prepend-icon="link.icon"
+              ></v-list-item>
+            </template>
+
+            <!-- Loop through the children of the current link -->
+            <v-list-item
+              v-for="(child, childIndex) in link.children"
+              v-if="link.children"
+              :key="childIndex"
+              :prepend-icon="child.icon"
+              :title="child.title"
+              :to="{ name: child.href }"
+              exact
+            ></v-list-item>
+          </v-list-group>
+          <v-list-item
+            :prepend-icon="link.icon"
+            :title="link.title"
+            :to="{ name: link.href }"
+            v-else
+          ></v-list-item>
+        </div>
+      </v-list>
+    </v-navigation-drawer>
+    <v-app-bar color="secondary">
       <template v-slot:prepend>
         <v-container>
           <v-app-bar-nav-icon
@@ -299,51 +343,6 @@ const links = computed(() => {
       </template>
       <v-spacer></v-spacer>
     </v-app-bar>
-
-    <v-navigation-drawer
-      v-model="drawer"
-      :location="$vuetify.display.mobile ? 'bottom' : undefined"
-      temporary
-    >
-      <v-list nav color="primary">
-        <!-- Loop through the main links array -->
-        <div
-          v-for="(link, index) in links"
-          :key="index"
-          :prepend-icon="link.icon"
-          :value="link.title"
-        >
-          <!-- Handle nested children with v-list-group -->
-
-          <v-list-group v-if="link.children">
-            <template v-slot:activator="{ props }">
-              <v-list-item
-                v-bind="props"
-                :title="link.title"
-                :prepend-icon="link.icon"
-              ></v-list-item>
-            </template>
-
-            <!-- Loop through the children of the current link -->
-            <v-list-item
-              v-for="(child, childIndex) in link.children"
-              v-if="link.children"
-              :key="childIndex"
-              :prepend-icon="child.icon"
-              :title="child.title"
-              :to="{ name: child.href }"
-              exact
-            ></v-list-item>
-          </v-list-group>
-          <v-list-item
-            :prepend-icon="link.icon"
-            :title="link.title"
-            :to="{ name: link.href }"
-            v-else
-          ></v-list-item>
-        </div>
-      </v-list>
-    </v-navigation-drawer>
     <v-main>
       <v-progress-linear
         :color="progressColor"
