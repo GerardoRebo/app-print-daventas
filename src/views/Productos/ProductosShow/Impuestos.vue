@@ -6,11 +6,15 @@
       <p class="font-weight-bold">Codigo: {{ productActual.codigo }}</p>
       <v-divider></v-divider>
       <v-row dense class="mt-4">
-        <v-col cols="12" md="2">
+        <v-col cols="12" md="auto">
           <v-btn @click="abrirModal" prepend-icon="mdi-plus" variant="outlined" color="primary" class="mx-2"
             size="small">Agregar
             impuesto
           </v-btn>
+        </v-col>
+        <v-col cols="12" md="2" >
+          <v-select :items="ObjetoImpItems" v-model="productActual.ObjetoImp" @update:modelValue="updateObjetoImpuesto" label="Objeto impuesto:" class="mx-2" color="primary">
+          </v-select>
         </v-col>
         <v-col cols="12" md="2">
           <v-btn @click="abrirClave" prepend-icon="mdi-magnify" variant="tonal" color="primary" class="mx-2"
@@ -124,6 +128,7 @@
 <script setup>
 import { onMounted, ref, watch, computed } from "@vue/runtime-core";
 import Impuesto from "@js/apis/Impuesto";
+import Product from "@js/apis/Product";
 import { useSnackBar } from "@js/composables/SnackBar";
 import { useRoute } from "vue-router";
 import { useProductActual } from "../../../composables/ProductActual";
@@ -150,6 +155,7 @@ const isVisible = ref(false);
 const isClaveOpen = ref(false);
 const isUnidadOpen = ref(false);
 const productId = ref(route.params.productId);
+const ObjetoImpItems = ref([{ title: "No objeto de impuesto", value: "01" }, { title: "Si objeto de impuesto", value: "02" }, { title: "Si objeto de impuesto, no desglose", value: "03" }]);
 const impuestoItems = computed(() => {
   return impuestos.value.map((item) => {
     return {
@@ -268,6 +274,17 @@ function updateClave(clave) {
       handleOpException(error);
       alert("Ha ocurrido un error")
     });
+}
+async function updateObjetoImpuesto(e) {
+  try {
+    const { data } = await Product.updateObjetoImp(productActual.value.id, e);
+    snackSuccess("Actualizado correctamente")
+    showpd()
+  } catch (error) {
+    console.log(error);
+    // handleOpException(error);
+    alert("Ha ocurrido un error")
+  }
 }
 function getAllImpuestos() {
   Impuesto.getTrasladoImpuestos()

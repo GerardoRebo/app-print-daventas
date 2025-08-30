@@ -219,4 +219,9 @@ export default {
       },
     });
   },
+  updateObjetoImp(productId, value) {
+        return Api().put(`/products/${productId}/updateObjetoImp`, {
+            ObjetoImp: value
+        })
+    },
 };

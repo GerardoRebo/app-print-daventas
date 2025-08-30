@@ -10,6 +10,7 @@ export function useProductActual(productId,productActual, cargando, snackbar) {
             productActual.value.id = data.id;
             productActual.value.name = data.name;
             productActual.value.codigo = data.codigo;
+            productActual.value.ObjetoImp = data.ObjetoImp;
             return productActual;
         }, cargando, snackbar)
 }
