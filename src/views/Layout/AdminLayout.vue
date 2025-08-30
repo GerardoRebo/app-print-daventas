@@ -111,10 +111,12 @@ const links = computed(() => {
       { icon: 'mdi-account-group', title: 'Usuarios', href: "UsuariosIndex" },
       { icon: 'mdi-file-presentation-box', title: 'Tabulares', href: "MiTabular" },
       { icon: 'mdi-file-excel', title: 'Datos', href: "MisDatos" },
+      // { icon: 'mdi-invoice-list', title: 'Facturacion', href: "Facturacion" },
       { icon: 'mdi-list-box', title: 'Impuestos', href: "Impuestos" },
       { icon: 'mdi-invoice-list', title: 'Facturas', href: "FacturasIndex" },
       { icon: 'mdi-view-list', title: 'FacturasGlobales', href: "FacturasGlobalesIndex" },
       { icon: 'mdi-file-document-outline', title: 'Reglas de Retención', href: "ReglasRetencionIndex" },
+      // { icon: 'mdi-file-document-outline', title: 'Mi Suscripción', href: "suscription-plan" },
       // {
       //   icon: 'mdi-format-list-bulleted-type', title: 'Facturas', href: "#", children: [
       //     { icon: '', title: 'Facturas', href: "ProductosIndex" },
@@ -130,11 +132,12 @@ const links = computed(() => {
 </script>
 <template>
   <v-app>
-    <v-app-bar color="primary_d800">
+    
+    <v-app-bar color="secondary">
       <template v-slot:prepend>
         <v-container>
-          <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer" color="white"
-            v-if="isLoggedIn"></v-app-bar-nav-icon>
+          <!-- <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer" color="white"
+            v-if="isLoggedIn"></v-app-bar-nav-icon> -->
 
         </v-container>
       </template>
@@ -158,8 +161,8 @@ const links = computed(() => {
         <v-container>
           <v-menu min-width="200px" rounded v-if="isLoggedIn">
             <template v-slot:activator="{ props }">
-              <v-btn icon color="primary_l800" @click="getNotifications" v-bind="props">
-                <v-badge color="primary_l100" :content="countNotf">
+              <v-btn icon color="gray" @click="getNotifications" v-bind="props">
+                <v-badge color="accent" :content="countNotf">
                   <v-icon> mdi-bell</v-icon>
                 </v-badge>
               </v-btn>
@@ -177,7 +180,7 @@ const links = computed(() => {
           <v-menu min-width="200px" rounded v-if="isLoggedIn">
             <template v-slot:activator="{ props }">
               <v-btn icon v-bind="props">
-                <v-avatar color="accent" size="small">
+                <v-avatar color="primary" size="small">
                   <span class="text-h5">{{ initials }}</span>
                 </v-avatar>
               </v-btn>
@@ -185,7 +188,7 @@ const links = computed(() => {
             <v-card>
               <v-card-text>
                 <div class="mx-auto text-center">
-                  <v-avatar color="accent">
+                  <v-avatar color="primary">
                     <span class="text-h5">{{ initials }}</span>
                   </v-avatar>
                   <h3>{{ nombre }}</h3>
@@ -214,11 +217,8 @@ const links = computed(() => {
       </template>
       <v-spacer></v-spacer>
     </v-app-bar>
-
-    <v-navigation-drawer v-model="drawer" :location="$vuetify.display.mobile ? 'bottom' : undefined" temporary>
-      <v-list nav color="primary">
-        <v-list-subheader>Área de Administración</v-list-subheader>
-        <v-divider></v-divider>
+<v-navigation-drawer   :location="$vuetify.display.mobile ? 'bottom' : undefined" temporary permanent>
+      <v-list nav color="primary" >
         <!-- Loop through the main links array -->
         <div v-for="(link, index) in links" :key="index" :prepend-icon="link.icon" :value="link.title">
           <!-- Handle nested children with v-list-group -->
@@ -236,6 +236,7 @@ const links = computed(() => {
         </div>
       </v-list>
     </v-navigation-drawer>
+
     <v-main>
       <v-progress-linear color="grey" model-value="100"></v-progress-linear>
       <slot></slot>
