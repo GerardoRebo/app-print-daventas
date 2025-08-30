@@ -30,9 +30,31 @@
         </v-btn>
         <v-btn @click="copyLinkToClipBoard" size="small" class="mx-2" prepend-icon="mdi-link" variant="tonal">Mi Tienda
         </v-btn>
-        <v-btn @click="printLastTicket" size="small" class="mx-2" prepend-icon="mdi-printer-pos" variant="tonal">Ultimo
-          ticket
-        </v-btn>
+        <v-menu transition="scale-transition">
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" size="small" class="mx-2" append-icon="mdi-chevron-down" variant="tonal">Ultimo
+                ticket
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item @click="openLastTicket">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-eye"></v-icon>
+                </template>
+                <v-list-item-title>
+                  Ver</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="printLastTicket">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-printer-pos"></v-icon>
+                </template>
+                <v-list-item-title>
+                  Imprimir</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+          <v-btn size="small" class="mx-2" append-icon="mdi-keyboard" variant="tonal"
+            @click="isShortcutsOpen = true">Atajos</v-btn>
         <v-select :items="almacenItems" v-if="ticketActual.miAlmacenId == null" label="Almacenes"
           @update:modelValue="asignarAlmacen" max-width="300" hide-details></v-select>
         <div class="d-flex justify-space-around">
@@ -469,71 +491,66 @@
   </v-dialog>
 
   <!-- Clientes -->
-  <v-dialog v-model="openCliente">
+  <v-dialog v-model="openCliente" max-width="1200">
     <v-card>
       <v-card-title>Clientes</v-card-title>
       <v-card-text>
         <v-text-field v-model="keycliente" label="Cliente" prepend-inner-icon="mdi-magnify" variant="outlined"
           placeholder="Ingresa nombre del cliente" hide-details single-line id="keycliente"></v-text-field>
+        <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
+        <v-data-table :headers="clienteHeaders" :items="clients" items-per-page="10">
+          <!-- Dollar sign formatting for "Importe" column -->
+          <template v-slot:item.name="{ item }">
+            <a href="" class="decoration-none" @keydown.enter.prevent="setCliente(item.id)"
+              @click.prevent="setCliente(item.id)"><span color="primary">{{ item.name }}</span></a>
+          </template>
+          <template v-slot:item.saldo_actual="{ item }">
+            <span>${{ item.saldo_actual }}</span>
+          </template>
+          <template v-slot:item.limite_credito="{ item }">
+            <span>${{ item.limite_credito }}</span>
+          </template>
+          <template v-slot:item.actions="{ item }">
+            <v-btn prepend-icon="mdi-check" size="small" tabindex="-1" @click="setCliente(item.id)" color="primary">
+              Agregar
+            </v-btn>
+          </template>
+        </v-data-table>
       </v-card-text>
-      <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
-      <v-data-table :headers="clienteHeaders" :items="clients" items-per-page="5" show-select select-strategy="single">
-        <template v-slot:item.data-table-select="{
-          internalItem,
-          isSelected,
-          toggleSelect,
-          index,
-        }">
-          <v-checkbox-btn :model-value="isSelected(internalItem)" color="primary"
-            @update:model-value="toggleSelect(internalItem)" class="articulosInputs"
-            @click="setCliente(internalItem.raw.id)" @keydown.enter="setCliente(internalItem.raw.id)"></v-checkbox-btn>
-        </template>
-        <!-- Dollar sign formatting for "Precio" column -->
-
-        <!-- Dollar sign formatting for "Importe" column -->
-        <template v-slot:item.saldo_actual="{ item }">
-          <span>${{ item.saldo_actual }}</span>
-        </template>
-        <template v-slot:item.limite_credito="{ item }">
-          <span>${{ item.limite_credito }}</span>
-        </template>
-      </v-data-table>
     </v-card>
   </v-dialog>
   <!-- Pendientes -->
-  <v-dialog v-model="openPendiente">
+  <v-dialog v-model="openPendiente" max-width="1200">
     <v-card>
       <v-card-title>Pendientes</v-card-title>
-      <v-card-text> </v-card-text>
       <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
-      <v-data-table :headers="pendientesHeaders" :items="pendientes" items-per-page="5" show-select
-        select-strategy="single">
-        <template v-slot:item.data-table-select="{
-          internalItem,
-          isSelected,
-          toggleSelect,
-          index,
-        }">
-          <v-checkbox-btn :model-value="isSelected(internalItem)" color="primary"
-            @update:model-value="toggleSelect(internalItem)" class="articulosPendientesInputs"
-            @keydown.enter="getSpecificVT(internalItem.raw.id)"
-            @click="getSpecificVT(internalItem.raw.id)"></v-checkbox-btn>
-        </template>
-        <template v-slot:item.cliente="{ item }">
-          <span>{{ item.cliente?.name }}</span>
-        </template>
-        <template v-slot:item.almacen="{ item }">
-          <span>{{ item.almacen?.name }}</span>
-        </template>
-        <template v-slot:item.total="{ item }">
-          <span>${{ item.total }}</span>
-        </template>
-      </v-data-table>
+      <v-card-text>
+        <v-data-table :headers="pendientesHeaders" :items="pendientes" items-per-page="5">
+          <template v-slot:item.consecutivo="{ item }">
+            <a href="" class="decoration-none" @keydown.enter.prevent="getSpecificVT(item.id)"
+              @click.prevent="getSpecificVT(item.id)"><span color="primary">{{ item.consecutivo }}</span></a>
+          </template>
+          <template v-slot:item.cliente="{ item }">
+            <span>{{ item.cliente?.name }}</span>
+          </template>
+          <template v-slot:item.almacen="{ item }">
+            <span>{{ item.almacen?.name }}</span>
+          </template>
+          <template v-slot:item.total="{ item }">
+            <span>${{ item.total }}</span>
+          </template>
+          <template v-slot:item.actions="{ item }">
+            <v-btn prepend-icon="mdi-check" size="small" tabindex="-1" @click="getSpecificVT(item.id)" color="primary">
+              Asignar
+            </v-btn>
+          </template>
+        </v-data-table>
+      </v-card-text>
     </v-card>
   </v-dialog>
 
   <!-- Existencias-->
-  <v-dialog v-model="openExistencias">
+  <v-dialog v-model="openExistencias" >
     <v-card>
       <v-card-title>Existencias</v-card-title>
       <v-card-text> </v-card-text>
@@ -822,6 +839,50 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+  <v-dialog v-model="isShortcutsOpen" max-width="600">
+    <v-card class="pa-6">
+      <v-card-title class="text-h5 font-weight-bold">
+        <v-icon start class="mr-2">mdi-keyboard</v-icon>
+        Atajos de Teclado
+      </v-card-title>
+
+      <v-divider class="my-4" />
+
+      <v-card-text>
+
+        <v-list>
+          <v-list-item v-for="(shortcut, index) in shortcuts" :key="index">
+              <v-list-item-title class="text-subtitle-1 font-weight-medium">
+                {{ shortcut.title }}
+              </v-list-item-title>
+              <v-list-item-subtitle>
+                {{ shortcut.description }}
+              </v-list-item-subtitle>
+            <v-list-item-action>
+              <v-chip color="black" text-color="black" class="ma-1" v-for="(key, i) in shortcut.keys" :key="i">
+                {{ key }}
+              </v-chip>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
+        <v-alert type="info" variant="tonal" color="accent" class="mt-4 text-body-2">
+          <p class="text-secondary">
+
+            Nota: Algunos atajos como <strong>F1</strong>, <strong>F2</strong>, etc., pueden requerir que mantengas
+            presionada la tecla <kbd>Fn</kbd> en ciertos modelos de laptop o teclados compactos, especialmente en
+            MacBooks
+            o
+            dispositivos con funciones especiales asignadas a las teclas de función.
+          </p>
+        </v-alert>
+      </v-card-text>
+
+      <v-card-actions>
+        <v-spacer />
+        <v-btn color="primary" @click="isShortcutsOpen = false" variant="outlined">Cerrar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
   <DynamicSnack :snackbar="snackbar" />
 </template>
 <style>
@@ -950,6 +1011,7 @@ const isVisible = ref(false);
 const isOpenImagenes = ref(false);
 const imagenes = ref([]);
 const isInfoAgregarExistenciaOpen = ref(false);
+const isShortcutsOpen = ref(false);
 const openEdit = ref(false);
 const openExistencias = ref(false);
 const openCobrar = ref(false);
@@ -983,6 +1045,58 @@ const tHeaders = ref([
   "Existencia",
   "Acciones",
 ]);
+const shortcuts = [
+  {
+    title: 'Navegar a punto de venta',
+    description: 'Estando en cualquier página, esta tecla te dirige al punto de venta',
+    keys: ['F1'],
+  },
+  {
+    title: 'Navegar al catálogo de productos',
+    description: 'Estando en cualquier página, esta tecla te dirige al catálogo de productos',
+    keys: ['F4'],
+  },
+  {
+    title: 'Navegar a la pagina de Movimientos',
+    description: 'Estando en cualquier página, esta tecla te dirige a la página de movimientos',
+    keys: ['F8'],
+  },
+  {
+    title: 'Cerrar todo',
+    description: 'Cierras las ventas de dialogo y vas a la caja de código',
+    keys: ['ESC'],
+  },
+  {
+    title: 'Buscar productos por nombre',
+    description: 'Abre la ventana para buscar un producto por su nombre',
+    keys: ['F9'],
+  },
+  {
+    title: 'Ver existencia de producto',
+    description: 'Una vez teninendo un producto ya encontrado, puedes ver la existencia de ese producto en todos los almacenes',
+    keys: ['F10'],
+  },
+  {
+    title: 'Cobrar venta',
+    description: 'Abres la ventana para cobrar la venta',
+    keys: ['F2'],
+  },
+  {
+    title: 'Poner venta como pendiente',
+    description: 'Dejas pendiente la venta',
+    keys: ['F3'],
+  },
+  {
+    title: 'Ver los tickets pendientes',
+    description: 'Abrir la ventana para ver los tickets que están pendientes',
+    keys: ['F6'],
+  },
+  {
+    title: 'Navegar a mis ventas',
+    description: 'Ir a la pagina para ver el historial de ventas',
+    keys: ['F7'],
+  },
+]
 const headers = ref([
   { title: "Código", key: "codigo", align: "start", sortable: false },
   { title: "Nombre", key: "name", align: "start", sortable: false },
@@ -1018,6 +1132,7 @@ const clienteHeaders = ref([
   },
   { title: "Teléfono", key: "telefono", align: "start", sortable: false },
   { title: "Email", key: "email", align: "start", sortable: false },
+  { title: "", key: "actions", align: "start", sortable: false },
 ]);
 const pendientesHeaders = ref([
   { title: "Folio", key: "consecutivo", align: "start", sortable: false },
@@ -1025,6 +1140,7 @@ const pendientesHeaders = ref([
   { title: "Cliente", key: "cliente", align: "start", sortable: false },
   { title: "Almacén", key: "almacen", align: "start", sortable: false },
   { title: "Total", key: "total", align: "start", sortable: false },
+  { title: "Acciones", key: "actions", align: "start", sortable: false },
 ]);
 const existenciasHeaders = ref([
   { title: "Almacen", key: "almacen", align: "start", sortable: false },
@@ -1264,6 +1380,18 @@ function onEscape(e) {
     router.push({ name: "VentasIndex" });
   }
 }
+const openLastTicket = async () => {
+  try {
+    const { data } = await PuntoVenta.getLastTicket();
+    if (data) {
+      router.push({ name: "VentasShow", params: { ventaId: data.id } });
+    }
+  } catch (error) {
+    handleOpException(error);
+    console.log(error);
+    alert("Ha ocurrido un error");
+  }
+};
 function modificaPrecioBase(event) {
   conversion_form.precioBase = event.target.value;
   const fixed = +event.target.value * +conversion_form.peso;
