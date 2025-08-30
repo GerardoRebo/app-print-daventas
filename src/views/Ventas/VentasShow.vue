@@ -1,8 +1,6 @@
 <template>
   <v-card class="mb-2" v-if="mdAndUp">
-    <v-card-title
-      >Ticket venta folio # {{ ticketActual?.consecutivo }}</v-card-title
-    >
+    <v-card-title>Ticket venta folio # {{ ticketActual?.consecutivo }}</v-card-title>
     <v-card-text>
       <router-link :to="{ name: 'VentasIndex' }">
         <span class="text-decoration-underline text-caption">
@@ -10,87 +8,37 @@
         </span>
       </router-link>
       <v-row dense class="mt-2">
-        <v-btn
-          size="small"
-          @click="verFormasDePago"
-          class="mx-2"
-          prepend-icon="mdi-wallet"
-          >Formas de pago</v-btn
-        >
-        <v-btn
-          size="small"
-          @click="imprimirVenta"
-          class="mx-2"
-          prepend-icon="mdi-printer-pos"
-          >Reimprimir</v-btn
-        >
-        <v-btn
-          size="small"
-          v-if="
-            !ticketActual.cancelada &&
-            !devuelto &&
-            !ticketActual.facturado_en &
-              !ticketActual.latest_pre_factura?.facturado_en
-          "
-          @click="cancelarVenta"
-          class="mx-2"
-          prepend-icon="mdi-cancel"
-          >Cancelar</v-btn
-        >
-        <v-btn
-          size="small"
-          v-if="
-            !ticketActual.cancelada &&
-            !devuelto &&
-            !ticketActual.facturado_en &&
-            !ticketActual.clienteId &
-              !ticketActual.latest_pre_factura?.facturado_en
-          "
-          @click="abrirCliente"
-          class="mx-2"
-          prepend-icon="mdi-account-multiple"
-          >Clientes</v-btn
-        >
-        <v-btn
-          size="small"
-          v-if="
-            !ticketActual.cancelada &&
-            !devuelto &&
-            !ticketActual.facturado_en &&
-            !ticketActual.latest_pre_factura?.facturado_en
-          "
-          @click="isFacturaInfoOpen = true"
-          class="mx-2"
-          color="accent"
-          variant="elevated"
-          prepend-icon="mdi-check"
-          >Facturar</v-btn
-        >
-        <template
-          v-else-if="!ticketActual.cancelada && ticketActual?.facturado_en"
-        >
-          <v-btn
-            size="small"
-            @click="descargarXml"
-            class="mx-2"
-            prepend-icon="mdi-xml"
-            >Descargar Xml</v-btn
-          >
-          <v-btn
-            size="small"
-            @click="descargarPdf"
-            class="mx-2"
-            prepend-icon="mdi-file-pdf-box"
-            >Descargar Pdf</v-btn
-          >
+        <v-btn size="small" @click="verFormasDePago" class="mx-2" prepend-icon="mdi-wallet">Formas de pago</v-btn>
+        <v-btn size="small" @click="imprimirVenta" class="mx-2" prepend-icon="mdi-printer-pos">Reimprimir</v-btn>
+        <v-btn size="small" v-if="
+          !ticketActual.esta_cancelado &&
+          !devuelto &&
+          !ticketActual.facturado_en &
+          !ticketActual.latest_pre_factura?.facturado_en
+        " @click="cancelarVenta" class="mx-2" prepend-icon="mdi-cancel">Cancelar</v-btn>
+        <v-btn size="small" v-if="
+          !ticketActual.esta_cancelado &&
+          !devuelto &&
+          !ticketActual.facturado_en &&
+          !ticketActual.clienteId &
+          !ticketActual.latest_pre_factura?.facturado_en
+        " @click="abrirCliente" class="mx-2" prepend-icon="mdi-account-multiple">Clientes</v-btn>
+        <v-btn size="small" v-if="
+          !ticketActual.esta_cancelado &&
+          !devuelto &&
+          !ticketActual.facturado_en &&
+          !ticketActual.latest_pre_factura?.facturado_en
+        " @click="isFacturaInfoOpen = true" class="mx-2" color="accent" variant="elevated"
+          prepend-icon="mdi-check">Facturar</v-btn>
+        <template v-else-if="!ticketActual.esta_cancelado && ticketActual?.facturado_en">
+          <v-btn size="small" @click="descargarXml" class="mx-2" prepend-icon="mdi-xml">Descargar Xml</v-btn>
+          <v-btn size="small" @click="descargarPdf" class="mx-2" prepend-icon="mdi-file-pdf-box">Descargar Pdf</v-btn>
           <p v-if="ticketActual.facturado_en" class="mx-2">
             Facturado en:
             {{ moment(ticketActual.facturado_en).format("DD-MM-YYYY h:mma") }}
           </p>
         </template>
-        <template
-          v-if="ticketActual?.latest_pre_factura?.pre_factura_global_id"
-        >
+        <template v-if="ticketActual?.latest_pre_factura?.pre_factura_global_id">
           <p class="mx-2">
             Facturado en:
             {{
@@ -101,15 +49,13 @@
           </p>
           <p class="mx-2">
             Factura global:
-            <router-link
-              :to="{
-                name: 'FacturasGlobalesShow',
-                params: {
-                  facturaId:
-                    ticketActual.latest_pre_factura.pre_factura_global_id,
-                },
-              }"
-            >
+            <router-link :to="{
+              name: 'FacturasGlobalesShow',
+              params: {
+                facturaId:
+                  ticketActual.latest_pre_factura.pre_factura_global_id,
+              },
+            }">
               {{ ticketActual.latest_pre_factura.pre_factura_global_id }}
             </router-link>
           </p>
@@ -133,7 +79,7 @@
           Pagado en:
           {{ moment(ticketActual.pagado_en).format("DD-MM-YYYY h:mma") }}
         </p>
-        <p v-if="ticketActual.cancelada" class="mx-4 text-error">Cancelada</p>
+        <p v-if="ticketActual.esta_cancelado" class="mx-4 text-error">Cancelada</p>
       </v-row>
     </v-card-text>
   </v-card>
@@ -151,14 +97,8 @@
         </v-col>
         <v-col cols="12">
           <v-spacer></v-spacer>
-          <v-btn
-            class="hidden-xs-only"
-            v-if="mdAndDown"
-            variant="outlined"
-            size="small"
-            append-icon="mdi-menu-down"
-            @click="drawer = true"
-          >
+          <v-btn class="hidden-xs-only" v-if="mdAndDown" variant="outlined" size="small" append-icon="mdi-menu-down"
+            @click="drawer = true">
             Detalles
           </v-btn>
         </v-col>
@@ -166,67 +106,34 @@
     </v-card-text>
   </v-card>
   <!-- Mobile Navigation Drawer -->
-  <v-navigation-drawer
-    v-model="drawer"
-    :location="$vuetify.display.mobile ? 'bottom' : undefined"
-    temporary
-    v-if="mdAndDown"
-  >
+  <v-navigation-drawer v-model="drawer" :location="$vuetify.display.mobile ? 'bottom' : undefined" temporary
+    v-if="mdAndDown">
     <v-card>
       <v-container>
         <v-row dense class="m2-4">
-          <v-btn size="small" @click="imprimirVenta" class="my-1" block
-            >Reimprimir</v-btn
-          >
-          <v-btn
-            size="small"
-            v-if="
-              !ticketActual.cancelada &&
-              !devuelto &&
-              !ticketActual.facturado_en &
-                !ticketActual.latest_pre_factura?.facturado_en
-            "
-            @click="cancelarVenta"
-            class="my-1"
-            block
-            >Cancelar</v-btn
-          >
-          <v-btn
-            size="small"
-            v-if="
-              !ticketActual.cancelada &&
-              !devuelto &&
-              !ticketActual.facturado_en &&
-              !ticketActual.clienteId &
-                !ticketActual.latest_pre_factura?.facturado_en
-            "
-            @click="abrirCliente"
-            class="my-1"
-            block
-            >Clientes</v-btn
-          >
-          <v-btn
-            size="small"
-            v-if="
-              !ticketActual.cancelada &&
-              !devuelto &&
-              !ticketActual.facturado_en &&
-              !ticketActual.latest_pre_factura?.facturado_en
-            "
-            @click="isFacturaInfoOpen = true"
-            class="my-1"
-            color="accent"
-            variant="elevated"
-            block
-            >Facturar</v-btn
-          >
-          <template v-else-if="!ticketActual.cancelada">
-            <v-btn size="small" @click="descargarXml" class="my-1" block
-              >Descargar Xml</v-btn
-            >
-            <v-btn size="small" @click="descargarPdf" class="my-1" block
-              >Descargar Pdf</v-btn
-            >
+          <v-btn size="small" @click="imprimirVenta" class="my-1" block>Reimprimir</v-btn>
+          <v-btn size="small" v-if="
+          !ticketActual.esta_canceladesta_canceladoo &&
+          !devuelto &&
+          !ticketActual.facturado_en &
+          !ticketActual.latest_pre_factura?.facturado_en
+        " @click="cancelarVenta" class="mx-2" prepend-icon="mdi-cancel">Cancelar</v-btn>
+          <v-btn size="small" v-if="
+            !ticketActual.esta_cancelado &&
+            !devuelto &&
+            !ticketActual.facturado_en &&
+            !ticketActual.clienteId &
+            !ticketActual.latest_pre_factura?.facturado_en
+          " @click="abrirCliente" class="my-1" block>Clientes</v-btn>
+          <v-btn size="small" v-if="
+            !ticketActual.esta_cancelado &&
+            !devuelto &&
+            !ticketActual.facturado_en &&
+            !ticketActual.latest_pre_factura?.facturado_en
+          " @click="isFacturaInfoOpen = true" class="my-1" color="accent" variant="elevated" block>Facturar</v-btn>
+          <template v-else-if="!ticketActual.esta_cancelado">
+            <v-btn size="small" @click="descargarXml" class="my-1" block>Descargar Xml</v-btn>
+            <v-btn size="small" @click="descargarPdf" class="my-1" block>Descargar Pdf</v-btn>
             <p v-if="ticketActual.facturado_en" class="my-1">
               Facturado en:
               {{ moment(ticketActual.facturado_en).format("DD-MM-YYYY h:mma") }}
@@ -241,15 +148,13 @@
             </p>
             <p v-if="ticketActual.latest_pre_factura.facturado_en" class="">
               Factura global:
-              <router-link
-                :to="{
-                  name: 'FacturasGlobalesShow',
-                  params: {
-                    facturaId:
-                      ticketActual.latest_pre_factura.pre_factura_global_id,
-                  },
-                }"
-              >
+              <router-link :to="{
+                name: 'FacturasGlobalesShow',
+                params: {
+                  facturaId:
+                    ticketActual.latest_pre_factura.pre_factura_global_id,
+                },
+              }">
                 {{ ticketActual.latest_pre_factura.pre_factura_global_id }}
               </router-link>
             </p>
@@ -270,7 +175,7 @@
               Pagado en:
               {{ moment(ticketActual.pagado_en).format("DD-MM-YYYY h:mma") }}
             </p>
-            <p v-if="ticketActual.cancelada" class="text-error">Cancelada</p>
+            <p v-if="ticketActual.esta_cancelado" class="text-error">Cancelada</p>
           </div>
         </v-row>
       </v-container>
@@ -279,16 +184,12 @@
   <v-container fluid>
     <v-data-table :headers="tHeaders" :items="articulos" dense>
       <template v-slot:item.product_name="{ item }">
-        <router-link
-          :to="{
-            name: 'ProductosIndex',
-            query: { keyword: item.product_name ?? item.product.name },
-          }"
-        >
-          <span
-            class="text-primary text-decoration-underline cursor-pointer font-weight-medium"
-            >{{ item.product_name ?? item.product?.name }}</span
-          >
+        <router-link :to="{
+          name: 'ProductosIndex',
+          query: { keyword: item.product_name ?? item.product.name },
+        }">
+          <span class="text-primary text-decoration-underline cursor-pointer font-weight-medium">{{ item.product_name ??
+            item.product?.name }}</span>
         </router-link>
       </template>
       <template v-slot:item.precio_usado="{ item }">
@@ -307,45 +208,20 @@
     <v-card>
       <v-card-title>Clientes</v-card-title>
       <v-card-text>
-        <v-text-field
-          v-model="keycliente"
-          label="Cliente"
-          prepend-inner-icon="mdi-magnify"
-          variant="outlined"
-          placeholder="Ingresa nombre del cliente"
-          hide-details
-          single-line
-          id="keycliente"
-        ></v-text-field>
+        <v-text-field v-model="keycliente" label="Cliente" prepend-inner-icon="mdi-magnify" variant="outlined"
+          placeholder="Ingresa nombre del cliente" hide-details single-line id="keycliente"></v-text-field>
       </v-card-text>
-      <v-progress-linear
-        color="accent"
-        indeterminate
-        v-if="cargando"
-      ></v-progress-linear>
-      <v-data-table
-        :headers="clienteHeaders"
-        :items="clients"
-        items-per-page="5"
-        show-select
-        select-strategy="single"
-      >
-        <template
-          v-slot:item.data-table-select="{
-            internalItem,
-            isSelected,
-            toggleSelect,
-            index,
-          }"
-        >
-          <v-checkbox-btn
-            :model-value="isSelected(internalItem)"
-            color="primary"
-            @update:model-value="toggleSelect(internalItem)"
-            class="articulosInputs"
-            @click="setCliente(internalItem.raw.id)"
-            @keydown.enter="setCliente(internalItem.raw.id)"
-          ></v-checkbox-btn>
+      <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
+      <v-data-table :headers="clienteHeaders" :items="clients" items-per-page="5" show-select select-strategy="single">
+        <template v-slot:item.data-table-select="{
+          internalItem,
+          isSelected,
+          toggleSelect,
+          index,
+        }">
+          <v-checkbox-btn :model-value="isSelected(internalItem)" color="primary"
+            @update:model-value="toggleSelect(internalItem)" class="articulosInputs"
+            @click="setCliente(internalItem.raw.id)" @keydown.enter="setCliente(internalItem.raw.id)"></v-checkbox-btn>
         </template>
         <template v-slot:item.saldo_actual="{ item }">
           <span>${{ item.saldo_actual }}</span>
@@ -365,44 +241,15 @@
           metodo de pago PPD-Pago en parcialidades o diferido y forma de pago:
           99-Por definir, para emitir complementos de pago por cada abono.
         </p>
-        <v-text-field
-          label="Serie (opcional)"
-          v-model="ticketActual.serie"
-        ></v-text-field>
-        <v-select
-          :items="metodoPagos"
-          label="Método de pago"
-          v-model="ticketActual.metodo_pago"
-        ></v-select>
-        <v-select
-          :items="pagoFormas"
-          label="Forma de pago"
-          v-model="ticketActual.forma_pago"
-        ></v-select>
-        <v-select
-          :items="cdfiUsos"
-          label="Uso de CFDI"
-          v-model="ticketActual.uso_cfdi"
-        ></v-select>
-        <v-text-field
-          label="Clave privada local"
-          v-model="ticketActual.clave_privada_local"
-        ></v-text-field>
+        <v-text-field label="Serie (opcional)" v-model="ticketActual.serie"></v-text-field>
+        <v-select :items="metodoPagos" label="Método de pago" v-model="ticketActual.metodo_pago"></v-select>
+        <v-select :items="pagoFormas" label="Forma de pago" v-model="ticketActual.forma_pago"></v-select>
+        <v-select :items="cdfiUsos" label="Uso de CFDI" v-model="ticketActual.uso_cfdi"></v-select>
+        <v-text-field label="Clave privada local" v-model="ticketActual.clave_privada_local"></v-text-field>
       </v-card-text>
       <v-card-actions>
-        <v-btn
-          @click="isFacturaInfoOpen = false"
-          variant="text"
-          :loading="cargando"
-          >Cancelar</v-btn
-        >
-        <v-btn
-          @click="facturar"
-          color="accent"
-          variant="outlined"
-          :loading="cargando"
-          >Facturar</v-btn
-        >
+        <v-btn @click="isFacturaInfoOpen = false" variant="text" :loading="cargando">Cancelar</v-btn>
+        <v-btn @click="facturar" color="accent" variant="outlined" :loading="cargando">Facturar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -442,12 +289,7 @@
         <v-divider></v-divider>
       </v-card-text>
       <v-card-actions>
-        <v-btn
-          @click="isFormasDePagoOpen = false"
-          variant="text"
-          :loading="cargando"
-          >Cerrar</v-btn
-        >
+        <v-btn @click="isFormasDePagoOpen = false" variant="text" :loading="cargando">Cerrar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -730,6 +572,9 @@ function imprimirVenta() {
   );
 }
 function cancelarVenta() {
+  if (!confirm('Estas seguro de cancelar esta venta?')) {
+    return;
+  }
   PuntoVenta.cancelarVenta(ticketActual.value.id)
     .then(() => {
       getSpecificVT(ticketActual.value.id);
