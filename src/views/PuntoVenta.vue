@@ -5,7 +5,7 @@
       </BannerVue> -->
   <!-- Toolbar -->
   <v-toolbar color="neutral200" density="compact">
-    <v-icon color="primary" class="ml-2">mdi-network-pos</v-icon>
+    <!-- <v-icon color="primary" class="ml-2">mdi-network-pos</v-icon> -->
     <v-toolbar-title class="text-primary_d600">Punto de Venta</v-toolbar-title>
     <v-btn class="hidden-xs-only" v-if="mdAndDown" variant="outlined" size="small" append-icon="mdi-menu-down"
       @click="drawer = true">
@@ -56,7 +56,8 @@
           <v-btn size="small" class="mx-2" append-icon="mdi-keyboard" variant="tonal"
             @click="isShortcutsOpen = true">Atajos</v-btn>
         <v-select :items="almacenItems" v-if="ticketActual.miAlmacenId == null" label="Almacenes"
-          @update:modelValue="asignarAlmacen" max-width="300" hide-details></v-select>
+            @update:modelValue="asignarAlmacen" max-width="300" hide-details :active="true"
+            class="highlighted-select"></v-select>
         <div class="d-flex justify-space-around">
           <p class="mx-2">Folio: {{ ticketActual.consecutivo }}</p>
           <p v-if="ticketActual.cliente" class="mx-2">
@@ -127,7 +128,7 @@
           </v-btn>
         </v-col>
         <v-col cols="1">
-          <v-btn @click="abrirCobrarModal" color="accent" variant="flat" prepend-icon="mdi-cash-register">Cobrar
+          <v-btn @click="abrirCobrarModal" color="primary" variant="flat" prepend-icon="mdi-currency-usd">Cobrar
           </v-btn>
         </v-col>
         <v-col cols="2">
@@ -886,10 +887,34 @@
   <DynamicSnack :snackbar="snackbar" />
 </template>
 <style>
+.v-chip {
+  font-weight: 500;
+  font-family: monospace;
+}
+
 .ring:focus {
   outline: none;
   box-shadow: 0 0 0 4px rgba(59, 114, 191, 0.5);
   /* Blue ring effect */
+}
+
+.highlighted-select {
+  animation: pulse 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(56, 155, 242, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 37, 64, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 13, 13, 0);
+  }
 }
 </style>
 <script setup>

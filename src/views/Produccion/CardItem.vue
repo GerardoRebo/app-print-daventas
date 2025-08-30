@@ -263,14 +263,14 @@ getFiles();
                       class="cursor-pointer"></v-img>
                   </template>
                   <template v-slot:item.actions="{ item }">
-                    <v-menu>
+                    <!-- <v-menu>
                       <template v-slot:activator="{ props }">
                         <v-btn icon="mdi-dots-vertical" size="small" class="mx-2" v-bind="props"></v-btn>
                       </template>
                       <v-list>
-                        <!-- <v-list-item @click="retocarImagen(item.id)">
+                        <v-list-item @click="retocarImagen(item.id)">
                           <v-list-item-title>Retocar Imagen</v-list-item-title>
-                        </v-list-item> -->
+                        </v-list-item>
                         <v-list-item @click="crearAnimacion(item.id)">
                           <v-list-item-title>Crear Animación</v-list-item-title>
                         </v-list-item>
@@ -278,7 +278,7 @@ getFiles();
                           <v-list-item-title>Checar status</v-list-item-title>
                         </v-list-item>
                       </v-list>
-                    </v-menu>
+                    </v-menu> -->
                     <v-btn icon="mdi-download" size="small" color="primary" class="mr-2" @click="downloadFile(item.id, item.filename)"></v-btn>
                     <v-btn icon="mdi-trash-can" size="small" color="error" @click="eliminarFile(item.id)"></v-btn>
                   </template>

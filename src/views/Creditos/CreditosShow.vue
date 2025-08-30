@@ -41,6 +41,13 @@
       </template>
       <template v-slot:item.acciones="{ item }">
         <v-btn @click="abrirAbono(item)" class="mx-2" size="small">Realizar abono</v-btn>
+        <v-btn
+          size="small"
+          @click="imprimirVenta(item)"
+          class="mx-2"
+          prepend-icon="mdi-printer-pos"
+          >Reimprimir</v-btn
+        >
         <v-btn size="small" @keydown.enter="verAbonos(item)" @click="verAbonos(item)"
           prepend-icon="mdi-eye">Abonos</v-btn>
       </template>
@@ -64,7 +71,7 @@
     </v-card>
   </v-dialog>
   <!-- Historial -->
-  <v-dialog v-model="openRealizados">
+  <v-dialog v-model="openRealizados" max-width="1200">
     <v-card>
       <v-card-title>Historial completo del cliente</v-card-title>
       <v-card-text>
@@ -218,6 +225,9 @@ function verAbonos(deuda) {
   ventaticketFolio.value = deuda.ventaticket.consecutivo
   getAbonos(deuda.id);
   openAbonos.value = true;
+}
+function imprimirVenta(deuda) {
+  window.open(`/ventatickets/imprimir/${deuda.ventaticket.id}`, '_blank');
 }
 function getAbonos(deuda) {
   Creditos.getAbonos(deuda)

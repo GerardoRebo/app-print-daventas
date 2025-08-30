@@ -1,6 +1,6 @@
 <template>
   <v-toolbar color="neutral200" density="compact">
-    <v-icon color="primary" class="ml-2">mdi-truck</v-icon>
+    <!-- <v-icon color="primary" class="ml-2">mdi-truck</v-icon> -->
     <v-toolbar-title class="text-primary_d600">Movimientos</v-toolbar-title>
     <v-btn
       class="hidden-xs-only"
@@ -80,16 +80,12 @@
           class="mx-2"
           max-width="300"
         ></v-select>
-        <v-btn
-          v-if="
+        <v-btn variant="tonal" color="secondary" class="highlighted-select" v-if="
             movimientoActual.almacenOrigenId == null &&
             movimientoActual.tipo != null
-          "
-          @click="asignarAlmacen"
-          small
-        >
-          Asignar
-        </v-btn>
+          " @click="asignarAlmacen" small>
+            Asignar
+          </v-btn>
         <div class="d-flex justify-space-around">
           <p class="mx-2">Folio: {{ movimientoActual.consecutivo }}</p>
           <p v-if="movimientoActual.tipo == 'T'" class="mx-2">
@@ -207,8 +203,8 @@
             @click="guardar('ambos')"
             v-if="mostrarGuardar"
             variant="elevated"
-            color="accent"
-            prepend-icon="mdi-check"
+            color="primary"
+            prepend-icon="mdi-truck"
             >Guardar
           </v-btn>
         </v-col>
@@ -727,33 +723,14 @@
     </v-card>
   </v-dialog>
   <!-- Pendientes -->
-  <v-dialog v-model="openPendiente">
+  <v-dialog v-model="openPendiente" max-width="1200">
     <v-card>
       <v-card-title>Pendientes</v-card-title>
       <v-card-text> </v-card-text>
-      <v-data-table
-        :headers="pendientesHeaders"
-        :items="pendientes"
-        items-per-page="5"
-        show-select
-        select-strategy="single"
-      >
-        <template
-          v-slot:item.data-table-select="{
-            internalItem,
-            isSelected,
-            toggleSelect,
-            index,
-          }"
-        >
-          <v-checkbox-btn
-            :model-value="isSelected(internalItem)"
-            color="primary"
-            @update:model-value="toggleSelect(internalItem)"
-            class="articulosInputs"
-            @keydown.enter="getSpecificVT(internalItem.raw.id)"
-            @click="getSpecificVT(internalItem.raw.id)"
-          ></v-checkbox-btn>
+      <v-data-table :headers="pendientesHeaders" :items="pendientes" items-per-page="5">
+        <template v-slot:item.consecutivo="{ item }">
+          <a href="" class="decoration-none" @keydown.enter.prevent="getSpecificVT(item.id)"
+            @click.prevent="getSpecificVT(item.id)"><span color="primary">{{ item.consecutivo }}</span></a>
         </template>
         <template v-slot:item.proveedor="{ item }">
           <span>{{ item.proveedor?.name }}</span>
@@ -763,6 +740,11 @@
         </template>
         <template v-slot:item.total_enviado="{ item }">
           <span>${{ item.total_enviado }}</span>
+        </template>
+        <template v-slot:item.actions="{ item }">
+          <v-btn prepend-icon="mdi-check" size="small" tabindex="-1" @click="getSpecificVT(item.id)" color="primary">
+            Seleccionar
+          </v-btn>
         </template>
       </v-data-table>
     </v-card>
@@ -1029,6 +1011,7 @@ const pendientesHeaders = ref([
     sortable: false,
   },
   { title: "Total", key: "total_enviado", align: "start", sortable: false },
+  { title: "", key: "actions", align: "start", sortable: false },
 ]);
 const existenciasHeaders = ref([
   { title: "Almacen", key: "almacen", align: "start", sortable: false },
@@ -1686,3 +1669,29 @@ onUnmounted(() => {
   document.removeEventListener("keydown", onEscape);
 });
 </script>
+<style scoped>
+.ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(59, 114, 191, 0.5);
+  /* Blue ring effect */
+}
+
+.highlighted-select {
+  animation: pulse 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(56, 155, 242, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 37, 64, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 13, 13, 0);
+  }
+}
+</style>
