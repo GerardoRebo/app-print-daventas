@@ -1,11 +1,11 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useUserStore } from "../s";
 import { useRoute, useRouter } from "vue-router";
 import User from "../apis/User";
 import { useDisplay } from "vuetify";
-const { mobile } = useDisplay();
 
+const { mobile } = useDisplay();
 const s = useUserStore();
 const router = useRouter();
 const route = useRoute();
@@ -13,12 +13,22 @@ const countNotf = ref(0);
 const notifications = ref([]);
 const intervalId = ref(null);
 
-const countNotfComputed = computed(() => {
-  if (countNotf.value > 9) {
-    return "+9";
+const drawer = ref(true);
+const rail = ref(true);
+
+const permanentDrawer = computed(() => {
+  if (mobile.value) return false;
+  return route.name === 'PuntoVenta' || route.name === 'MovimientosCreate'
+
+})
+const progressColor = computed(() => {
+  if (route.name == "MovimientosCreate") {
+    return "gray";
   }
-  return countNotf.value;
+  return "primary";
 });
+
+
 const links = computed(() => {
   if (isAdmin.value) {
     return [
@@ -92,13 +102,13 @@ const links = computed(() => {
         href: "CreditosIndex",
       },
       { icon: "mdi-cash-check", title: "Cortes", href: "Cortes" },
+      { icon: "mdi-account-cash", title: "Refiere y Gana", href: "distribuidores" },
     ];
   } else {
     return [];
   }
 });
 const isLoggedIn = computed(() => s.isLoggedIn);
-
 const isAdmin = computed(() => {
   return s.roles.includes("Admin") || s.roles.includes("Owner");
 });
@@ -164,8 +174,21 @@ function logout() {
     router.push({ name: "Login" });
   });
 }
+const isChildRouteActive = computed(() => {
+  return links.value.some(link =>
+    link.children?.some(child => route.name === child.href || route.path.includes(child.href))
+  )
+})
+watch(route, () => {
+  if (isChildRouteActive.value) {
+    rail.value = false
+  } else {
+    rail.value = true
+  }
+})
 onMounted(() => {
-  intervalId.value = setInterval(getCountNotf, 720000);
+  getCountNotf();
+  intervalId.value = setInterval(getCountNotf, 600000);
   document.addEventListener("keydown", onEscape);
 });
 onUnmounted(() => {
@@ -173,43 +196,66 @@ onUnmounted(() => {
   clearInterval(intervalId.value);
 });
 
-const progressColor = computed(() => {
-  if (route.name == "MovimientosCreate") {
-    return "neutral700";
-  }
-  return "primary";
-});
 
-const drawer = ref(false);
-
+if (permanentDrawer.value) {
+  drawer.value = true
+}
 
 </script>
 <template>
   <v-app>
+    <v-navigation-drawer v-model="drawer" :location="$vuetify.display.mobile ? 'bottom' : undefined"
+      @click="rail = false" :permanent="permanentDrawer" :rail="rail" v-if="isLoggedIn">
+      <v-list>
+        <v-list-item prepend-avatar="https://randomuser.me/api/portraits/men/85.jpg" :title="nombre">
+          <template v-slot:append>
+            <v-btn icon="mdi-chevron-left" variant="text" @click.stop="rail = !rail"
+              v-if="!$vuetify.display.mobile"></v-btn>
+          </template>
+        </v-list-item>
+      </v-list>
 
-
-    <v-navigation-drawer v-model="drawer" :location="$vuetify.display.mobile ? 'bottom' : undefined">
+      <v-divider></v-divider>
       <v-list nav color="primary">
         <!-- Loop through the main links array -->
         <div v-for="(link, index) in links" :key="index" :prepend-icon="link.icon" :value="link.title">
           <!-- Handle nested children with v-list-group -->
-
-          <v-list-group v-if="link.children">
-            <template v-slot:activator="{ props }">
-              <v-list-item v-bind="props" :title="link.title" :prepend-icon="link.icon"></v-list-item>
+          <v-list-group v-if="link.children" @click="rail = false">
+            <template v-slot:activator="{ props }" v-if="rail">
+              <v-tooltip location="right">
+                <template #activator="{ props }">
+                  <v-list-item v-bind="props" :title="link.title" :prepend-icon="link.icon"
+                    @click="rail = false"></v-list-item>
+                </template>
+                <span>{{ link.title }}</span>
+              </v-tooltip>
             </template>
-
+            <template v-else v-slot:activator="{ props }">
+              <v-list-item v-bind="props" :title="link.title" :prepend-icon="link.icon"
+                @click="rail = false"></v-list-item>
+            </template>
             <!-- Loop through the children of the current link -->
             <v-list-item v-for="(child, childIndex) in link.children" v-if="link.children" :key="childIndex"
-              :prepend-icon="child.icon" :title="child.title" :to="{ name: child.href }" exact></v-list-item>
+              :prepend-icon="child.icon" :title="child.title" :to="{ name: child.href }" exact
+              @click="rail = false"></v-list-item>
           </v-list-group>
-          <v-list-item :prepend-icon="link.icon" :title="link.title" :to="{ name: link.href }" v-else></v-list-item>
+          <div v-else>
+            <v-tooltip location="right" v-if="rail">
+              <template #activator="{ props }">
+                <v-list-item v-bind="props" :prepend-icon="link.icon" :title="link.title" :to="{ name: link.href }"
+                  @click="rail = false"></v-list-item>
+              </template>
+              <span>{{ link.title }}</span>
+            </v-tooltip>
+            <v-list-item :prepend-icon="link.icon" :title="link.title" :to="{ name: link.href }"
+              @click="rail = false" v-else></v-list-item >
+          </div>
         </div>
       </v-list>
     </v-navigation-drawer>
     <v-app-bar color="secondary">
       <template v-slot:prepend>
-        <v-container>
+        <v-container v-if="$vuetify.display.mobile">
           <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer" color="white"
             v-if="isLoggedIn"></v-app-bar-nav-icon>
         </v-container>
@@ -234,8 +280,8 @@ const drawer = ref(false);
         <v-container>
           <v-menu min-width="200px" rounded v-if="isLoggedIn">
             <template v-slot:activator="{ props }">
-              <v-btn icon color="primary_l800" @click="getNotifications" v-bind="props">
-                <v-badge color="primary_l100" :content="countNotf">
+              <v-btn icon color="white" @click="getNotifications" v-bind="props">
+                <v-badge  color="accent" :content="countNotf">
                   <v-icon> mdi-bell</v-icon>
                 </v-badge>
               </v-btn>
@@ -255,7 +301,7 @@ const drawer = ref(false);
           <v-menu min-width="200px" rounded v-if="isLoggedIn">
             <template v-slot:activator="{ props }">
               <v-btn icon v-bind="props">
-                <v-avatar color="accent" size="small">
+                <v-avatar color="primary" size="small">
                   <span class="text-h5">{{ initials }}</span>
                 </v-avatar>
               </v-btn>
@@ -263,7 +309,7 @@ const drawer = ref(false);
             <v-card>
               <v-card-text>
                 <div class="mx-auto text-center">
-                  <v-avatar color="accent">
+                  <v-avatar color="primary">
                     <span class="text-h5">{{ initials }}</span>
                   </v-avatar>
                   <h3>{{ nombre }}</h3>
