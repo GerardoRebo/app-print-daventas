@@ -204,30 +204,29 @@
     </v-data-table>
   </v-container>
   <!-- Clientes -->
-  <v-dialog v-model="openCliente">
+  <v-dialog v-model="openCliente" max-width="1200">
     <v-card>
       <v-card-title>Clientes</v-card-title>
       <v-card-text>
         <v-text-field v-model="keycliente" label="Cliente" prepend-inner-icon="mdi-magnify" variant="outlined"
           placeholder="Ingresa nombre del cliente" hide-details single-line id="keycliente"></v-text-field>
       </v-card-text>
-      <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
-      <v-data-table :headers="clienteHeaders" :items="clients" items-per-page="5" show-select select-strategy="single">
-        <template v-slot:item.data-table-select="{
-          internalItem,
-          isSelected,
-          toggleSelect,
-          index,
-        }">
-          <v-checkbox-btn :model-value="isSelected(internalItem)" color="primary"
-            @update:model-value="toggleSelect(internalItem)" class="articulosInputs"
-            @click="setCliente(internalItem.raw.id)" @keydown.enter="setCliente(internalItem.raw.id)"></v-checkbox-btn>
+      <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
+      <v-data-table :headers="clienteHeaders" :items="clients" items-per-page="5">
+        <template v-slot:item.name="{ item }">
+          <a href="" class="decoration-none" @keydown.enter.prevent="setCliente(item.id)"
+            @click.prevent="setCliente(item.id)"><span color="primary">{{ item.name }}</span></a>
         </template>
         <template v-slot:item.saldo_actual="{ item }">
           <span>${{ item.saldo_actual }}</span>
         </template>
         <template v-slot:item.limite_credito="{ item }">
           <span>${{ item.limite_credito }}</span>
+        </template>
+        <template v-slot:item.actions="{ item }">
+          <v-btn prepend-icon="mdi-check" size="small" tabindex="-1" @click="setCliente(item.id)" color="primary">
+            Agregar
+          </v-btn>
         </template>
       </v-data-table>
     </v-card>
@@ -413,6 +412,7 @@ const clienteHeaders = ref([
     sortable: false,
   },
   { title: "Email", key: "email", align: "start", sortable: false },
+  { title: "", key: "actions", align: "start", sortable: false },
 ]);
 const tHeaders = ref([
   { title: "Código", key: "codigo", align: "start", sortable: false },
