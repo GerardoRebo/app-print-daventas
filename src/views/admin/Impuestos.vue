@@ -3,12 +3,12 @@
     <v-card-text>
       <v-card-title>Configuración de impuestos</v-card-title>
       <v-row dense class="mt-4">
-        <v-btn @click="openCreateImpuesto" :loading="cargando" class="mx-4" prepend-icon="mdi-plus">
+        <v-btn @click="openCreateImpuesto" :loading="cargando" class="mx-4" prepend-icon="mdi-plus" color="primary">
           Agregar impuesto</v-btn>
       </v-row>
     </v-card-text>
   </v-card>
-  <v-container>
+  <v-container fluid>
     <v-data-table :headers="headers" :items="impuestos" items-per-page="5">
       <template v-slot:item.tipo="{ item }">
         {{ formatName(item.tipo) }}
@@ -24,7 +24,7 @@
         <!-- <v-btn @click="navigate(item.id)" size="small" prepend-icon="mdi-checkbox-multiple-marked"
           class="mx-4">Asignación
           masiva</v-btn> -->
-        <v-btn @click="destroyImpuesto(item.id)" size="small" prepend-icon="mdi-trash-can">Eliminar</v-btn>
+        <!-- <v-btn @click="destroyImpuesto(item.id)" size="small" prepend-icon="mdi-trash-can">Eliminar</v-btn> -->
       </template>
     </v-data-table>
   </v-container>
@@ -100,6 +100,7 @@ const taxOptions = ref([
 const headers = ref([
   { title: 'Nombre', key: 'descripcion', align: 'start', sortable: false },
   { title: 'Tipo', key: 'tipo', align: 'start', sortable: false },
+  { title: 'Tipo Factor', key: 'tipo_factor', align: 'start', sortable: false },
   { title: 'Porcentaje', key: 'tasa_cuota', align: 'start', sortable: false },
   { title: 'Activo', key: 'activo', align: 'start', sortable: false },
   { title: 'Acciones', key: 'actions', align: 'start', sortable: false },

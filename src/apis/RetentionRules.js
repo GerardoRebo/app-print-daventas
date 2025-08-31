@@ -6,6 +6,9 @@ export default {
     index() {
         return Api().get(base);
     },
+    commonRetentionRules() {
+        return Api().get(`${base}/?type=common`);
+    },
     store(post){
         return Api().post(base,post);
     },
