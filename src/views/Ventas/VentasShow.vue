@@ -28,11 +28,43 @@
           !devuelto &&
           !ticketActual.facturado_en &&
           !ticketActual.latest_pre_factura?.facturado_en
-        " @click="isFacturaInfoOpen = true" class="mx-2" color="accent" variant="elevated"
+        " @click="isFacturaInfoOpen = true" class="mx-2" color="primary" variant="elevated"
           prepend-icon="mdi-check">Facturar</v-btn>
         <template v-else-if="!ticketActual.esta_cancelado && ticketActual?.facturado_en">
-          <v-btn size="small" @click="descargarXml" class="mx-2" prepend-icon="mdi-xml">Descargar Xml</v-btn>
-          <v-btn size="small" @click="descargarPdf" class="mx-2" prepend-icon="mdi-file-pdf-box">Descargar Pdf</v-btn>
+          <v-menu>
+            <template v-slot:activator="{ props }">
+              <v-btn variant="tonal" v-bind="props" append-icon="mdi-menu-down" size="small">
+                Factura
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item @click="onWatchPdf()">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-eye"></v-icon>
+                </template>
+                <v-list-item-title>
+                  Ver PDF</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="descargarPdf()">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-file-pdf-box"></v-icon>
+                </template>
+                <v-list-item-title>
+                  Descarga PDF
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="descargarXml()">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-xml"></v-icon>
+                </template>
+                <v-list-item-title>
+                  Descarga XML</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+
+          <!-- <v-btn size="small" @click="descargarXml" class="mx-2" prepend-icon="mdi-xml">Descargar Xml</v-btn>
+          <v-btn size="small" @click="descargarPdf" class="mx-2" prepend-icon="mdi-file-pdf-box">Descargar Pdf</v-btn> -->
           <p v-if="ticketActual.facturado_en" class="mx-2">
             Facturado en:
             {{ moment(ticketActual.facturado_en).format("DD-MM-YYYY h:mma") }}
@@ -113,11 +145,11 @@
         <v-row dense class="m2-4">
           <v-btn size="small" @click="imprimirVenta" class="my-1" block>Reimprimir</v-btn>
           <v-btn size="small" v-if="
-          !ticketActual.esta_canceladesta_canceladoo &&
-          !devuelto &&
-          !ticketActual.facturado_en &
-          !ticketActual.latest_pre_factura?.facturado_en
-        " @click="cancelarVenta" class="mx-2" prepend-icon="mdi-cancel">Cancelar</v-btn>
+            !ticketActual.esta_cancelado &&
+            !devuelto &&
+            !ticketActual.facturado_en &
+            !ticketActual.latest_pre_factura?.facturado_en
+          " @click="cancelarVenta" class="my-1" block>Cancelar</v-btn>
           <v-btn size="small" v-if="
             !ticketActual.esta_cancelado &&
             !devuelto &&
@@ -130,10 +162,39 @@
             !devuelto &&
             !ticketActual.facturado_en &&
             !ticketActual.latest_pre_factura?.facturado_en
-          " @click="isFacturaInfoOpen = true" class="my-1" color="accent" variant="elevated" block>Facturar</v-btn>
+          " @click="isFacturaInfoOpen = true" class="my-1" color="primary" variant="elevated" block>Facturar</v-btn>
           <template v-else-if="!ticketActual.esta_cancelado">
-            <v-btn size="small" @click="descargarXml" class="my-1" block>Descargar Xml</v-btn>
-            <v-btn size="small" @click="descargarPdf" class="my-1" block>Descargar Pdf</v-btn>
+            <v-menu transition="scale-transition" size="small">
+              <template v-slot:activator="{ props }">
+                <v-btn variant="tonal" v-bind="props" append-icon="mdi-menu-down" size="small">
+                  Factura
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item @click="onWatchPdf(item)">
+                  <template v-slot:prepend>
+                    <v-icon icon="mdi-eye"></v-icon>
+                  </template>
+                  <v-list-item-title>
+                    Ver PDF</v-list-item-title>
+                </v-list-item>
+                <v-list-item @click="descargarPdf()">
+                  <template v-slot:prepend>
+                    <v-icon icon="mdi-file-pdf-box"></v-icon>
+                  </template>
+                  <v-list-item-title>
+                    Descarga PDF
+                  </v-list-item-title>
+                </v-list-item>
+                <v-list-item @click="descargarXml()">
+                  <template v-slot:prepend>
+                    <v-icon icon="mdi-xml"></v-icon>
+                  </template>
+                  <v-list-item-title>
+                    Descarga XML</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
             <p v-if="ticketActual.facturado_en" class="my-1">
               Facturado en:
               {{ moment(ticketActual.facturado_en).format("DD-MM-YYYY h:mma") }}
@@ -235,7 +296,7 @@
     <v-card>
       <v-card-title>Informacion de CFDI</v-card-title>
       <v-card-text>
-        <p class="text-caption mb-2">
+        <p class="text-caption mb-2" v-if="ticketActual.forma_de_pago == 'C'">
           Debido a que esta venta a sido marcada como venta a credito, usa la el
           metodo de pago PPD-Pago en parcialidades o diferido y forma de pago:
           99-Por definir, para emitir complementos de pago por cada abono.
@@ -248,7 +309,7 @@
       </v-card-text>
       <v-card-actions>
         <v-btn @click="isFacturaInfoOpen = false" variant="text" :loading="cargando">Cancelar</v-btn>
-        <v-btn @click="facturar" color="accent" variant="outlined" :loading="cargando">Facturar</v-btn>
+        <v-btn @click="facturar" color="primary" variant="outlined" :loading="cargando">Facturar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -412,7 +473,7 @@ const clienteHeaders = ref([
     sortable: false,
   },
   { title: "Email", key: "email", align: "start", sortable: false },
-  { title: "", key: "actions", align: "start", sortable: false },
+  { title: "Acciones", key: "actions", align: "start", sortable: false },
 ]);
 const tHeaders = ref([
   { title: "Código", key: "codigo", align: "start", sortable: false },
@@ -427,8 +488,14 @@ const tHeaders = ref([
     sortable: false,
   },
   {
-    title: "Impuesto",
+    title: "Impuesto T",
     key: "impuesto_traslado",
+    align: "start",
+    sortable: false,
+  },
+  {
+    title: "Impuesto R",
+    key: "impuesto_retenido",
     align: "start",
     sortable: false,
   },
@@ -451,6 +518,11 @@ watch(isFacturaInfoOpen, () => {
   if (ticketActual.value.forma_de_pago == "C") {
     ticketActual.value.forma_pago = "99";
     ticketActual.value.metodo_pago = "PPD";
+    ticketActual.value.uso_cfdi = "G01";
+  } else {
+    ticketActual.value.forma_pago = "01";
+    ticketActual.value.metodo_pago = "PUE";
+    ticketActual.value.uso_cfdi = "G01";
   }
 });
 
@@ -504,6 +576,23 @@ function descargarXml() {
       cargando.value = false;
     });
 }
+function onWatchPdf() {
+  if (cargando.value) return;
+  cargando.value = true;
+  PuntoVenta.descargarPdf(ventaId.value)
+    .then((response) => {
+      const file = new Blob([response.data], { type: response.headers['content-type'] });
+      const fileURL = URL.createObjectURL(file);
+      window.open(fileURL);
+    })
+    .catch((error) => {
+      alert("Ha ocurrido un error")
+      handleOpException(error);
+    }).finally(() => {
+      cargando.value = false;
+    });
+
+}
 function getAllClientes() {
   if (cargando.value) return;
   cargando.value = true;
@@ -523,11 +612,41 @@ function setCliente(cliente) {
   if (cargando.value) return;
   cargando.value = true;
   Cliente.setCliente(cliente, ticketActual.value.id)
-    .then(() => {
-      getSpecificVT(ventaId.value);
+    .then((response) => {
+      if (response.data?.success && response.data?.retentionRules?.length) {
+        if (
+          confirm(
+            "Se aplicaran las siguientes reglas de retencion: " +
+            response.data.retentionRules
+          ) == true
+        ) {
+          cargando.value = false;
+          acceptRetentionRules();
+        } else {
+          getSpecificVT(ticketActual.value.id);
+          openCliente.value = false;
+
+        }
+      }
+    })
+    .catch((error) => {
+      handleOpException(error);
+      alert("Ha ocurrido un error");
+    })
+    .finally(() => {
+      cargando.value = false;
+    });
+}
+function acceptRetentionRules() {
+  if (cargando.value) return;
+  cargando.value = true;
+  PuntoVenta.acceptRetentionRules(ticketActual.value.id)
+    .then((response) => {
+      getSpecificVT(ticketActual.value.id);
       openCliente.value = false;
     })
     .catch((error) => {
+      console.log(error);
       handleOpException(error);
       alert("Ha ocurrido un error");
     })
