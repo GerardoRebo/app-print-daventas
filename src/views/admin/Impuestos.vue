@@ -35,19 +35,24 @@
         <v-select :items="taxOptionsItems" label="Elige el impuesto" v-model="impuesto_form.c_impuesto"
           :error-messages="errors.c_impuesto ? errors.c_impuesto[0] : null" />
         <v-text-field label="Tasa o cuota" v-model="impuesto_form.tasa_cuota"
-          :error-messages="errors.tasa_cuota ? errors.tasa_cuota[0] : null" />
+          :error-messages="errors.tasa_cuota ? errors.tasa_cuota[0] : null"  />
         <v-select :items="[
           { value: 'traslado', title: 'Traslado' },
           { value: 'retenido', title: 'Retención' },
-        ]" label="Tipo" v-model="impuesto_form.tipo" :error-messages="errors.tipo ? errors.tipo[0] : null" />
+        ]" label="Tipo" v-model="impuesto_form.tipo" :error-messages="errors.tipo ? errors.tipo[0] : null" disabled/>
+        <v-select :items="[
+          { value: 'Tasa', title: 'Tasa' },
+          { value: 'Cuota', title: 'Cuota' },
+          { value: 'Exento', title: 'Exento' },
+        ]" label="Tipo Factor" v-model="impuesto_form.tipo_factor" :error-messages="errors.tipo_factor ? errors.tipo_factor[0] : null" />
         <v-select :items="[
           { value: '1', title: 'Si' },
           { value: '0', title: 'No' },
         ]" label="Activo" v-model="impuesto_form.activo" :error-messages="errors.activo ? errors.activo[0] : null" />
       </v-card-text>
       <v-card-actions>
-        <v-btn @click="isVisible = false">Cancelar</v-btn>
-        <v-btn @click="handleSubmit">Confirmar</v-btn>
+        <v-btn @click="isVisible = false" variant="text">Cancelar</v-btn>
+        <v-btn @click="handleSubmit" color="primary" variant="outlined">Confirmar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -65,6 +70,7 @@ const impuesto_form = reactive({
   c_impuesto: null,
   tasa_cuota: 0,
   tipo: 'traslado',
+  tipo_factor: 'Tasa',
   activo: "1",
 });
 const taxOptionsItems = computed(() => [
