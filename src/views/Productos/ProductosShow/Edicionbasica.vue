@@ -58,7 +58,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn @click="editarProduct" :loading="cargando" color="accent" variant="outlined">Actualizar</v-btn>
+        <v-btn @click="editarProduct" :loading="cargando" color="primary" variant="outlined">Actualizar</v-btn>
       </v-card-actions>
     </v-card>
   </v-container>
@@ -90,20 +90,6 @@ function showProduct() {
   Product.show(route.params.productId)
     .then((response) => {
       product_form.value = response.data
-      // product_form.name = response.data.name;
-      // product_form.codigo = response.data.codigo;
-      // product_form.descripcion = response.data.descripcion;
-      // product_form.porcentaje_ganancia = response.data.porcentaje_ganancia;
-      // product_form.es_presentacion_de_compra =
-      //   response.data.es_presentacion_de_compra;
-      // product_form.pcosto = response.data.pcosto;
-      // product_form.es_kit = !!response.data.es_kit;
-      // product_form.consumible =
-      //   !!response.data.consumible;
-      // product_form.necesita_produccion = !!response.data.necesita_produccion;
-      // product_form.usa_medidas = !!response.data.usa_medidas;
-      // product_form.tventa = response.data.tventa;
-      // product_form.prioridad = !!response.data.prioridad;
     })
     .catch((error) => {
       handleOpException(error);
@@ -133,7 +119,6 @@ function editarProduct() {
 }
 
 onMounted(() => {
-  // productActualId.value = inject("productActualId");
 });
 </script>
 

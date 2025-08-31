@@ -58,8 +58,8 @@
   <v-container fluid>
     <v-text-field v-model="keyword" label="Buscar Producto" prepend-inner-icon="mdi-magnify" variant="solo-filled" flat
       hide-details single-line ref="keywordRef" color="accent" clearable></v-text-field>
-    <v-progress-linear color="primary_l800" v-if="!cargando" model-value="100"></v-progress-linear>
-    <v-progress-linear color="primary_l100" indeterminate v-if="cargando" model-value="100"></v-progress-linear>
+    <v-progress-linear color="gray" v-if="!cargando" model-value="100"></v-progress-linear>
+    <v-progress-linear color="primary" indeterminate v-if="cargando" model-value="100"></v-progress-linear>
     <v-table density="compact" fixed-header height="50vh" hover>
       <thead>
         <tr>
