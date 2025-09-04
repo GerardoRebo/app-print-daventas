@@ -1,6 +1,6 @@
 <template>
   <v-card class="mb-2" v-if="mdAndUp">
-    <v-card-title>Factura global</v-card-title>
+    <v-card-title>Factura global ID:{{ factura.id }}</v-card-title>
     <v-card-text>
       <v-row dense>
         <router-link :to="{ name: 'FacturasGlobalesIndex' }">
@@ -132,7 +132,7 @@
     <v-data-table :headers="headers" :items="factura?.articulos" dense>
       <template v-slot:item.consecutivo="{ item }">
         <router-link :to="{ name: 'VentasShow', params: { ventaId: item.ventaticket?.id } }"
-          :class="[checkMaxVentaticket(item.ventaticket?.id) ? 'text-accent' : '']">
+          :class="[checkMaxVentaticket(item.ventaticket?.id) ? 'warning' : '']">
           <span>{{
             item.ventaticket?.consecutivo }}</span>
         </router-link>

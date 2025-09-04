@@ -595,7 +595,7 @@
     </v-data-table>
   </v-container>
   <!-- Busca Producto Nombre-->
-  <v-dialog v-model="isVisible">
+  <v-dialog v-model="isVisible" max-width="1200">
     <v-card>
       <v-card-title>Busca producto por nombre</v-card-title>
       <v-card-text>
@@ -671,53 +671,29 @@
     </v-card>
   </v-dialog>
   <!-- Proveedores -->
-  <v-dialog v-model="openProveedor">
+  <v-dialog v-model="openProveedor" max-width="1200">
     <v-card>
       <v-card-title>Proveedores</v-card-title>
       <v-card-text>
-        <v-text-field
-          v-model="keyproveedor"
-          label="Proveedores"
-          prepend-inner-icon="mdi-magnify"
-          variant="outlined"
-          placeholder="Busca proveedor por nombre"
-          hide-details
-          single-line
-          id="keyproveedor"
-        ></v-text-field>
+        <v-text-field v-model="keyproveedor" label="Proveedores" prepend-inner-icon="mdi-magnify" variant="outlined"
+          placeholder="Busca proveedor por nombre" hide-details single-line id="keyproveedor"></v-text-field>
       </v-card-text>
-      <v-data-table
-        :headers="proveedorsHeaders"
-        :items="proveedors"
-        items-per-page="5"
-        show-select
-        select-strategy="single"
-      >
-        <template
-          v-slot:item.data-table-select="{
-            internalItem,
-            isSelected,
-            toggleSelect,
-            index,
-          }"
-        >
-          <v-checkbox-btn
-            :model-value="isSelected(internalItem)"
-            color="primary"
-            @update:model-value="toggleSelect(internalItem)"
-            class="articulosInputs"
-            @click="setProveedor(internalItem.raw.id)"
-            @keydown.enter="setProveedor(internalItem.raw.id)"
-          ></v-checkbox-btn>
-        </template>
-        <!-- Dollar sign formatting for "Precio" column -->
-
+      <v-data-table :headers="proveedorsHeaders" :items="proveedors" items-per-page="5">
         <!-- Dollar sign formatting for "Importe" column -->
+        <template v-slot:item.consecutivo="{ item }">
+          <a href="" class="decoration-none" @keydown.enter.prevent="setProveedor(item.id)"
+            @click.prevent="setProveedor(item.id)"><span color="primary">{{ item.consecutivo }}</span></a>
+        </template>
         <template v-slot:item.saldo_actual="{ item }">
           <span>${{ item.saldo_actual }}</span>
         </template>
         <template v-slot:item.limite_credito="{ item }">
           <span>${{ item.limite_credito }}</span>
+        </template>
+        <template v-slot:item.actions="{ item }">
+          <v-btn prepend-icon="mdi-plus" size="small" tabindex="-1" @click="setProveedor(item.id)" color="primary">
+            Agregar
+          </v-btn>
         </template>
       </v-data-table>
     </v-card>

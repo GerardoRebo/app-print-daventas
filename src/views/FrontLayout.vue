@@ -191,9 +191,10 @@ onMounted(() => {
   intervalId.value = setInterval(getCountNotf, 600000);
   document.addEventListener("keydown", onEscape);
 });
-onUnmounted(() => {
-  document.removeEventListener("keydown", onEscape);
-  clearInterval(intervalId.value);
+onMounted(() => {
+  getCountNotf();
+  intervalId.value = setInterval(getCountNotf, 600000);
+  document.addEventListener("keydown", onEscape);
 });
 
 

@@ -78,12 +78,14 @@
             @keydown.enter="searchProduct" v-model="codigo" hide-details autocomplete="password" ref="codigoRef" />
         </v-col>
         <v-col>
-          <v-tooltip :text="product_form.name" location="top">
-            <template v-slot:activator="{ props }">
-              <v-text-field label="Nombre" id="name" autocomplete="off" placeholder="" readonly hide-details
-                v-model="product_form.name" v-bind="props" />
-            </template>
-          </v-tooltip>
+          <v-tooltip :text="product_form.name" location="top" v-if="product_form.name">
+              <template v-slot:activator="{ props }">
+                <v-text-field label="Nombre" id="name" autocomplete="off" placeholder="" readonly hide-details
+                  v-model="product_form.name" v-bind="props" />
+              </template>
+            </v-tooltip>
+            <v-text-field v-else label="Nombre" id="name" autocomplete="off" placeholder="" readonly hide-details
+              v-model="product_form.name" />
         </v-col>
         <v-col cols="1">
           <v-text-field label="Cantidad" id="cantidad" autocomplete="off" placeholder="Cantidad"

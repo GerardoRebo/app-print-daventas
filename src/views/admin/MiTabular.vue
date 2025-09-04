@@ -9,8 +9,8 @@
       </v-row>
     </v-card-text>
   </v-card>
-  <v-container>
-    <v-table density="compact" color="primary_d700">
+  <v-container fluid>
+    <v-table density="compact" color="secondary">
       <thead>
         <tr>
           <th class="text-left" v-for="header in headers" :key="header">
@@ -19,9 +19,9 @@
         </tr>
       </thead>
       <tr v-for="(tabular, index) in misTabulares" :key="index">
-        <td>{{ index }}</td>
-        <td>{{ tabular }}%</td>
-        <td>
+        <td class="pa-2">{{ index }}</td>
+        <td class="pa-2">{{ tabular }}%</td>
+        <td class="pa-2">
           <v-btn @click="eliminarTabular(index)" :loading="cargando" size="small">Eliminar</v-btn>
         </td>
       </tr>

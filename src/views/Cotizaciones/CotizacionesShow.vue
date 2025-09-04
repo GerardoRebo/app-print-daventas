@@ -10,14 +10,14 @@
       <v-row dense class="mt-2">
         <v-btn size="small" @click="imprimirVenta" class="mx-2" prepend-icon="mdi-printer-pos">Imprimir</v-btn>
         <v-btn size="small" v-if="
-          !ticketActual.cancelado &&
+          !ticketActual.cancelada &&
           !devuelto &&
           !ticketActual.facturado_en &&
           !ticketActual.latest_pre_factura?.facturado_en &&
           !ticketActual.ventaticket_id 
         " @click="cancelarVenta" class="mx-2" prepend-icon="mdi-cancel">Cancelar</v-btn>
         <v-btn size="small" v-if="
-          !ticketActual.cancelado &&
+          !ticketActual.cancelada &&
           !devuelto &&
           !ticketActual.facturado_en &&
           !ticketActual.clienteId &&
@@ -25,7 +25,7 @@
           !ticketActual.ventaticket_id
         " @click="abrirCliente" class="mx-2" prepend-icon="mdi-account-multiple">Clientes</v-btn>
         <v-btn size="small" v-if="
-          !ticketActual.cancelado &&
+          !ticketActual.cancelada &&
           !devuelto &&
           !ticketActual.facturado_en &&
           !ticketActual.latest_pre_factura?.facturado_en &&
@@ -56,7 +56,7 @@
           Creado en:
           {{ moment(ticketActual.created_at).format("DD-MM-YYYY h:mma") }}
         </p>
-        <p v-if="ticketActual.cancelado" class="mx-4 text-error">cancelado</p>
+        <p v-if="ticketActual.cancelada" class="mx-4 text-error">cancelada</p>
       </v-row>
     </v-card-text>
   </v-card>

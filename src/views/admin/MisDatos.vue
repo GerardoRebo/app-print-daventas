@@ -8,69 +8,71 @@
       </v-row>
     </v-card-text>
   </v-card>
-  <v-card class="mb-2">
-    <v-card-title>Subir información</v-card-title>
-    <v-card-text>
-      <div class="flex">
-        <p class="mr-2">Decarga una plantilla </p> <a class="
+
+  <v-container fluid>
+    <v-card class="mb-2">
+      <v-card-title>Subir información</v-card-title>
+      <v-card-text>
+        <div class="flex">
+          <p class="mr-2">Decarga una plantilla </p> <a class="
                                   font-bold
                                   text-indigo-600
                                   hover:text-indigo-900
                                   cursor-pointer
                                 " :href="`${base_url}/PlantillaDatos.csv`" target="_blank"
-          rel="noreferrer noopener">aquí</a>
-      </div>
-      <div class="flex">
-        <p class="mr-2">Ver reporte de subida</p>
-        <a class="
+            rel="noreferrer noopener">aquí</a>
+        </div>
+        <div class="flex">
+          <p class="mr-2">Ver reporte de subida</p>
+          <a class="
                                   font-bold
                                   text-indigo-600
                                   hover:text-indigo-900
                                   cursor-pointer
                                 " @click.prevent="getReport">aquí</a>
-      </div>
-      <div>
-        <div class="md:flex md:items-center mb-6">
-          <div class="md:w-1/3"></div>
-          <div class="md:w-2/3">
-            <div class="flex flex-col">
-              <span v-show="!almacen.id">Elige un almacén primero</span>
-              <input ref="inputEl" :disabled="!almacen.id" @click="" v-on:change="handleFileUpload" type="file"
-                accept=".csv, .txt" />
+        </div>
+        <div>
+          <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/3"></div>
+            <div class="md:w-2/3">
+              <div class="flex flex-col">
+                <span v-show="!almacen.id">Elige un almacén primero</span>
+                <input ref="inputEl" :disabled="!almacen.id" @click="" v-on:change="handleFileUpload" type="file"
+                  accept=".csv, .txt" />
+              </div>
             </div>
           </div>
+          <div class="md:flex md:items-center mb-6">
+            <div class="md:w-1/3"></div>
+            <div class="md:w-2/3"></div>
+          </div>
         </div>
-        <div class="md:flex md:items-center mb-6">
+        <div class="md:flex md:items-center">
           <div class="md:w-1/3"></div>
-          <div class="md:w-2/3"></div>
+          <v-btn v-if="muestraButton" class="w-20" @click.prevent="senddata">Subir</v-btn>
         </div>
-      </div>
-      <div class="md:flex md:items-center">
-        <div class="md:w-1/3"></div>
-        <v-btn v-if="muestraButton" class="w-20" @click.prevent="senddata">Subir</v-btn>
-      </div>
-    </v-card-text>
-  </v-card>
+      </v-card-text>
+    </v-card>
 
-  <v-card class="mb-2">
-    <v-card-title>Descargar información</v-card-title>
-    <v-card-text>
-      <v-row>
-        <v-select :items="letras" v-model="desde" hide-details max-width="300" class="mx-4" />
-        <v-select :items="letras" v-model="hasta" hide-details max-width="300" />
-        <v-btn @click.prevent="downData" size="small" class="mx-4">Descargar</v-btn>
-      </v-row>
-      <v-container>
-        <v-data-table :headers="headers" :items="files" items-per-page="5">
-          <template v-slot:item.actions="{ item }">
-            <v-btn @click.prevent="downloadFile(item.id)" class="mx-2" size="small">Descargar</v-btn>
-            <v-btn @click.prevent="deleteFile(item.id)" class="mx-2" size="small">Eliminar</v-btn>
-          </template>
-        </v-data-table>
-      </v-container>
-    </v-card-text>
-  </v-card>
-
+    <v-card class="mb-2">
+      <v-card-title>Descargar información</v-card-title>
+      <v-card-text>
+        <v-row>
+          <v-select :items="letras" v-model="desde" hide-details max-width="300" class="mx-4" />
+          <v-select :items="letras" v-model="hasta" hide-details max-width="300" />
+          <v-btn @click.prevent="downData" size="small" class="mx-4">Descargar</v-btn>
+        </v-row>
+        <v-container>
+          <v-data-table :headers="headers" :items="files" items-per-page="5">
+            <template v-slot:item.actions="{ item }">
+              <v-btn @click.prevent="downloadFile(item.id)" class="mx-2" size="small">Descargar</v-btn>
+              <v-btn @click.prevent="deleteFile(item.id)" class="mx-2" size="small">Eliminar</v-btn>
+            </template>
+          </v-data-table>
+        </v-container>
+      </v-card-text>
+    </v-card>
+  </v-container>
   <v-dialog v-model="isVisible">
     <v-card>
       <v-card-title>Asigna almacén</v-card-title>

@@ -6,48 +6,50 @@
       <v-divider></v-divider>
     </v-card-text>
   </v-card>
-  <v-row class="my-2">
-    <v-col cols="12" md="3">
-      <v-card>
-        <v-card-text>
-          <v-form @submit.prevent="submitForm">
-            <v-row>
-              <v-col cols="12">
-                <v-file-input multiple label="Upload Images" @change="handleFiles" :loading="cargando"
-                  color="primary"></v-file-input>
-              </v-col>
-              <v-col cols="12">
-                <v-row>
-                  <v-col v-for="(image, index) in previewImages" :key="index" class="position-relative" cols="12">
-                    <v-img :src="image" class="rounded-md" height="128px" contain></v-img>
-                    <v-btn icon size="small" class="absolute top-0 right-0" @click="removeImage(index)" color="error">
-                      <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-            <v-btn color="primary" type="submit" class="mt-4">Subir</v-btn>
-          </v-form>
-        </v-card-text>
-      </v-card>
-    </v-col>
-    <v-col cols="12" md="9">
-      <v-card>
-        <v-card-text>
-          <v-btn text @click="isVisible = true" class="ma-2">Ver Todas</v-btn>
-          <v-data-table :headers="tHeaders" :items="imagenes" items-per-page="5">
-            <template v-slot:item.imagen="{ item }">
-              <v-img :src="item.url" height="56px" contain></v-img>
-            </template>
-            <template v-slot:item.actions="{ item }">
-              <v-btn icon="mdi-trash-can" size="small" color="error" @click="eliminarImagen(item.id)"></v-btn>
-            </template>
-          </v-data-table>
-        </v-card-text>
-      </v-card>
-    </v-col>
-  </v-row>
+  <v-container fluid>
+    <v-row class="my-2">
+      <v-col cols="12" md="3">
+        <v-card>
+          <v-card-text>
+            <v-form @submit.prevent="submitForm">
+              <v-row>
+                <v-col cols="12">
+                  <v-file-input multiple label="Upload Images" @change="handleFiles" :loading="cargando"
+                    color="primary"></v-file-input>
+                </v-col>
+                <v-col cols="12">
+                  <v-row>
+                    <v-col v-for="(image, index) in previewImages" :key="index" class="position-relative" cols="12">
+                      <v-img :src="image" class="rounded-md" height="128px" contain></v-img>
+                      <v-btn icon size="small" class="absolute top-0 right-0" @click="removeImage(index)" color="error">
+                        <v-icon>mdi-close</v-icon>
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                </v-col>
+              </v-row>
+              <v-btn color="primary" type="submit" class="mt-4">Subir</v-btn>
+            </v-form>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="9">
+        <v-card>
+          <v-card-text>
+            <v-btn text @click="isVisible = true" class="ma-2">Ver Todas</v-btn>
+            <v-data-table :headers="tHeaders" :items="imagenes" items-per-page="5">
+              <template v-slot:item.imagen="{ item }">
+                <v-img :src="item.url" height="56px" contain></v-img>
+              </template>
+              <template v-slot:item.actions="{ item }">
+                <v-btn icon="mdi-trash-can" size="small" color="error" @click="eliminarImagen(item.id)"></v-btn>
+              </template>
+            </v-data-table>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
   <v-dialog v-model="isVisible">
     <v-card>
       <v-card-title>
@@ -55,7 +57,7 @@
       </v-card-title>
       <v-card-text>
         <v-carousel>
-          <v-carousel-item v-for="image in imagenes" :src="image.url" ></v-carousel-item>
+          <v-carousel-item v-for="image in imagenes" :src="image.url"></v-carousel-item>
         </v-carousel>
       </v-card-text>
       <v-card-actions>

@@ -6,11 +6,13 @@
       <v-divider></v-divider>
     </v-card-text>
   </v-card>
-  <v-data-table :headers="tHeaders" :items="misProducts" items-per-page="5">
-    <template v-slot:item.actions="{ item }">
-      <v-btn icon="mdi-pencil" size="small" color="primary_l200" @click="abrirModal(item.almacen_id)"></v-btn>
-    </template>
-  </v-data-table>
+  <v-container fluid>
+    <v-data-table :headers="tHeaders" :items="misProducts" items-per-page="5">
+      <template v-slot:item.actions="{ item }">
+        <v-btn icon="mdi-pencil" size="small" color="primary_l200" @click="abrirModal(item.almacen_id)"></v-btn>
+      </template>
+    </v-data-table>
+  </v-container>
   <v-dialog v-model="isVisible" max-width="600">
     <v-card>
       <v-card-title>Edita Min Max</v-card-title>

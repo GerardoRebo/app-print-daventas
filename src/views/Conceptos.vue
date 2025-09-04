@@ -1,14 +1,17 @@
 <template>
+  <v-container fluid class="py-0 mt-2">
   <v-card class="mb-2">
     <v-card-text>
       <v-card-title>Catálogo conceptos</v-card-title>
       <v-row dense class="mt-4">
-        <v-btn prepend-icon="mdi-check-circle" variant="outlined" color="primary" class="mx-2"
+        <v-btn prepend-icon="mdi-plus" variant="outlined" color="primary" class="mx-2"
           @click="openCreateConcepto">Crear Concepto
         </v-btn>
       </v-row>
     </v-card-text>
   </v-card>
+  </v-container>
+  <v-container fluid>
   <v-card>
     <v-card-text>
       <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
@@ -20,6 +23,7 @@
       </v-data-table>
     </v-card-text>
   </v-card>
+  </v-container>
   <v-dialog v-model="isVisible" max-width="800">
     <v-card>
       <v-card-title>{{ title }}</v-card-title>

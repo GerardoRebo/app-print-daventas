@@ -8,7 +8,7 @@
       </v-row>
     </v-card-text>
   </v-card>
-  <v-container>
+  <v-container fluid>
     <v-table density="compact" color="primary_d700">
       <thead>
         <tr>

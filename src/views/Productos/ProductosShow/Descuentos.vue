@@ -6,26 +6,12 @@
       <v-divider></v-divider>
       <v-row dense class="mt-4">
         <v-col cols="12" md="2">
-          <v-text-field
-            label="Desde"
-            id="desde"
-            autocomplete="off"
-            placeholder="Cantidad"
-            v-model="desde"
-            hide-details
-            class="mx-2"
-          />
+          <v-text-field label="Desde" id="desde" autocomplete="off" placeholder="Cantidad" v-model="desde" hide-details
+            class="mx-2" />
         </v-col>
         <v-col cols="12" md="2">
-          <v-text-field
-            label="Hasta"
-            id="hasta"
-            autocomplete="off"
-            placeholder="Cantidad"
-            v-model="hasta"
-            hide-details
-            class="mx-2"
-          />
+          <v-text-field label="Hasta" id="hasta" autocomplete="off" placeholder="Cantidad" v-model="hasta" hide-details
+            class="mx-2" />
         </v-col>
         <v-col cols="12" md="2">
           <v-radio-group inline v-model="porcentaje_type">
@@ -34,42 +20,27 @@
           </v-radio-group>
         </v-col>
         <v-col cols="12" md="2">
-          <v-text-field
-            :label="porcentajeTypeString"
-            id="hasta"
-            autocomplete="off"
-            :placeholder="porcentajeTypeString"
-            v-model="porcentaje"
-            hide-details
-            class="mx-2"
-          />
+          <v-text-field :label="porcentajeTypeString" id="hasta" autocomplete="off" :placeholder="porcentajeTypeString"
+            v-model="porcentaje" hide-details class="mx-2" />
         </v-col>
         <v-col cols="12" md="3">
-          <v-btn
-            prepend-icon="mdi-arrow-right-bold"
-            variant="outlined"
-            color="primary"
-            class="mx-2"
-            @click="enviarDescuento()"
-            >Agregar
+          <v-btn prepend-icon="mdi-arrow-right-bold" variant="outlined" color="primary" class="mx-2"
+            @click="enviarDescuento()">Agregar
           </v-btn>
         </v-col>
       </v-row>
     </v-card-text>
   </v-card>
-  <v-data-table :headers="tHeaders" :items="misDescuentos">
-    <template v-slot:item.tipo="{ item }">
-      {{ item.porcentaje_type ? "Porcentaje" : "Cantidad" }}
-    </template>
-    <template v-slot:item.actions="{ item }">
-      <v-btn
-        icon="mdi-trash-can"
-        size="small"
-        color="error"
-        @click="eliminarDescuento(item.id)"
-      ></v-btn>
-    </template>
-  </v-data-table>
+  <v-container fluid>
+    <v-data-table :headers="tHeaders" :items="misDescuentos">
+      <template v-slot:item.tipo="{ item }">
+        {{ item.porcentaje_type ? "Porcentaje" : "Cantidad" }}
+      </template>
+      <template v-slot:item.actions="{ item }">
+        <v-btn icon="mdi-trash-can" size="small" color="error" @click="eliminarDescuento(item.id)"></v-btn>
+      </template>
+    </v-data-table>
+  </v-container>
 </template>
 
 <script setup>

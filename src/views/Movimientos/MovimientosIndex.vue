@@ -76,7 +76,7 @@
       </v-container>
     </v-card>
   </v-navigation-drawer>
-  <v-container>
+  <v-container fluid>
     <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
     <v-table density="compact" color="primary_d700">
       <thead>

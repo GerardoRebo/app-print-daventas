@@ -15,7 +15,7 @@
     </v-card-text>
     <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
   </v-card>
-  <v-container>
+  <v-container fluid>
     <v-table density="compact" color="primary_d700">
       <thead>
         <tr>

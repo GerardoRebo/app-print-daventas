@@ -13,7 +13,7 @@
       </v-row>
     </v-card-text>
   </v-card>
-  <v-container>
+  <v-container fluid>
     <v-progress-linear color="accent" indeterminate v-if="false"></v-progress-linear>
     <v-table density="compact" color="primary_d700">
       <thead>

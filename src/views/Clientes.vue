@@ -4,7 +4,7 @@
       <v-card-text>
         <v-card-title>Catálogo clientes</v-card-title>
         <v-row dense class="mt-4">
-          <v-btn prepend-icon="mdi-check-circle" variant="outlined" color="primary" class="mx-2"
+          <v-btn prepend-icon="mdi-plus" variant="outlined" color="primary" class="mx-2"
             @click="openCreateCliente" v-model="keyword">Crear Cliente
           </v-btn>
         </v-row>

@@ -8,21 +8,24 @@
       <v-row dense class="mt-4">
         <v-text-field label="Código" autocomplete="password" v-model="codigo" @keydown.enter.stop="agregarCodigo"
           hide-details class="mx-2" max-width="300" ref="codigoRef" />
-        <v-btn prepend-icon="mdi-check-circle" variant="outlined" color="primary" class="mx-2" @click="agregarCodigo">Agregar
+        <v-btn prepend-icon="mdi-check-circle" variant="outlined" color="primary" class="mx-2"
+          @click="agregarCodigo">Agregar
         </v-btn>
       </v-row>
     </v-card-text>
-  <v-progress-linear color="neutral300" model-value="100"></v-progress-linear>
+    <v-progress-linear color="neutral300" model-value="100"></v-progress-linear>
   </v-card>
-  <v-card>
-    <v-card-text>
-      <v-data-table :headers="tHeaders" :items="misCodigos" items-per-page="5">
-        <template v-slot:item.actions="{ item }">
-          <v-btn icon="mdi-trash-can" size="small" color="error" @click="eliminarCodigoEq(item.id)"></v-btn>
-        </template>
-      </v-data-table>
-    </v-card-text>
-  </v-card>
+  <v-container fluid>
+    <v-card>
+      <v-card-text>
+        <v-data-table :headers="tHeaders" :items="misCodigos" items-per-page="5">
+          <template v-slot:item.actions="{ item }">
+            <v-btn icon="mdi-trash-can" size="small" color="error" @click="eliminarCodigoEq(item.id)"></v-btn>
+          </template>
+        </v-data-table>
+      </v-card-text>
+    </v-card>
+  </v-container>
 </template>
 
 <script setup>

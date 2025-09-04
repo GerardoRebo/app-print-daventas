@@ -107,7 +107,38 @@
       <v-card-text>
         <v-data-table :headers="abonosHeaders" :items="abonos" dense>
           <template v-slot:item.actions="{ item }">
-            <v-btn @click="facturarAbono(item)" class="mx-2" size="small" v-if="!item.facturado_en">Facturar
+            <v-menu transition="scale-transition" v-if="item.facturado_en">
+              <template v-slot:activator="{ props }">
+                <v-btn variant="tonal" v-bind="props" append-icon="mdi-menu-down" size="small">
+                  Factura
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item @click="onWatchPdf(item)">
+                  <template v-slot:prepend>
+                    <v-icon icon="mdi-eye"></v-icon>
+                  </template>
+                  <v-list-item-title>
+                    Ver PDF</v-list-item-title>
+                </v-list-item>
+                <v-list-item @click="onDownloadPdf(item)">
+                  <template v-slot:prepend>
+                    <v-icon icon="mdi-file-pdf-box"></v-icon>
+                  </template>
+                  <v-list-item-title>
+                    Descarga PDF
+                  </v-list-item-title>
+                </v-list-item>
+                <v-list-item @click="onDownloadXml(item)">
+                  <template v-slot:prepend>
+                    <v-icon icon="mdi-xml"></v-icon>
+                  </template>
+                  <v-list-item-title>
+                    Descarga XML</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+            <v-btn @click="facturarAbono(item)" size="small" v-if="!item.facturado_en && selectedDeuda?.ventaticket?.facturado_en">Facturar
               abono</v-btn>
           </template>
         </v-data-table>
@@ -302,6 +333,65 @@ function facturarAbono(abono) {
       handleOpException(error);
     }).finally(() => {
       getDeudas(creditoId.value);
+      cargando.value = false;
+    });
+}
+function onWatchPdf(abono) {
+  console.log(abono.id, 'abono');
+
+  if (cargando.value) return;
+  cargando.value = true;
+  Creditos.downloadPdf(abono.id)
+    .then((response) => {
+      const file = new Blob([response.data], { type: response.headers['content-type'] });
+      const fileURL = URL.createObjectURL(file);
+      window.open(fileURL);
+    })
+    .catch((error) => {
+      alert("Ha ocurrido un error")
+      handleOpException(error);
+    }).finally(() => {
+      cargando.value = false;
+    });
+
+}
+function onDownloadPdf(abono) {
+  if (cargando.value) return;
+  cargando.value = true;
+  Creditos.downloadPdf(abono.id)
+    .then((response) => {
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "factura";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    })
+    .catch((error) => {
+      handleOpException(error);
+      alert("Ha ocurrido un error");
+    })
+    .finally(() => {
+      cargando.value = false;
+    });
+}
+function onDownloadXml(abono) {
+  if (cargando.value) return;
+  cargando.value = true;
+  Creditos.downloadXml(abono.id)
+    .then((response) => {
+      const blob = new Blob([response.data], { type: "application/xml" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "factura";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    })
+    .catch((error) => {
+      handleOpException(error);
+      alert("Ha ocurrido un error");
+    })
+    .finally(() => {
       cargando.value = false;
     });
 }

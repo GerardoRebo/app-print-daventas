@@ -11,7 +11,7 @@
       <v-btn v-if="turno_actual?.id" @click="abrirCaja" :loading="cargando" class="mx-2">Movimiento</v-btn>
     </v-card-text>
   </v-card>
-  <v-container>
+  <v-container fluid>
     <v-row>
       <v-col>
         <CortesSumary :turno_actual="turno_actual" @openVMovCaja="isVMovCaja = true"></CortesSumary>

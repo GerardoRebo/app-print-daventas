@@ -9,7 +9,7 @@
       </v-row>
     </v-card-text>
   </v-card>
-  <v-container>
+  <v-container fluid>
     <v-data-table :headers="headers" :items="misAlmacens" items-per-page="5">
       <template v-slot:item.actions="{ item }">
         <v-btn @click="detachAlmacen(item.id)" size="small" prepend-icon="mdi-cancel">Quitar</v-btn>

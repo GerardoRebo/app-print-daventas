@@ -7,7 +7,7 @@
       </v-row>
     </v-card-text>
   </v-card>
-  <v-container>
+  <v-container fluid>
 
     <v-data-table :headers="headers" :items="misUsers" items-per-page="5">
       <template v-slot:item.precio_final="{ item }">

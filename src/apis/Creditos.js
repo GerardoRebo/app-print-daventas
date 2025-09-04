@@ -51,5 +51,11 @@ export default {
     facturarAbono(abono) {
         return Api().post(`/creditos/facturarabono/${abono}`);
     },
+     downloadPdf(abono) {
+        return ApiBlob().get("/creditos/downloadPdf/" + abono);
+      },
+    downloadXml(abono) {
+        return ApiBlob().get("/creditos/downloadXml/" + abono);
+      },
 
 }
