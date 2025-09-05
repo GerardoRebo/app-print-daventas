@@ -57,6 +57,9 @@ export default {
     getFoliosSaldo() {
         return Api().get("/organizacions/foliosSaldo/");
     },
+    loadFacturacionData() {
+        return Api().get("/organizacions/facturacionData/");
+    },
     downloadFile(file) {
         return Api().get("excelfile/excelfile/downloadExported/" + file);
     },

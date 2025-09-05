@@ -106,12 +106,12 @@ const links = computed(() => {
     return [
       { icon: 'mdi-network-pos', title: 'Punto de Venta', href: "PuntoVenta" },
       { icon: 'mdi-domain', title: 'Mi Organización', href: "MiOrganizacion" },
+      { icon: 'mdi-invoice-list', title: 'Datos Fiscales', href: "Facturacion" },
       { icon: 'mdi-cash-check', title: 'Cortes', href: "AdminCortesIndex" },
       { icon: 'mdi-chart-bar', title: 'Reportes', href: "Reportes" },
       { icon: 'mdi-account-group', title: 'Usuarios', href: "UsuariosIndex" },
       { icon: 'mdi-file-presentation-box', title: 'Tabulares', href: "MiTabular" },
       { icon: 'mdi-file-excel', title: 'Datos', href: "MisDatos" },
-      // { icon: 'mdi-invoice-list', title: 'Facturacion', href: "Facturacion" },
       { icon: 'mdi-list-box', title: 'Impuestos', href: "Impuestos" },
       { icon: 'mdi-invoice-list', title: 'Facturas', href: "FacturasIndex" },
       { icon: 'mdi-view-list', title: 'FacturasGlobales', href: "FacturasGlobalesIndex" },

@@ -932,11 +932,6 @@ const tHeaders = ref([
   { title: "Acciones", key: "actions", sortable: false },
 ]);
 const headers = ref([
-  "Código",
-  "Nombre",
-  "Precio",
-  "Existencia",
-  "kit",
   { title: "Código", key: "codigo", align: "start", sortable: false },
   { title: "Nombre", key: "name", align: "start", sortable: false },
   { title: "Precio", key: "precio", align: "start", sortable: false },

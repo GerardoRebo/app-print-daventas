@@ -69,6 +69,7 @@ const MiTabular = () => import("../views/admin/MiTabular.vue");
 const Impuestos = () => import("../views/admin/Impuestos.vue");
 const ImpuestosAsignacionMasiva = () =>
   import("../views/admin/ImpuestosAsignacionMasiva.vue");
+const Facturacion = () => import('../views/admin/Facturacion/Facturacion.vue')
 const FacturasIndex = () => import("../views/admin/Facturas/FacturasIndex.vue");
 // const FacturasShow = () => import('../views/admin/Facturas/FacturasShow.vue')
 const ReglasRetencionIndex = () =>
@@ -454,7 +455,7 @@ const adminRoutes = [
       requireAdministrationRole: true,
     },
   },
-
+  { path: 'facturacion', name: 'Facturacion', component: Facturacion, meta: { hasOrganization: true, requiresAuth: true, requireAdministrationRole: true } },
   {
     path: "facturas",
     children: [

@@ -31,33 +31,33 @@
         <v-btn @click="copyLinkToClipBoard" size="small" class="mx-2" prepend-icon="mdi-link" variant="tonal">Mi Tienda
         </v-btn>
         <v-menu transition="scale-transition">
-            <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" size="small" class="mx-2" append-icon="mdi-chevron-down" variant="tonal">Ultimo
-                ticket
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item @click="openLastTicket">
-                <template v-slot:prepend>
-                  <v-icon icon="mdi-eye"></v-icon>
-                </template>
-                <v-list-item-title>
-                  Ver</v-list-item-title>
-              </v-list-item>
-              <v-list-item @click="printLastTicket">
-                <template v-slot:prepend>
-                  <v-icon icon="mdi-printer-pos"></v-icon>
-                </template>
-                <v-list-item-title>
-                  Imprimir</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-          <v-btn size="small" class="mx-2" append-icon="mdi-keyboard" variant="tonal"
-            @click="isShortcutsOpen = true">Atajos</v-btn>
+          <template v-slot:activator="{ props }">
+            <v-btn v-bind="props" size="small" class="mx-2" append-icon="mdi-chevron-down" variant="tonal">Ultimo
+              ticket
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item @click="openLastTicket">
+              <template v-slot:prepend>
+                <v-icon icon="mdi-eye"></v-icon>
+              </template>
+              <v-list-item-title>
+                Ver</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="printLastTicket">
+              <template v-slot:prepend>
+                <v-icon icon="mdi-printer-pos"></v-icon>
+              </template>
+              <v-list-item-title>
+                Imprimir</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <v-btn size="small" class="mx-2" append-icon="mdi-keyboard" variant="tonal"
+          @click="isShortcutsOpen = true">Atajos</v-btn>
         <v-select :items="almacenItems" v-if="ticketActual.miAlmacenId == null" label="Almacenes"
-            @update:modelValue="asignarAlmacen" max-width="300" hide-details :active="true"
-            class="highlighted-select"></v-select>
+          @update:modelValue="asignarAlmacen" max-width="300" hide-details :active="true"
+          class="highlighted-select"></v-select>
         <div class="d-flex justify-space-around">
           <p class="mx-2">Folio: {{ ticketActual.consecutivo }}</p>
           <p v-if="ticketActual.cliente" class="mx-2">
@@ -79,13 +79,13 @@
         </v-col>
         <v-col>
           <v-tooltip :text="product_form.name" location="top" v-if="product_form.name">
-              <template v-slot:activator="{ props }">
-                <v-text-field label="Nombre" id="name" autocomplete="off" placeholder="" readonly hide-details
-                  v-model="product_form.name" v-bind="props" />
-              </template>
-            </v-tooltip>
-            <v-text-field v-else label="Nombre" id="name" autocomplete="off" placeholder="" readonly hide-details
-              v-model="product_form.name" />
+            <template v-slot:activator="{ props }">
+              <v-text-field label="Nombre" id="name" autocomplete="off" placeholder="" readonly hide-details
+                v-model="product_form.name" v-bind="props" />
+            </template>
+          </v-tooltip>
+          <v-text-field v-else label="Nombre" id="name" autocomplete="off" placeholder="" readonly hide-details
+            v-model="product_form.name" />
         </v-col>
         <v-col cols="1">
           <v-text-field label="Cantidad" id="cantidad" autocomplete="off" placeholder="Cantidad"
@@ -426,7 +426,8 @@
                   articulo.ancho,
                   articulo.alto,
                 )
-                " v-if="articulo.product_id" icon="mdi-pencil" size="x-small" tabindex="-1">
+                " v-if="articulo.product_id" icon="mdi-pencil" size="x-small" tabindex="-1"
+                :disabled="!!((+articulo.impuesto_retenido) || (+articulo.impuesto_traslado))">
               </v-btn>
               <v-btn @click="destroyArticulo(articulo.id)" class="font-bold cursor-pointer text-red-500"
                 icon="mdi-trash-can" size="x-small" tabindex="-1">
@@ -440,7 +441,7 @@
 
   <!-- Busca Producto Nombre-->
   <v-dialog v-model="isVisible" max-width="1200">
-    <v-card max-height="500" >
+    <v-card max-height="500">
       <v-card-title>Busca producto por nombre</v-card-title>
       <v-card-text :scrollable="false">
         <p class="text-caption">
@@ -553,7 +554,7 @@
   </v-dialog>
 
   <!-- Existencias-->
-  <v-dialog v-model="openExistencias" >
+  <v-dialog v-model="openExistencias">
     <v-card>
       <v-card-title>Existencias</v-card-title>
       <v-card-text> </v-card-text>
@@ -855,12 +856,12 @@
 
         <v-list>
           <v-list-item v-for="(shortcut, index) in shortcuts" :key="index">
-              <v-list-item-title class="text-subtitle-1 font-weight-medium">
-                {{ shortcut.title }}
-              </v-list-item-title>
-              <v-list-item-subtitle>
-                {{ shortcut.description }}
-              </v-list-item-subtitle>
+            <v-list-item-title class="text-subtitle-1 font-weight-medium">
+              {{ shortcut.title }}
+            </v-list-item-title>
+            <v-list-item-subtitle>
+              {{ shortcut.description }}
+            </v-list-item-subtitle>
             <v-list-item-action>
               <v-chip color="black" text-color="black" class="ma-1" v-for="(key, i) in shortcut.keys" :key="i">
                 {{ key }}
@@ -1874,7 +1875,7 @@ function setNombreTicket() {
 function setCliente(cliente) {
   if (cargando.value) return;
   cargando.value = true;
-  Cliente.setCliente(cliente, ticketActual.id)
+  Cliente.setCliente(cliente, ticketActual.value.id)
     .then((response) => {
       if (response.data?.success && response.data?.retentionRules?.length) {
         if (
@@ -1885,15 +1886,14 @@ function setCliente(cliente) {
         ) {
           cargando.value = false;
           acceptRetentionRules();
+        } else {
+          getSpecificVT(ticketActual.value.id);
+
         }
       }
-      getSpecificVT(ticketActual.id);
-      openCliente.value = false;
-      nextTick(() => codigoRef.value.select());
+          openCliente.value = false;
     })
     .catch((error) => {
-      console.log(error);
-
       handleOpException(error);
       alert("Ha ocurrido un error");
     })
@@ -1904,15 +1904,13 @@ function setCliente(cliente) {
 function acceptRetentionRules() {
   if (cargando.value) return;
   cargando.value = true;
-  PuntoVenta.acceptRetentionRules(ticketActual.id)
+  PuntoVenta.acceptRetentionRules(ticketActual.value.id)
     .then((response) => {
-      getSpecificVT(ticketActual.id);
+      getSpecificVT(ticketActual.value.id);
       openCliente.value = false;
-      nextTick(() => codigoRef.value.select());
     })
     .catch((error) => {
       console.log(error);
-
       handleOpException(error);
       alert("Ha ocurrido un error");
     })

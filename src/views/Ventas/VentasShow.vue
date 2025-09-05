@@ -93,7 +93,7 @@
           </p>
         </template>
         <div class="mx-2">
-          <p>Timbres Disponibles: {{ saldo?.saldo ?? 0 }}</p>
+          <p>Timbres Disponibles: {{ saldo?? 0 }}</p>
           <p>Almacén: {{ ticketActual?.almacen?.name }}</p>
           <p>Cliente: {{ ticketActual?.cliente?.name }}</p>
         </div>
@@ -221,7 +221,7 @@
             </p>
           </template>
           <div>
-            <p>Timbres Disponibles: {{ saldo?.saldo ?? 0 }}</p>
+            <p>Timbres Disponibles: {{ saldo?? 0 }}</p>
             <p>Almacén: {{ ticketActual.miAlmacenName }}</p>
             <p>Cliente: {{ ticketActual.clienteName }}</p>
             <p>Subtotal: ${{ ticketActual.subtotal }}</p>
@@ -624,10 +624,10 @@ function setCliente(cliente) {
           acceptRetentionRules();
         } else {
           getSpecificVT(ticketActual.value.id);
-          openCliente.value = false;
 
         }
       }
+          openCliente.value = false;
     })
     .catch((error) => {
       handleOpException(error);
@@ -706,7 +706,7 @@ function cancelarVenta() {
 function facturar() {
   if (cargando.value) return;
   cargando.value = true;
-  if (!saldo.value?.saldo) {
+  if (!saldo.value) {
     alert(
       "No tienes suficientes timbres fiscales, contacta con la administración para solicitar timbres fiscales"
     );

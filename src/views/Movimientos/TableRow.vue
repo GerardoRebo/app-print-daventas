@@ -56,14 +56,15 @@ const { movimiento } = toRefs(props);
             </router-link>
             <v-tooltip text="Imprimir" location="top">
                 <template v-slot:activator="{ props }">
-                    <v-btn @click="imprimirMovimiento(movimiento.id)" icon size="x-small" v-bind="props" class="mx-1">
+                    <!-- @click="$emit('getUserMovimientos', corte.id)" -->
+                    <v-btn @click="$emit('imprimirMovimiento', movimiento.id)" icon size="x-small" v-bind="props" class="mx-1">
                         <v-icon>mdi-cloud-print</v-icon>
                     </v-btn>
                 </template>
             </v-tooltip>
             <v-tooltip text="Cancelar" location="top">
                 <template v-slot:activator="{ props }">
-                    <v-btn v-if="movimiento.estado != 'C'" @click="cancelarMovimiento(movimiento.id)" size="x-small"
+                    <v-btn v-if="movimiento.estado != 'C'" @click="$emit('cancelarMovimiento',movimiento.id)" size="x-small"
                         v-bind="props" icon class="mx-1">
                         <v-icon>mdi-cancel</v-icon>
                     </v-btn>
