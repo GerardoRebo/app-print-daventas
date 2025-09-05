@@ -35,7 +35,7 @@
       </v-card-text>
       <v-card-actions>
         <v-btn @click="isVisible = false">Cancelar</v-btn>
-        <v-btn @click="realizarCorte" color="primary_d500" variant="outlined">Confirmar</v-btn>
+        <v-btn @click="realizarCorte" color="primary" variant="outlined">Confirmar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -57,7 +57,7 @@
       </v-card-text>
       <v-card-actions>
         <v-btn @click="openCaja = false">Cancelar</v-btn>
-        <v-btn @click="realizarMovimiento" color="accent" variant="outlined">Confirmar</v-btn>
+        <v-btn @click="realizarMovimiento" color="primary" variant="outlined">Confirmar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -70,7 +70,7 @@
       </v-card-text>
       <v-card-actions>
         <v-btn @click="openInicial = false">Cancelar</v-btn>
-        <v-btn @click="habilitarCaja" color="accent" variant="outlined">Confirmar</v-btn>
+        <v-btn @click="habilitarCaja" color="primary" variant="outlined">Confirmar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

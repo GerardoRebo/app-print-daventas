@@ -1875,7 +1875,7 @@ function setNombreTicket() {
 function setCliente(cliente) {
   if (cargando.value) return;
   cargando.value = true;
-  Cliente.setCliente(cliente, ticketActual.value.id)
+  Cliente.setCliente(cliente, ticketActual.id)
     .then((response) => {
       if (response.data?.success && response.data?.retentionRules?.length) {
         if (
@@ -1887,11 +1887,13 @@ function setCliente(cliente) {
           cargando.value = false;
           acceptRetentionRules();
         } else {
-          getSpecificVT(ticketActual.value.id);
+          getSpecificVT(ticketActual.id);
 
         }
       }
-          openCliente.value = false;
+      getSpecificVT(ticketActual.id);
+      openCliente.value = false;
+      nextTick(() => codigoRef.value.select());
     })
     .catch((error) => {
       handleOpException(error);
@@ -1904,9 +1906,9 @@ function setCliente(cliente) {
 function acceptRetentionRules() {
   if (cargando.value) return;
   cargando.value = true;
-  PuntoVenta.acceptRetentionRules(ticketActual.value.id)
+  PuntoVenta.acceptRetentionRules(ticketActual.id)
     .then((response) => {
-      getSpecificVT(ticketActual.value.id);
+      getSpecificVT(ticketActual.id);
       openCliente.value = false;
     })
     .catch((error) => {
