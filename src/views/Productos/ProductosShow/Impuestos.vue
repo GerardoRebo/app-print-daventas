@@ -12,8 +12,9 @@
             impuesto
           </v-btn>
         </v-col>
-        <v-col cols="12" md="2" >
-          <v-select :items="ObjetoImpItems" v-model="productActual.ObjetoImp" @update:modelValue="updateObjetoImpuesto" label="Objeto impuesto:" class="mx-2" color="primary">
+        <v-col cols="12" md="2">
+          <v-select :items="ObjetoImpItems" v-model="productActual.ObjetoImp" @update:modelValue="updateObjetoImpuesto"
+            label="Objeto impuesto:" class="mx-2" color="primary"  :error-messages="errors">
           </v-select>
         </v-col>
         <v-col cols="12" md="2">
@@ -56,10 +57,10 @@
         {{ item.product_hijo.codigo }}
       </template>
       <template v-slot:item.venta="{ item }">
-        {{ item.pivot.venta }}
+        {{ item.pivot.venta ? "Si" : "No"}}
       </template>
       <template v-slot:item.compra="{ item }">
-        {{ item.pivot.compra }}
+        {{ item.pivot.compra ? "Si" : "No"}}
       </template>
       <template v-slot:item.actions="{ item }">
         <v-btn icon="mdi-pencil" size="small" color="primary" @click="abrirModalEdit(item)"></v-btn>
@@ -143,19 +144,29 @@ const impuestoActualId = ref(null);
 const misImpuestos = ref([]);
 const product = ref(null);
 const venta = ref(true);
-const compra = ref(true);
+const compra = ref(false);
 const claves = ref([]);
 const unidades = ref([]);
 const cargando = ref(false);
 const timeOut = ref("");
 const claveKeyword = ref("");
 const unidadKeyword = ref("");
-const errors = ref([]);
+const errors = computed(() => {
+  // console.log(productActual.vaj);
+  
+  if (misImpuestos.value.length && !productActual.value.ObjetoImp) {
+    return "Selecciona una opción valida"
+  }
+})
 const isVisible = ref(false);
 const isClaveOpen = ref(false);
 const isUnidadOpen = ref(false);
 const productId = ref(route.params.productId);
-const ObjetoImpItems = ref([{ title: "No objeto de impuesto", value: "01" }, { title: "Si objeto de impuesto", value: "02" }, { title: "Si objeto de impuesto, no desglose", value: "03" }]);
+const ObjetoImpItems = ref([
+  { title: "", value: null },
+  { title: "No objeto de impuesto", value: "01" },
+  { title: "Si objeto de impuesto", value: "02" }, 
+  { title: "Si objeto de impuesto, no desglose", value: "03" }]);
 const impuestoItems = computed(() => {
   return impuestos.value.map((item) => {
     return {
@@ -226,7 +237,7 @@ async function abrirModal() {
   isVisible.value = true;
   impuestoActualId.value = null;
   impuestoSelect.value = null;
-  compra.value = true;
+  compra.value = false;
   venta.value = true;
 }
 async function abrirModalEdit(impuesto) {

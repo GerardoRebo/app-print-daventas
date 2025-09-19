@@ -325,8 +325,8 @@ const tHeaders = ref([
   "Min",
   "Max",
   "Kit",
+  "Impuestos",
   "Acciones",
-  "",
 ]);
 const existenciasHeaders = ref([
   { title: "Almacen", key: "almacen", align: "start", sortable: false },

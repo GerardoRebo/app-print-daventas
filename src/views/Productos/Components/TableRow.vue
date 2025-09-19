@@ -1,9 +1,21 @@
 <script setup>
-import { toRef, toRefs } from 'vue';
+import {computed, toRef, toRefs } from 'vue';
 
 const props = defineProps(['product']);
 defineEmits(['ajusteProduct', 'abrirExistencias', 'destroyProduct'])
 const { product } = toRefs(props);
+const ObjetoImp = computed(()=>{
+    switch (product.value.ObjetoImp) {
+        case "01":
+            return "No Objeto"
+            break;
+        case "02":
+            return "Sí Objeto"
+            break;
+        default:
+            break;
+    }
+} )
 
 </script>
 <template>
@@ -30,6 +42,7 @@ const { product } = toRefs(props);
         <td>{{ product.invmin }}</td>
         <td>{{ product.invmax }}</td>
         <td>{{ product.es_kit ? 'Sí' : 'No' }}</td>
+        <td>{{ ObjetoImp}}</td>
         <td>
             <router-link :to="{
                 name: 'ProductosShowBasica',

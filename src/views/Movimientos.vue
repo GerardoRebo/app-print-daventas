@@ -42,6 +42,10 @@
         >
           Proveedor
         </v-btn>
+        <v-btn v-if="movimientoActual.tipo == 'C'" class="mx-2" prepend-icon="mdi-numeric"
+            @click="abrirFolioFactura" size="small">
+            Folio Factura
+          </v-btn>
         <v-select
           v-if="movimientoActual.tipo == null"
           @update:modelValue="setMovimiento"
@@ -106,6 +110,9 @@
           <p v-if="movimientoActual.tipo != 'C'" class="mx-2">
             Almacen Destino: {{ movimientoActual.miAlmacenDestinoName }}
           </p>
+          <p v-if="movimientoActual.tipo == 'C' && movimientoActual.factura_uuid" class="mx-2">
+              Folio Factura Proveedor: <strong> {{ movimientoActual.factura_uuid }}</strong>
+            </p>
         </div>
       </v-row>
       <v-row dense class="mb-2">
@@ -478,6 +485,9 @@
           <p v-if="movimientoActual.tipo != 'C'">
             Almacen Destino: {{ movimientoActual.miAlmacenDestinoName }}
           </p>
+          <p v-if="movimientoActual.tipo != 'C' && movimientoActual.factura_uuid" class="mx-2">
+              Folio Factura Proveedor: <strong> {{ movimientoActual.factura_uuid }}</strong>
+            </p>
         </div>
 
         <v-divider></v-divider>
@@ -696,6 +706,20 @@
           </v-btn>
         </template>
       </v-data-table>
+    </v-card>
+  </v-dialog>
+  <!-- Folio Factura -->
+  <v-dialog v-model="isOpenFolioFactura" max-width="500">
+    <v-card>
+      <v-card-title>Folio de factura del proveedor</v-card-title>
+      <v-card-text>
+        <v-text-field v-model="folioFactura" label="Folio" 
+          placeholder="Sirve para identificar la factura del proveedor" hide-details  id="key_folio_factura"></v-text-field>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn @click="isOpenFolioFactura =false">Cancel</v-btn>
+        <v-btn color="primary" variant="outlined" @click="updateFolioFactura" >Actualizar</v-btn>
+      </v-card-actions>
     </v-card>
   </v-dialog>
   <!-- Pendientes -->
@@ -1040,6 +1064,8 @@ const isVisible = ref(false);
 const openEdit = ref(false);
 const openExistencias = ref(false);
 const openProveedor = ref(false);
+const isOpenFolioFactura = ref(false);
+const folioFactura = ref('');
 const openPendiente = ref(false);
 const nombreT = ref("");
 const porcentaje = ref(null);
@@ -1435,6 +1461,23 @@ function setNombreTicket() {
       alert("Ha ocurrido un error");
     });
 }
+function updateFolioFactura() {
+  if (cargando.value) return;
+  cargando.value = true;
+  Movimientos.updateFolioFactura(folioFactura.value, movimientoActual.id)
+    .then(() => {
+      getSpecificVT(movimientoActual.id);
+      isOpenFolioFactura.value = false;
+      nextTick(() => codigoRef.value.select());
+    })
+    .catch((error) => {
+      handleOpException(error);
+      alert("Ha ocurrido un error");
+    })
+    .finally(() => {
+      cargando.value = false;
+    });
+}
 function setProveedor(proveedor) {
   if (cargando.value) return;
   cargando.value = true;
@@ -1501,6 +1544,10 @@ function abrirProveedor() {
   nextTick(() => document.getElementById("keyproveedor").select());
   getAllProveedors();
 }
+function abrirFolioFactura() {
+  isOpenFolioFactura.value = true;
+  nextTick(() => document.getElementById("key_folio_factura").select());
+}
 function abrirPendiente() {
   openPendiente.value = true;
   getAllPendientes();
@@ -1511,6 +1558,7 @@ async function rellenaTicket(response) {
   movimientoActual.almacenOrigenId = response.almacen_origen_id;
   movimientoActual.almacenDestinoId = response.almacen_destino_id;
 
+  movimientoActual.factura_uuid = response.factura_uuid;
   movimientoActual.tipo = response.tipo;
   movimientoActual.consecutivo = response.consecutivo;
   movimientoActual.proveedorId = response.proveedor_id;

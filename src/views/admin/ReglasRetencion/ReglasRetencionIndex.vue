@@ -131,7 +131,7 @@ const fiscalRegimenes = ref([
   { "value": '606', "title": "606 - Arrendamiento" },
   { "value": '607', "title": "607 - Régimen de Enajenación o Adquisición de Bienes" },
   { "value": '608', "title": "608 - Demás ingresos" },
-  { "value": '610', "title": "610 -  Residentes en el Extranjero sin Establecimiento Permanente en México" },
+  { "value": '610', "title": "610 - Residentes en el Extranjero sin Establecimiento Permanente en México" },
   { "value": '611', "title": "611 - Ingresos por Dividendos (socios y accionistas)" },
   { "value": '612', "title": "612 - Personas Físicas con Actividades Empresariales y Profesionales" },
   { "value": '614', "title": "614 - Ingresos por intereses" },

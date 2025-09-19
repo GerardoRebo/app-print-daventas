@@ -32,6 +32,14 @@
         </div>
         <div class="mx-4">
           <label class="text-xs">
+            Devoluciones Ventas Contado:
+          </label>
+          <p>
+            - ${{ corte?.devoluciones_ventas_efectivo }}
+          </p>
+        </div>
+        <div class="mx-4">
+          <label class="text-xs">
             Ventas Credito:
           </label>
           <p class="font-semibold">

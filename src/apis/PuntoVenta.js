@@ -127,6 +127,12 @@ export default {
   facturar(ticket, post) {
     return Api().post("/puntoventa/facturar/" + ticket, post);
   },
+  cancelarFactura(ticket, post) {
+    return Api().post("/puntoventa/cancelar_factura/" + ticket, post);
+  },
+  verificarEstadoCancelacion(ticket) {
+    return Api().post("/puntoventa/verificar_estado_cancelacion/" + ticket);
+  },
   descargarXml(ticket) {
     return Api().get("/puntoventa/descargarXml/" + ticket);
   },

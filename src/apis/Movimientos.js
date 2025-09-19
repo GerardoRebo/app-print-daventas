@@ -58,6 +58,12 @@ export default {
         })
 
     },
+    updateFolioFactura(folioFactura, movimiento) {
+        return Api().post(`/movimientos/updateFolioFactura`, {
+            folioFactura,
+            movimiento
+        })
+    },
     setProveedor(proveedor, movimiento) {
         return Api().post(`/movimientos/setproveedor`, {
             params: {

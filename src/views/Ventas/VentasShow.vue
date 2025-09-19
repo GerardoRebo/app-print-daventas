@@ -62,6 +62,16 @@
               </v-list-item>
             </v-list>
           </v-menu>
+          <div v-if="!ticketActual.cfdi_cancellation_status">
+            <v-btn @click="isCancelarFacturaOpen = true" size="small" class="ml-2" prepend-icon="mdi-cancel"
+              :loading="cargando">
+              Cancelar Factura
+            </v-btn>
+          </div>
+          <v-btn @click="verificarEstadoCancelacion" size="small" class="ml-2" prepend-icon="mdi-progress-check"
+            :loading="cargando">
+            Verificar estado de cancelación
+          </v-btn>
 
           <!-- <v-btn size="small" @click="descargarXml" class="mx-2" prepend-icon="mdi-xml">Descargar Xml</v-btn>
           <v-btn size="small" @click="descargarPdf" class="mx-2" prepend-icon="mdi-file-pdf-box">Descargar Pdf</v-btn> -->
@@ -93,7 +103,7 @@
           </p>
         </template>
         <div class="mx-2">
-          <p>Timbres Disponibles: {{ saldo?? 0 }}</p>
+          <p>Timbres Disponibles: {{ saldo ?? 0 }}</p>
           <p>Almacén: {{ ticketActual?.almacen?.name }}</p>
           <p>Cliente: {{ ticketActual?.cliente?.name }}</p>
         </div>
@@ -221,7 +231,7 @@
             </p>
           </template>
           <div>
-            <p>Timbres Disponibles: {{ saldo?? 0 }}</p>
+            <p>Timbres Disponibles: {{ saldo ?? 0 }}</p>
             <p>Almacén: {{ ticketActual.miAlmacenName }}</p>
             <p>Cliente: {{ ticketActual.clienteName }}</p>
             <p>Subtotal: ${{ ticketActual.subtotal }}</p>
@@ -294,22 +304,84 @@
   </v-dialog>
   <v-dialog v-model="isFacturaInfoOpen" max-width="800">
     <v-card>
-      <v-card-title>Informacion de CFDI</v-card-title>
+      <v-card-title>Información de CFDI</v-card-title>
       <v-card-text>
-        <p class="text-caption mb-2" v-if="ticketActual.forma_de_pago == 'C'">
-          Debido a que esta venta a sido marcada como venta a credito, usa la el
-          metodo de pago PPD-Pago en parcialidades o diferido y forma de pago:
-          99-Por definir, para emitir complementos de pago por cada abono.
-        </p>
-        <v-text-field label="Serie (opcional)" v-model="ticketActual.serie"></v-text-field>
-        <v-select :items="metodoPagos" label="Método de pago" v-model="ticketActual.metodo_pago"></v-select>
-        <v-select :items="pagoFormas" label="Forma de pago" v-model="ticketActual.forma_pago"></v-select>
-        <v-select :items="cdfiUsos" label="Uso de CFDI" v-model="ticketActual.uso_cfdi"></v-select>
-        <v-text-field label="Clave privada local" v-model="ticketActual.clave_privada_local"></v-text-field>
+        <div v-if="erroresRelacionadas + fieldErrorCount > 0" class="text-error mb-2">
+          {{ erroresRelacionadas + fieldErrorCount }} error(es) en datos de facturacion
+        </div>
+        <!-- Navegación de Tabs -->
+        <v-tabs v-model="activeTab" grow>
+          <v-tab value="basico">Básico</v-tab>
+          <v-tab value="avanzado">Opciones Avanzadas</v-tab>
+        </v-tabs>
+
+        <!-- Contenido de Tabs -->
+        <v-window v-model="activeTab">
+          <!-- TAB BÁSICO -->
+          <v-window-item value="basico">
+            <v-card-text>
+              <p class="text-caption mb-2" v-if="ticketActual.forma_de_pago == 'C'">
+                Debido a que esta venta a sido marcada como venta a credito, usa la el
+                metodo de pago PPD-Pago en parcialidades o diferido y forma de pago:
+                99-Por definir, para emitir complementos de pago por cada abono.
+              </p>
+              <v-checkbox label="Es Público en General" v-model="ticketActual.es_publico_en_general"></v-checkbox>
+              <v-text-field label="Nombre del receptor (opcional)" v-model="ticketActual.nombre_receptor"
+                v-if="ticketActual.es_publico_en_general"></v-text-field>
+              <v-text-field label="Serie (opcional)" v-model="ticketActual.serie"></v-text-field>
+              <v-select :items="metodoPagos" label="Método de pago" v-model="ticketActual.metodo_pago"
+                :disabled="ticketActual.es_publico_en_general"></v-select>
+              <v-select :items="pagoFormas" label="Forma de pago" v-model="ticketActual.forma_pago"></v-select>
+              <v-select :items="cdfiUsos" label="Uso de CFDI" v-model="ticketActual.uso_cfdi"
+                :disabled="ticketActual.es_publico_en_general"></v-select>
+              <v-text-field label="Clave privada local" v-model="ticketActual.clave_privada_local"
+                :error-messages="errors.clave_privada_local ? errors.clave_privada_local[0] : null"></v-text-field>
+            </v-card-text>
+          </v-window-item>
+
+          <!-- TAB AVANZADO -->
+          <v-window-item value="avanzado">
+            <v-card-text>
+              <div class="d-flex justify-space-between align-center mb-3">
+                <span class="text-subtitle-1 font-weight-medium">Facturas Relacionadas</span>
+                <v-btn color="primary" variant="outlined" size="small" prepend-icon="mdi-plus" @click="agregarRelacion">
+                  Relación
+                </v-btn>
+              </div>
+
+              <!-- Lista editable -->
+              <v-container fluid>
+                <v-row v-for="(relacion, index) in ticketActual.facturasRelacionadas" :key="index"
+                  class="align-center mb-2">
+                  <v-col cols="5">
+                    <v-select :items="tiposRelacion" label="Tipo de Relación"
+                      :error-messages="relacion.tipo ? '' : 'Campo requerido'" v-model="relacion.tipo" />
+                  </v-col>
+                  <v-col cols="6">
+                    <v-text-field label="Folio Fiscal" v-model="relacion.folio"
+                      v-maska="'********-****-****-****-************'"
+                      :error-messages="relacion.folio ? '' : 'Campo requerido'"
+                      placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" />
+                  </v-col>
+                  <v-col cols="1" class="d-flex justify-end">
+                    <v-btn icon="mdi-delete" color="error" variant="text" size="small"
+                      @click="eliminarRelacion(index)" />
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+          </v-window-item>
+        </v-window>
       </v-card-text>
+      <!-- Acciones -->
       <v-card-actions>
-        <v-btn @click="isFacturaInfoOpen = false" variant="text" :loading="cargando">Cancelar</v-btn>
-        <v-btn @click="facturar" color="primary" variant="outlined" :loading="cargando">Facturar</v-btn>
+        <v-spacer />
+        <v-btn @click="isFacturaInfoOpen = false" variant="text" :loading="cargando">
+          Cancelar
+        </v-btn>
+        <v-btn @click="facturar" color="primary" variant="outlined" :loading="cargando">
+          Facturar
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -353,6 +425,21 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+  <v-dialog v-model="isCancelarFacturaOpen" max-width="600">
+    <v-card>
+      <v-card-title>Cancelar Factura</v-card-title>
+      <v-card-text>
+        <v-select :items="motivosCancelacion" label="Motivo cancelacion" v-model="cancelacionData.motivo" />
+        <v-text-field label="Folio Fiscal" v-model="cancelacionData.sustitucion" v-if="cancelacionData.motivo == '01'"
+          v-maska="'********-****-****-****-************'" placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" />
+      </v-card-text>
+      <v-card-actions>
+        <v-btn @click="isCancelarFacturaOpen = false" variant="text" :loading="cargando">Cerrar</v-btn>
+        <v-btn @click="cancelarFactura" variant="tonal" :loading="cargando" color="error"
+          prepend-icon="mdi-cancel">Cancelar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 <script setup>
 import {
@@ -369,6 +456,7 @@ import { useRoute } from "vue-router";
 import moment from "moment-timezone";
 import Organizacion from "@js/apis/Organizacion";
 import PuntoVenta from "../../apis/PuntoVenta";
+import { vMaska } from "maska/vue"
 
 const s = useUserStore();
 const { handleOpException } = s;
@@ -380,10 +468,17 @@ const route = useRoute();
 const keycliente = ref("");
 const clients = ref([]);
 const ventaId = ref(null);
+const cancelacionData = ref({
+  motivo: '01',
+  sustitucion: '',
+});
 const isFacturaInfoOpen = ref(false);
 const isFormasDePagoOpen = ref(false);
+const isCancelarFacturaOpen = ref(false);
 const cargando = ref(false);
+const errors = ref([]);
 const openCliente = ref(false);
+const erroresRelacionadas = ref([]);
 const drawer = ref(false);
 const cdfiUsos = ref([
   { value: "G01", title: "G01-Adquisición de mercancías." },
@@ -526,6 +621,13 @@ watch(isFacturaInfoOpen, () => {
   }
 });
 
+watch(() => ticketActual.value.es_publico_en_general, (newVal) => {
+  if (newVal) {
+    ticketActual.value.uso_cfdi = 'S01';
+    ticketActual.value.metodo_pago = 'PUE';
+    ticketActual.value.nombre_receptor = 'PUBLICO EN GENERAL';
+  }
+});
 const devuelto = computed(() =>
   articulos.value.some((articulo) => articulo.fue_devuelto == 1)
 );
@@ -627,7 +729,7 @@ function setCliente(cliente) {
 
         }
       }
-          openCliente.value = false;
+      openCliente.value = false;
     })
     .catch((error) => {
       handleOpException(error);
@@ -657,6 +759,31 @@ function acceptRetentionRules() {
 function onEscape(e) {
   if (e.key === "F4") {
     //ir a ventas
+  }
+}
+async function cancelarFactura() {
+  try {
+    cargando.value = true;
+    if (cancelacionData.value.motivo != '01') {
+      cancelacionData.value.sustitucion = '';
+    }
+    const { data } = await PuntoVenta.cancelarFactura(ticketActual.value.id, cancelacionData.value)
+    console.log(data);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    cargando.value = false;
+  }
+}
+async function verificarEstadoCancelacion() {
+  try {
+    cargando.value = true;
+    const { data } = await PuntoVenta.verificarEstadoCancelacion(ticketActual.value.id)
+    console.log(data);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    cargando.value = false;
   }
 }
 async function getSpecificVT(ventaticket) {
@@ -703,7 +830,26 @@ function cancelarVenta() {
       alert("Ha ocurrido un error");
     });
 }
+const validarFacturasRelacionadas = () => {
+  if (!Array.isArray(ticketActual.value.facturasRelacionadas)) return true;
+
+  let errores = 0;
+  ticketActual.value.facturasRelacionadas.forEach(relacion => {
+    if (!relacion.tipo || !relacion.folio) {
+      errores++;
+    }
+  });
+  erroresRelacionadas.value = errores;
+  return errores === 0;
+}
+const fieldErrorCount = computed(() => {
+  return Object.keys(errors.value).length;
+})
 function facturar() {
+  if (!validarFacturasRelacionadas()) {
+    activeTab.value = 'avanzado'; // Optionally switch to the tab with errors
+    return;
+  }
   if (cargando.value) return;
   cargando.value = true;
   if (!saldo.value) {
@@ -720,16 +866,23 @@ function facturar() {
     uso_cfdi: ticketActual.value.uso_cfdi,
     serie: ticketActual.value.serie,
     clave_privada_local: ticketActual.value.clave_privada_local,
+    publico_en_general: ticketActual.value.es_publico_en_general ?? false,
+    nombre_receptor: ticketActual.value.nombre_receptor,
+    facturas_relacionadas: ticketActual.value.facturasRelacionadas,
   })
     .then((response) => {
+      isFacturaInfoOpen.value = false;
       getSpecificVT(ventaId.value);
     })
     .catch((error) => {
+      if (error.response.status === 422) {
+        errors.value = error.response.data.errors;
+        return
+      }
       handleOpException(error);
       alert("Ha ocurrido un error");
     })
     .finally(() => {
-      isFacturaInfoOpen.value = false;
       cargando.value = false;
     });
 }
@@ -741,4 +894,41 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener("keydown", onEscape);
 });
+
+// control del tab activo
+const activeTab = ref("basico")
+
+// catálogo de relaciones (SAT)
+const tiposRelacion = [
+  { title: "01 - Nota de crédito de los documentos relacionados", value: "01" },
+  { title: "02 - Nota de débito de los documentos relacionados", value: "02" },
+  { title: "03 - Devolución de mercancía sobre facturas o traslados previos", value: "03" },
+  { title: "04 - Sustitución de los CFDI previos", value: "04" },
+  { title: "05 - Traslados de mercancías facturados previamente", value: "05" },
+  { title: "06 - Factura generada por los traslados previos", value: "06" },
+  { title: "07 - CFDI por aplicación de anticipo", value: "07" }
+]
+const motivosCancelacion = [
+  { title: "01 - Comprobantes emitidos con errores con relación", value: "01" },
+  { title: "02 - Comprobantes emitidos con errores sin relación", value: "02" },
+  { title: "03 - No se llevo a cabo la operacion", value: "03" },
+  { title: "04 - Operación nominativa relacionada en una factura global", value: "04" },
+]
+
+function agregarRelacion() {
+  if (!Array.isArray(ticketActual.value.facturasRelacionadas)) {
+    ticketActual.value.facturasRelacionadas = [{ tipo: null, folio: "" }]
+    return;
+  }
+  ticketActual.value.facturasRelacionadas.push({ tipo: null, folio: "" })
+}
+
+
+function eliminarRelacion(index) {
+  console.log(index);
+
+  if (Array.isArray(ticketActual.value.facturasRelacionadas)) {
+    ticketActual.value.facturasRelacionadas.splice(index, 1);
+  }
+}
 </script>

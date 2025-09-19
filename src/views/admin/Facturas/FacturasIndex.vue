@@ -81,7 +81,7 @@ const onPagination = (page) => {
     .push({ name: route.name, query: { ...route.query, page } })
     .catch(() => {
     }).finally(() => {
-      getMisVentas()
+      getFacturas()
     });
 };
 watch([dfecha, hfecha], () => {
@@ -104,6 +104,7 @@ const getFacturas = async () => {
     const { data } = await Organizacion.getFacturas({
       desde: dfecha.value,
       hasta: hfecha.value,
+      page: page.value,
     })
     facturas.value = data.facturas
   } catch (error) {

@@ -11,6 +11,10 @@
         <v-btn size="small" class="mx-1" prepend-icon="mdi-printer-pos" @click="imprimirMovimiento">Reimprimir</v-btn>
         <v-btn size="small" class="mx-1" prepend-icon="mdi-cancel" v-if="movimientoActual.estado !== 'C'"
           @click="cancelarMovimiento">Cancelar</v-btn>
+          <v-btn v-if="movimientoActual.tipo == 'C'" class="mx-2" prepend-icon="mdi-numeric"
+            @click="abrirFolioFactura" size="small">
+            Folio Factura
+          </v-btn>
         <div class="mx-2">
           <p>Id: {{ movimientoActual.id }}</p>
           <p>Consecutivo: {{ movimientoActual.consecutivo }}</p>
@@ -24,6 +28,9 @@
           </p>
           <p>
             Almacén Destino:{{ movimientoActual.miAlmacenDestinoName }}
+          </p>
+          <p>
+            Folio Factura:{{ movimientoActual.factura_uuid }}
           </p>
         </div>
         <div>
@@ -106,9 +113,23 @@
       </template>
     </v-data-table>
   </v-container>
+  <!-- Folio Factura -->
+  <v-dialog v-model="isOpenFolioFactura" max-width="500">
+    <v-card>
+      <v-card-title>Folio de factura del proveedor</v-card-title>
+      <v-card-text>
+        <v-text-field v-model="folioFactura" label="Folio" 
+          placeholder="Sirve para identificar la factura del proveedor" hide-details  id="key_folio_factura"></v-text-field>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn @click="isOpenFolioFactura =false">Cancel</v-btn>
+        <v-btn color="primary" variant="outlined" @click="updateFolioFactura" >Actualizar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 <script setup>
-import { onMounted, onUnmounted, ref, reactive, watch } from "vue";
+import { onMounted, onUnmounted, ref, reactive, watch, nextTick } from "vue";
 
 import { useRoute } from "vue-router";
 import Movimientos from "../../apis/Movimientos";
@@ -147,6 +168,8 @@ const tHeaders = ref([
 const articulos = ref([]);
 const loadingButton = ref(false);
 const drawer = ref(false);
+const isOpenFolioFactura = ref(false);
+const folioFactura = ref('');
 watch(movimientoActual, () => {
   getSpecificVT(movimientoActual.id);
 });
@@ -175,6 +198,7 @@ function rellenaTicket(response) {
   movimientoActual.subtotal = response.subtotal_enviado;
   movimientoActual.proveedorId = response.proveedor_id;
   movimientoActual.estado = response.estado;
+  movimientoActual.factura_uuid = response.factura_uuid;
 
   if (movimientoActual.almacenOrigenId) {
     movimientoActual.miAlmacenOrigenName = response.almacen_origen.name;
@@ -210,6 +234,27 @@ function imprimirMovimiento() {
     "noreferrer",
     "_blank"
   );
+}
+function abrirFolioFactura() {
+  isOpenFolioFactura.value = true;
+  nextTick(() => document.getElementById("key_folio_factura").select());
+}
+function updateFolioFactura() {
+  if (loadingButton.value) return;
+  loadingButton.value = true;
+  Movimientos.updateFolioFactura(folioFactura.value, movimientoActual.id)
+    .then(() => {
+      getSpecificVT(movimientoActual.id);
+      isOpenFolioFactura.value = false;
+      nextTick(() => codigoRef.value.select());
+    })
+    .catch((error) => {
+      handleOpException(error);
+      alert("Ha ocurrido un error");
+    })
+    .finally(() => {
+      loadingButton.value = false;
+    });
 }
 function cancelarMovimiento() {
   if (loadingButton.value) return;

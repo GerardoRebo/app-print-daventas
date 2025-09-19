@@ -6,6 +6,10 @@
 
     Cajero: {{ ticket?.user?.name }}
     <br>
+    Proveedor: {{ ticket?.proveedor?.name }}
+    <br>
+    Folio Factura: #{{ ticket?.factura_uuid}}
+    <br>
     Sucursal: {{ ticket?.almacen?.name }}
     <br>
     Dirección: {{ ticket?.almacen?.direccion }}

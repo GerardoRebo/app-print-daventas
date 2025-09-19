@@ -37,10 +37,7 @@ export default {
     },
     getFacturas(postData) {
         return Api().get("/organizacions/facturas", {
-            params: {
-                desde: postData.desde,
-                hasta: postData.hasta,
-            }
+            params:postData 
         });
     },
     getFacturasGlobales(postData) {

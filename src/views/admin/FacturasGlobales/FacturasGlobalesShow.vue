@@ -13,7 +13,7 @@
             #Tickets:{{ factura?.articulos?.length }}
           </p>
           <p>
-            Timbres Disponibles: {{ saldo?.saldo ?? 0 }}
+            Timbres Disponibles: {{ saldo ?? 0 }}
           </p>
           <p>
             De:{{ factura.desde }}
@@ -27,16 +27,16 @@
         </div>
         <div class="flex flex-col">
           <p>
-            Subtotal: ${{ subtotalComputed }}
+            Subtotal: ${{ factura.subtotal }}
           </p>
           <p>
-            Descuento: ${{ descuentoComputed }}
+            Descuento: ${{ factura.descuento }}
           </p>
           <p>
-            Impuesto Trasladado: ${{ impuestoComputed }}
+            Impuesto Trasladado: ${{ factura.impuesto_traslado }}
           </p>
           <p class="font-weight-bold">
-            Total: ${{ totalComputed }}
+            Total: ${{ factura.total }}
           </p>
         </div>
         <v-btn :loading="cargando" class="mx-4" @click="deleteFacturaGlobal" v-if="!factura.facturado_en"
@@ -323,7 +323,7 @@ const checkMaxVentaticket = (ventaticket) => {
   return ventaticket == maxVentaticket.value
 }
 const timbrarFacturaGlobal = async () => {
-  if (!saldo.value?.saldo) {
+  if (!saldo.value) {
     alert('No tienes suficientes timbres fiscales, contacta con la administración para solicitar timbres fiscales')
     return;
   }

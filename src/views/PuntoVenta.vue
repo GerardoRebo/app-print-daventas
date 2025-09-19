@@ -107,20 +107,22 @@
           <v-text-field label="Existencia" id="existencia" autocomplete="off" placeholder=""
             v-model="product_form.existencia" readonly hide-details />
         </v-col>
+        <v-col cols="1" class="ml-4">
+            <v-btn :disabled="!(almacen.id && product_form.name)" @click="enviarArticulo"
+              prepend-icon="mdi-arrow-right-bold" variant="tonal" color="secondary">Agregar
+            </v-btn>
+          </v-col>
         <v-spacer />
-        <v-col cols="1">
-          <v-btn @click="enviarArticulo" prepend-icon="mdi-arrow-right-bold" variant="outlined" color="primary">Agregar
-          </v-btn>
-        </v-col>
         <v-col cols="1">
           <v-btn @click="abrirModalBuscaProductsNombre" prepend-icon="mdi-magnify" variant="outlined"
             color="primary">Buscar
           </v-btn>
         </v-col>
         <v-col cols="1">
-          <v-btn @click="abrirExistencias" prepend-icon="mdi-eye" variant="outlined" color="primary">Ver
-          </v-btn>
-        </v-col>
+            <v-btn :disabled="!(almacen.id && product_form.name)" @click="abrirExistencias" prepend-icon="mdi-eye"
+              variant="outlined" color="secondary">Ver
+            </v-btn>
+          </v-col>
       </v-row>
       <!-- Cobrar -->
       <v-row dense>
@@ -465,6 +467,16 @@
               <span>{{ item.name }}</span>
             </a>
           </template>
+          <template v-slot:item.actions="{ item }">
+            <router-link :to="{
+              name: 'ProductosIndex',
+              query: {
+                keyword: item.name
+              },
+            }" tabindex="-1">
+              <v-btn size="x-small" icon tabindex="-1"><v-icon>mdi-open-in-new</v-icon></v-btn>
+            </router-link>
+          </template>
           <template v-slot:item.precio="{ item }">
             <span>${{ item.precio }}</span>
           </template>
@@ -474,21 +486,7 @@
           <template v-slot:item.es_kit="{ item }">
             <span>{{ item.es_kit ? "Sí" : "No" }}</span>
           </template>
-          <template v-slot:item.actions="{ item }">
-            <v-icon class="me-2" size="small" @click="
-              abrirEdicion(
-                item.id,
-                item.product_name ?? item.product.name,
-                item.precio_usado,
-                item.cantidad
-              )
-              " v-if="item.product_id">
-              mdi-pencil
-            </v-icon>
-            <v-icon size="small" @click="destroyArticulo(item.id)">
-              mdi-delete
-            </v-icon>
-          </template>
+          
         </v-data-table>
       </v-card-text>
     </v-card>
@@ -554,35 +552,34 @@
   </v-dialog>
 
   <!-- Existencias-->
-  <v-dialog v-model="openExistencias">
+  <v-dialog v-model="openExistencias" max-width="1200">
     <v-card>
       <v-card-title>Existencias</v-card-title>
-      <v-card-text> </v-card-text>
-      <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
-      <v-data-table :headers="existenciasHeaders" :items="existencias" items-per-page="5" show-select
-        select-strategy="single">
-        <template v-slot:item.data-table-select="{
-          internalItem,
-          isSelected,
-          toggleSelect,
-          index,
+      <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
+      <v-card-text>
+        <router-link :to="{
+          name: 'ProductosIndex',
+          query: {
+            keyword: product_form.name
+          },
         }">
-          <v-checkbox-btn :model-value="isSelected(internalItem)" color="primary"
-            @update:model-value="toggleSelect(internalItem)" class="articulosInputs"></v-checkbox-btn>
-        </template>
-        <template v-slot:item.product_name="{ item }">
-          <span>{{ item.product?.name }}</span>
-        </template>
-        <template v-slot:item.almacen="{ item }">
-          <span>{{ item.almacen?.name }}</span>
-        </template>
-        <template v-slot:item.codigo="{ item }">
-          <span>{{ item.product?.codigo }}</span>
-        </template>
-        <template v-slot:item.pcosto="{ item }">
-          <span>${{ item.product?.pcosto }}</span>
-        </template>
-      </v-data-table>
+          <v-btn size="small" class="mb-4" prepend-icon="mdi-format-list-bulleted-type">Ver en catalogo</v-btn>
+        </router-link>
+        <v-data-table :headers="existenciasHeaders" :items="existencias">
+          <template v-slot:item.product_name="{ item }">
+            <span>{{ item.product?.name }}</span>
+          </template>
+          <template v-slot:item.almacen="{ item }">
+            <span>{{ item.almacen?.name }}</span>
+          </template>
+          <template v-slot:item.codigo="{ item }">
+            <span>{{ item.product?.codigo }}</span>
+          </template>
+          <template v-slot:item.pcosto="{ item }">
+            <span>${{ item.product?.pcosto }}</span>
+          </template>
+        </v-data-table>
+      </v-card-text>
     </v-card>
   </v-dialog>
 
@@ -1128,6 +1125,7 @@ const shortcuts = [
 const headers = ref([
   { title: "Código", key: "codigo", align: "start", sortable: false },
   { title: "Nombre", key: "name", align: "start", sortable: false },
+  { title: "", key: "actions", align: "start", sortable: false },
   { title: "Precio", key: "precio", align: "start", sortable: false },
   {
     title: "Existencia",
