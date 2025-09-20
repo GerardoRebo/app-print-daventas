@@ -44,8 +44,37 @@
         <v-btn :loading="cargando" class="mx-4" @click="isFacturaInfoOpen = true" v-if="!factura.facturado_en"
           prepend-icon="mdi-certificate" color="accent" variant="elevated">Timbrar</v-btn>
         <template v-else>
-          <v-btn @click="descargarXml" class="mx-2" prepend-icon="mdi-xml" size="small">Descargar Xml</v-btn>
-          <v-btn @click="descargarPdf" class="mx-2" prepend-icon="mdi-file-pdf-box" size="small">Descargar Pdf</v-btn>
+          <v-menu>
+            <template v-slot:activator="{ props }">
+              <v-btn variant="tonal" v-bind="props" append-icon="mdi-menu-down" size="small">
+                Factura
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item @click="onWatchPdf()">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-eye"></v-icon>
+                </template>
+                <v-list-item-title>
+                  Ver PDF</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="descargarPdf()">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-file-pdf-box"></v-icon>
+                </template>
+                <v-list-item-title>
+                  Descarga PDF
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="descargarXml()">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-xml"></v-icon>
+                </template>
+                <v-list-item-title>
+                  Descarga XML</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
           <p class="mx-2">Facturado en: {{ moment(factura.facturado_en).format('DD-MM-YYYY h:mma') }}</p>
         </template>
       </v-row>
@@ -87,8 +116,37 @@
           <v-btn :loading="cargando" block class="my-1" @click="deleteFacturaGlobal" v-if="!factura.facturado_en"
             prepend-icon="mdi-trash-can">Borrar</v-btn>
           <template v-else>
-            <v-btn @click="descargarXml" class="mx-2" prepend-icon="mdi-xml">Descargar Xml</v-btn>
-            <v-btn @click="descargarPdf" class="mx-2" prepend-icon="mdi-file-pdf-box">Descargar Pdf</v-btn>
+            <v-menu>
+              <template v-slot:activator="{ props }">
+                <v-btn variant="tonal" v-bind="props" append-icon="mdi-menu-down" size="small">
+                  Factura
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item @click="onWatchPdf()">
+                  <template v-slot:prepend>
+                    <v-icon icon="mdi-eye"></v-icon>
+                  </template>
+                  <v-list-item-title>
+                    Ver PDF</v-list-item-title>
+                </v-list-item>
+                <v-list-item @click="descargarPdf()">
+                  <template v-slot:prepend>
+                    <v-icon icon="mdi-file-pdf-box"></v-icon>
+                  </template>
+                  <v-list-item-title>
+                    Descarga PDF
+                  </v-list-item-title>
+                </v-list-item>
+                <v-list-item @click="descargarXml()">
+                  <template v-slot:prepend>
+                    <v-icon icon="mdi-xml"></v-icon>
+                  </template>
+                  <v-list-item-title>
+                    Descarga XML</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
             <p class="mx-2">Facturado en: {{ moment(factura.facturado_en).format('DD-MM-YYYY h:mma') }}</p>
           </template>
           <div>
