@@ -768,6 +768,9 @@ async function cancelarFactura() {
       cancelacionData.value.sustitucion = '';
     }
     const { data } = await PuntoVenta.cancelarFactura(ticketActual.value.id, cancelacionData.value)
+    if (data.output) {
+      alert(data.output)
+    }
     console.log(data);
   } catch (error) {
     console.log(error);
@@ -780,6 +783,9 @@ async function verificarEstadoCancelacion() {
     cargando.value = true;
     const { data } = await PuntoVenta.verificarEstadoCancelacion(ticketActual.value.id)
     console.log(data);
+    if (data.output) {
+      alert(data.output)
+    }
   } catch (error) {
     console.log(error);
   } finally {
