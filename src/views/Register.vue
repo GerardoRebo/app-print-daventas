@@ -44,10 +44,10 @@
 
             <v-divider class="my-3"></v-divider>
 
-            <v-btn @click="registerWithGoogle" color="primary" class="mb-3" block :loading="cargando">
+            <!-- <v-btn @click="registerWithGoogle" color="primary" class="mb-3" block :loading="cargando">
               <v-icon left size="small" class="mr-2">mdi-google</v-icon>
               Registrarse con Google
-            </v-btn>
+            </v-btn> -->
 
             <v-divider class="my-3"></v-divider>
 
