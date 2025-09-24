@@ -53,6 +53,9 @@
             </v-list-item>
           </v-list>
         </v-menu>
+        <v-btn class="mx-2" prepend-icon="mdi-calendar-range" @click="isFechaEntregaOpen = true" size="small">
+          Fecha entrega
+        </v-btn>
         <v-btn size="small" class="mx-2" append-icon="mdi-keyboard" variant="tonal"
           @click="isShortcutsOpen = true">Atajos</v-btn>
         <v-select :items="almacenItems" v-if="ticketActual.miAlmacenId == null" label="Almacenes"
@@ -65,6 +68,9 @@
           </p>
           <p v-if="ticketActual.miAlmacenName" class="mx-2">
             Almacen: {{ ticketActual.miAlmacenName }}
+          </p>
+          <p v-if="ticketActual.fecha_entrega" class="mx-2">
+            Entrega: {{ moment(ticketActual.fecha_entrega).format("DD/MM/YYYY") }}
           </p>
           <p v-if="ticketActual.nombre" class="mx-2">
             Nombre Ticket: {{ ticketActual.nombre }}
@@ -108,10 +114,10 @@
             v-model="product_form.existencia" readonly hide-details />
         </v-col>
         <v-col cols="1" class="ml-4">
-            <v-btn :disabled="!(almacen.id && product_form.name)" @click="enviarArticulo"
-              prepend-icon="mdi-arrow-right-bold" variant="tonal" color="secondary">Agregar
-            </v-btn>
-          </v-col>
+          <v-btn :disabled="!(almacen.id && product_form.name)" @click="enviarArticulo"
+            prepend-icon="mdi-arrow-right-bold" variant="tonal" color="secondary">Agregar
+          </v-btn>
+        </v-col>
         <v-spacer />
         <v-col cols="1">
           <v-btn @click="abrirModalBuscaProductsNombre" prepend-icon="mdi-magnify" variant="outlined"
@@ -119,10 +125,10 @@
           </v-btn>
         </v-col>
         <v-col cols="1">
-            <v-btn :disabled="!(almacen.id && product_form.name)" @click="abrirExistencias" prepend-icon="mdi-eye"
-              variant="outlined" color="secondary">Ver
-            </v-btn>
-          </v-col>
+          <v-btn :disabled="!(almacen.id && product_form.name)" @click="abrirExistencias" prepend-icon="mdi-eye"
+            variant="outlined" color="secondary">Ver
+          </v-btn>
+        </v-col>
       </v-row>
       <!-- Cobrar -->
       <v-row dense>
@@ -486,7 +492,7 @@
           <template v-slot:item.es_kit="{ item }">
             <span>{{ item.es_kit ? "Sí" : "No" }}</span>
           </template>
-          
+
         </v-data-table>
       </v-card-text>
     </v-card>
@@ -884,6 +890,21 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+  <!-- Fecha entrega -->
+  <v-dialog v-model="isFechaEntregaOpen" max-width="500">
+    <v-card>
+      <v-card-title>Fecha de entrega</v-card-title>
+      <v-card-text>
+        <v-row justify="center" dense>
+          <v-date-picker v-model="fechaEntrega"  color="primary" header-color="primary" />
+        </v-row>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn @click="isFechaEntregaOpen = false">Cancel</v-btn>
+        <v-btn color="primary" variant="outlined" @click="updateFechaEntrega">Actualizar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
   <DynamicSnack :snackbar="snackbar" />
 </template>
 <style>
@@ -938,6 +959,7 @@ import { useUserStore } from "../s";
 import { storeToRefs } from "pinia";
 import User from "../apis/User";
 import { removeVuetifyTableTabIndexes } from "../utils";
+import moment from "moment-timezone";
 
 import { WebviewWindow } from "@tauri-apps/api/window";
 
@@ -1037,6 +1059,8 @@ const isOpenImagenes = ref(false);
 const imagenes = ref([]);
 const isInfoAgregarExistenciaOpen = ref(false);
 const isShortcutsOpen = ref(false);
+const isFechaEntregaOpen = ref(false);
+const fechaEntrega = ref(null);
 const openEdit = ref(false);
 const openExistencias = ref(false);
 const openCobrar = ref(false);
@@ -1359,6 +1383,12 @@ watch(tab, (newVal) => {
 watch(keycliente, () => {
   getAllClientes();
 });
+function formatDateTimeLocal(date) {
+  const d = new Date(date)
+  d.setSeconds(0, 0) // limpiar ms
+  return d.toISOString().slice(0, 19).replace('T', ' ')
+}
+
 function onEscape(e) {
   if (e.key === "Esc" || e.key === "Escape") {
     if (openExistencias.value === true) {
@@ -1557,6 +1587,7 @@ async function rellenaTicket(response) {
   ticketActual.nombre = response.nombre;
   ticketActual.consecutivo = response.consecutivo;
   ticketActual.clienteId = response.cliente_id;
+  ticketActual.fecha_entrega = response.fecha_entrega;
   if (ticketActual.miAlmacenId) {
     ticketActual.miAlmacenName = response.almacen.name;
     almacen.name = response.almacen.name;
@@ -2239,6 +2270,24 @@ function makeUpdate(e) {
 function debounce(func, wait = 1000) {
   clearTimeout(timeOut.value);
   timeOut.value = setTimeout(func, wait);
+}
+function updateFechaEntrega() {
+  if (cargando.value) return;
+  cargando.value = true;
+  const fechaFormateada = formatDateTimeLocal(fechaEntrega.value)
+  PuntoVenta.updateFechaEntrega(ticketActual.id, fechaFormateada)
+    .then(() => {
+      getSpecificVT(ticketActual.id);
+      isFechaEntregaOpen.value = false;
+      nextTick(() => codigoRef.value.select());
+    })
+    .catch((error) => {
+      handleOpException(error);
+      alert("Ha ocurrido un error");
+    })
+    .finally(() => {
+      cargando.value = false;
+    });
 }
 
 onMounted(() => {

@@ -67,12 +67,12 @@ export default {
   },
   register(productActualId, ticketActual, product_form) {
     return Api().post("/puntoventa/register", {
-        productActualId: productActualId,
-        ticketActual: ticketActual,
-        precio: product_form.pventa,
-        cantidad: product_form.cantidad,
-        ancho: product_form.ancho,
-        alto: product_form.alto,
+      productActualId: productActualId,
+      ticketActual: ticketActual,
+      precio: product_form.pventa,
+      cantidad: product_form.cantidad,
+      ancho: product_form.ancho,
+      alto: product_form.alto,
     });
   },
   destroyArticulo(articulo, ventaticket) {
@@ -85,12 +85,12 @@ export default {
   },
   update(articulo, ventaticket, articulo_form) {
     return Api().post("/puntoventa/update", {
-        articulo,
-        ventaticket,
-        precio: articulo_form.pventa,
-        cantidad: articulo_form.cantidad,
-        ancho: articulo_form.ancho,
-        alto: articulo_form.alto,
+      articulo,
+      ventaticket,
+      precio: articulo_form.pventa,
+      cantidad: articulo_form.cantidad,
+      ancho: articulo_form.ancho,
+      alto: articulo_form.alto,
     });
   },
   borrarTicket(ventaticket) {
@@ -138,5 +138,11 @@ export default {
   },
   descargarPdf(ticket) {
     return ApiBlob().get("/puntoventa/descargarPdf/" + ticket);
+  },
+  updateFechaEntrega(ticket, fechaEntrega) {
+    return Api().post(`/puntoventa/updateFechaEntrega`, {
+      fechaEntrega,
+      ticket
+    })
   },
 };
