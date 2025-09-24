@@ -260,6 +260,7 @@
             placeholder="Codigo + Enter"
             @keydown.right.prevent="goPrimerArticulo"
             @keydown.enter="searchProduct"
+            ref="codigoRef"
             v-model="codigo"
           />
         </v-col>

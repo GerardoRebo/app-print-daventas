@@ -21,6 +21,7 @@ console.log(corte);
             </p>
         </td>
         <td>{{ moment(corte.inicio_en).format('YYYY-MM-DD') }}</td>
+        <td>{{ corte.termino_en ? moment(corte.termino_en).format('YYYY-MM-DD') : 'Abierto'}}</td>
         <td class="font-bold">{{
             corte.ventas_efectivo
         }}</td>

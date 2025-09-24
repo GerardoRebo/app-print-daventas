@@ -132,12 +132,12 @@ const links = computed(() => {
 </script>
 <template>
   <v-app>
-    
+
     <v-app-bar color="secondary">
       <template v-slot:prepend>
         <v-container>
-          <!-- <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer" color="white"
-            v-if="isLoggedIn"></v-app-bar-nav-icon> -->
+          <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer" color="white"
+            v-if="isLoggedIn"></v-app-bar-nav-icon>
 
         </v-container>
       </template>
@@ -217,8 +217,8 @@ const links = computed(() => {
       </template>
       <v-spacer></v-spacer>
     </v-app-bar>
-<v-navigation-drawer   :location="$vuetify.display.mobile ? 'bottom' : undefined" temporary permanent>
-      <v-list nav color="primary" >
+    <v-navigation-drawer :location="$vuetify.display.mobile ? 'bottom' : undefined" temporary v-model="drawer">
+      <v-list nav color="primary">
         <!-- Loop through the main links array -->
         <div v-for="(link, index) in links" :key="index" :prepend-icon="link.icon" :value="link.title">
           <!-- Handle nested children with v-list-group -->

@@ -1,5 +1,6 @@
 <script setup>
 import { toRef, toRefs, computed } from 'vue';
+import moment from 'moment';
 const props = defineProps(['turno_actual']);
 defineEmits(['openVMovCaja'])
 const { turno_actual } = toRefs(props);
@@ -18,6 +19,14 @@ const efectivoCaja = computed(
 <template>
   <v-card>
     <v-card-title>Corte #{{ turno_actual?.id }} </v-card-title>
+    <v-card-subtitle>
+      <v-row dense justify="space-between">
+        <p class="font-weight-medium text-caption">
+          Inicio: {{ moment(turno_actual?.inicio_en).format('DD/MM/YYYY') }} <br />
+          <!-- Fin: {{ turno_actual?.termino_en ? turno_actual?.termino_en: 'Abierto' }} -->
+        </p>
+      </v-row>
+    </v-card-subtitle>
     <v-card-text>
       <v-row>
         <v-col cols="12" sm="6">

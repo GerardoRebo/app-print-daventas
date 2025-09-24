@@ -75,7 +75,8 @@ const onPagination = (page) => {
 const tHeaders = ref([
   'Id',
   'Usuario',
-  'Fecha',
+  'Fecha Inicio',
+  'Fecha Cierre',
   'Venta Contado',
   'Venta Crédito',
   'Abono Crédito',
