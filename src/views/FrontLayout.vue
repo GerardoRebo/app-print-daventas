@@ -200,6 +200,8 @@ onMounted(() => {
 
 if (permanentDrawer.value) {
   drawer.value = true
+}else{
+  rail.value = false
 }
 
 </script>
