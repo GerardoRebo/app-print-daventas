@@ -179,13 +179,13 @@
       <!-- Codigo -->
       <v-row dense>
         <v-col cols="8">
-          <v-text-field label="Codigo" id="codigo" autocomplete="off" placeholder="Codigo + Enter"
+          <v-text-field label="Codigo" id="codigo" autocomplete="off" placeholder="Codigo + ->"
             @keydown.right.prevent="goPrimerArticulo" @keydown.enter="searchProduct" v-model="codigo" density="compact"
             variant="outlined" hide-details class="mb-3" ref="codigoRef" />
         </v-col>
         <v-col cols="4">
           <div class="d-flex around align-center">
-            <v-btn :disabled="!(almacen.id && product_form.name)" @click="searchProduct" density="compact" icon="mdi-arrow-top-right-thick" class="mr-1"
+            <v-btn :disabled="!(almacen.id && codigo)" @click="searchProduct" density="compact" icon="mdi-arrow-top-right-thick" class="mr-1"
               color="primary">
             </v-btn>
             <v-btn @click="abrirModalBuscaProductsNombre" density="compact" icon="mdi-magnify" class="mr-1">

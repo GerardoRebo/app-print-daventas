@@ -74,10 +74,10 @@ export default {
     return Api().get(`/products/showextend/${productId}/${almacenActualId}`);
   },
   searchCode(codigo, almacenActualId) {
-    return Api().get(`/products/searchcode/${codigo}/${almacenActualId}`, {
+    return Api().get(`/products/searchcode`, {
       params: {
-        codigo: codigo,
-        almacenActualId: almacenActualId,
+        codigo,
+        almacenActualId,
       },
     });
   },
