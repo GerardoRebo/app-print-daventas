@@ -84,16 +84,22 @@ onMounted(() => {
           </div>
         </h1>
         <v-row dense justify-start align="center" class="mb-8">
-          <v-select label="Estado" :items="statusOptions" density="compact" hide-details class="mr-4" multiple
-            v-model="queryItems.statuses" max-width="800">
-          </v-select>
-          <v-autocomplete label="Cliente" density="compact" variant="outlined" hide-details class="mr-4"
-            v-model="queryItems.cliente_id" :items="clientes" clearable max-width="800">
-          </v-autocomplete>
-          <div class="mr-4">
-            Total ordenes: {{ orders.total }}
-          </div>
-          <div>Página {{ queryItems.page }} de {{ orders.last_page }}</div>
+          <v-col cols="12" sm="4">
+            <v-select label="Estado" :items="statusOptions" density="compact" hide-details class="mr-4" multiple
+              v-model="queryItems.statuses" max-width="800">
+            </v-select>
+          </v-col>
+          <v-col cols="12" sm="4">
+            <v-autocomplete label="Cliente" density="compact" variant="outlined" hide-details class="mr-4"
+              v-model="queryItems.cliente_id" :items="clientes" clearable max-width="800">
+            </v-autocomplete>
+          </v-col>
+          <v-col cols="12" sm="4">
+            <div class="mr-4">
+              Total ordenes: {{ orders.total }},  Página {{ queryItems.page }} de {{ orders.last_page }}
+            </div>
+            <div></div>
+          </v-col>
         </v-row>
       </template>
       <template v-slot:default="{ items }">

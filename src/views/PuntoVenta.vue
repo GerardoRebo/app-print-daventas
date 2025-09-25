@@ -185,10 +185,10 @@
         </v-col>
         <v-col cols="4">
           <div class="d-flex around align-center">
-            <v-btn @click="searchProduct" density="compact" icon="mdi-magnify" class="mr-1" color="primary">
+            <v-btn :disabled="!(almacen.id && product_form.name)" @click="searchProduct" density="compact" icon="mdi-arrow-top-right-thick" class="mr-1"
+              color="primary">
             </v-btn>
-            <v-btn @click="abrirModalBuscaProductsNombre" density="compact" icon class="mr-1">
-              <v-icon icon="mdi-binoculars"></v-icon>
+            <v-btn @click="abrirModalBuscaProductsNombre" density="compact" icon="mdi-magnify" class="mr-1">
             </v-btn>
             <v-btn @click="emptyValues" density="compact" icon="mdi-broom">
             </v-btn>
@@ -230,12 +230,13 @@
       </v-row>
       <v-row dense v-if="product_form.name">
         <v-col>
-          <v-btn @click="abrirExistencias" density="compact" prepend-icon="mdi-eye" variant="tonal">
+          <v-btn @click="abrirExistencias" density="compact" prepend-icon="mdi-eye" variant="text">
             Existencias
           </v-btn>
         </v-col>
         <v-col>
-          <v-btn @click="enviarArticulo" density="compact" prepend-icon="mdi-pencil-plus" class="mr-1" color="accent">
+          <v-btn @click="enviarArticulo" density="compact" prepend-icon="mdi-arrow-right-bold" class="mr-1"
+            color="primary">
             Agregar
           </v-btn>
         </v-col>
@@ -247,7 +248,7 @@
     <v-card v-if="mdAndDown">
       <v-container>
         <v-row class="mb-3">
-          <v-btn @click="abrirCobrarModal" color="accent" block variant="elevated" prepend-icon="mdi-cash-register"
+          <v-btn @click="abrirCobrarModal" color="accent" block variant="elevated" prepend-icon="mdi-currency-usd"
             class="mb-3">Cobrar
           </v-btn>
           <v-btn @click="borrarTicket" variant="tonal" prepend-icon="mdi-trash-can" block class="mb-3">
@@ -295,6 +296,51 @@
                 <v-list-item-title @click="copyLinkToClipBoard">
                   Mi Tienda</v-list-item-title>
               </v-list-item>
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon>mdi-receipt-text</v-icon>
+                </template>
+                <v-list-item-title>
+                  <v-menu transition="scale-transition">
+                    <template v-slot:activator="{ props }">
+                      <v-btn v-bind="props" size="small" variant="tonal" append-icon="mdi-chevron-down">
+                        Último ticket
+                      </v-btn>
+                    </template>
+
+                    <v-list>
+                      <v-list-item @click="openLastTicket">
+                        <template v-slot:prepend>
+                          <v-icon icon="mdi-eye"></v-icon>
+                        </template>
+                        <v-list-item-title>Ver</v-list-item-title>
+                      </v-list-item>
+
+                      <v-list-item @click="printLastTicket">
+                        <template v-slot:prepend>
+                          <v-icon icon="mdi-printer-pos"></v-icon>
+                        </template>
+                        <v-list-item-title>Imprimir</v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-calendar-range"></v-icon>
+                </template>
+                <v-list-item-title @click="isFechaEntregaOpen = true">
+                  Fecha entrega</v-list-item-title>
+              </v-list-item>
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-keyboard"></v-icon>
+                </template>
+                <v-list-item-title @click="isShortcutsOpen = true">
+                  Atajos</v-list-item-title>
+              </v-list-item>
+
             </v-list>
           </v-menu>
         </v-row>
@@ -313,6 +359,9 @@
           </v-col>
           <v-col cols="6" v-if="ticketActual.miAlmacenName">
             <p>Almacen: {{ ticketActual.miAlmacenName }}</p>
+          </v-col>
+          <v-col cols="6" v-if="ticketActual.fecha_entrega">
+            Entrega: {{ moment(ticketActual.fecha_entrega).format("DD/MM/YYYY") }}
           </v-col>
           <v-col cols="6" v-if="ticketActual.nombre">
             <p>Nombre Ticket: {{ ticketActual.nombre }}</p>
@@ -896,7 +945,7 @@
       <v-card-title>Fecha de entrega</v-card-title>
       <v-card-text>
         <v-row justify="center" dense>
-          <v-date-picker v-model="fechaEntrega"  color="primary" header-color="primary" />
+          <v-date-picker v-model="fechaEntrega" color="primary" header-color="primary" />
         </v-row>
       </v-card-text>
       <v-card-actions>

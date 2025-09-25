@@ -180,6 +180,10 @@ const isChildRouteActive = computed(() => {
   )
 })
 watch(route, () => {
+  if (mobile.value) {
+    rail.value = false
+    return;
+  }
   if (isChildRouteActive.value) {
     rail.value = false
   } else {
@@ -200,9 +204,12 @@ onMounted(() => {
 
 if (permanentDrawer.value) {
   drawer.value = true
-}else{
+}
+if (mobile.value) {
   rail.value = false
 }
+
+
 
 </script>
 <template>
@@ -250,8 +257,8 @@ if (permanentDrawer.value) {
               </template>
               <span>{{ link.title }}</span>
             </v-tooltip>
-            <v-list-item :prepend-icon="link.icon" :title="link.title" :to="{ name: link.href }"
-              @click="rail = false" v-else></v-list-item >
+            <v-list-item :prepend-icon="link.icon" :title="link.title" :to="{ name: link.href }" @click="rail = false"
+              v-else></v-list-item>
           </div>
         </div>
       </v-list>
@@ -284,7 +291,7 @@ if (permanentDrawer.value) {
           <v-menu min-width="200px" rounded v-if="isLoggedIn">
             <template v-slot:activator="{ props }">
               <v-btn icon color="white" @click="getNotifications" v-bind="props">
-                <v-badge  color="accent" :content="countNotf">
+                <v-badge color="accent" :content="countNotf">
                   <v-icon> mdi-bell</v-icon>
                 </v-badge>
               </v-btn>

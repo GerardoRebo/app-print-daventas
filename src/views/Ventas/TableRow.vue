@@ -69,7 +69,7 @@ const { xs, mdAndUp, mdAndDown, smAndDown } = useDisplay()
         <td v-if="smAndDown">
             <v-menu transition="scale-transition" class="" v-if="smAndDown">
                 <template v-slot:activator="{ props }">
-                    <v-btn color="primary" size="small" v-bind="props" append-icon="mdi-menu-down" :loading="cargando">
+                    <v-btn color="primary" size="small" v-bind="props" append-icon="mdi-menu-down" >
                         Opciones
                     </v-btn>
                 </template>

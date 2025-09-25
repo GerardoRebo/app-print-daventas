@@ -198,6 +198,7 @@ getFiles();
             rel="noopener">
             <p><span class="font-weight-bold">Ticket:</span> {{ `${order.ventaticket?.id}` }} </p>
           </RouterLink>
+          <p v-if="order.ventaticket?.fecha_entrega"><span class="font-weight-bold">Fecha Entrega:</span> {{moment(order.ventaticket?.fecha_entrega).format('DD/MM/YYYY') }} </p>
           <p><span class="font-weight-bold">Cliente:</span> {{ `${order.ventaticket?.cliente?.name ?? ''}` }} </p>
           <p><span class="font-weight-bold">Generó:</span> {{ `${order.ventaticket?.almacen?.name}` }} </p>
           <p><span class="font-weight-bold">Vendio:</span> {{ `${order.ventaticket.user?.name}` }} </p>

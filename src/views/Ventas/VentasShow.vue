@@ -232,8 +232,8 @@
           </template>
           <div>
             <p>Timbres Disponibles: {{ saldo ?? 0 }}</p>
-            <p>Almacén: {{ ticketActual.miAlmacenName }}</p>
-            <p>Cliente: {{ ticketActual.clienteName }}</p>
+            <p>Almacén: {{ ticketActual?.almacen?.name }}</p>
+            <p>Cliente: {{ ticketActual?.cliente?.name }}</p>
             <p>Subtotal: ${{ ticketActual.subtotal }}</p>
             <p>Descuento: ${{ ticketActual.descuento }}</p>
             <p>Impuesto Retenido: ${{ ticketActual.impuesto_retenido }}</p>
