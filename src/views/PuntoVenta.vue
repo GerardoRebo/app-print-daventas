@@ -2080,6 +2080,9 @@ function getSpecificVT(ventaticket) {
     });
 }
 function guardarVenta(imprimir) {
+  if(articulos.value.length === 0){
+    return snackWarning("No hay articulos en la venta")
+  }
   if (cargando.value) return;
   cargando.value = true;
   if (amountExceedsTotal.value) {
