@@ -40,16 +40,44 @@
         <span class="text-error mx-2">${{ item.saldo }}</span>
       </template>
       <template v-slot:item.acciones="{ item }">
-        <v-btn @click="abrirAbono(item)" class="mx-2" size="small">Realizar abono</v-btn>
-        <v-btn
-          size="small"
-          @click="imprimirVenta(item)"
-          class="mx-2"
-          prepend-icon="mdi-printer-pos"
-          >Reimprimir</v-btn
-        >
-        <v-btn size="small" @keydown.enter="verAbonos(item)" @click="verAbonos(item)"
-          prepend-icon="mdi-eye">Abonos</v-btn>
+        <div v-if="$vuetify.display.mobile">
+
+          <v-menu transition="scale-transition">
+            <template v-slot:activator="{ props }">
+              <v-btn variant="tonal" v-bind="props" append-icon="mdi-menu-down" size="small">
+                Acciones
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item @click="abrirAbono(item)">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-plus"></v-icon>
+                </template>
+                <v-list-item-title>Realizar abono</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="imprimirVenta(item)">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-printer-pos"></v-icon>
+                </template>
+                <v-list-item-title>Reimprimir</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="verAbonos(item)">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-eye"></v-icon>
+                </template>
+                <v-list-item-title>Ver abonos</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </div>
+        <div v-else>
+
+          <v-btn @click="abrirAbono(item)" class="mx-2" size="small">Realizar abono</v-btn>
+          <v-btn size="small" @click="imprimirVenta(item)" class="mx-2"
+            prepend-icon="mdi-printer-pos">Reimprimir</v-btn>
+          <v-btn size="small" @keydown.enter="verAbonos(item)" @click="verAbonos(item)"
+            prepend-icon="mdi-eye">Abonos</v-btn>
+        </div>
       </template>
     </v-data-table>
   </v-container>
@@ -78,10 +106,20 @@
         <v-data-table-server :headers="tHeaders" :items="realizados" :items-length="totalItems" :loading="cargando"
           :search="search" item-value="name" @update:options="getAllDeudas">
           <template v-slot:item.consecutivo="{ item }">
-            <span>{{ item.ventaticket.consecutivo }}</span>
+            <v-tooltip text="Ver" location="top">
+              <template v-slot:activator="{ props }">
+                <router-link :to="{
+                  name: 'VentasShow',
+                  params: { ventaId: item.ventaticket.id },
+                }">
+                  {{ item.ventaticket.consecutivo }}
+                </router-link>
+              </template>
+            </v-tooltip>
+            <!-- <span>{{ item.ventaticket.consecutivo }}</span> -->
           </template>
           <template v-slot:item.deuda="{ item }">
-            <p class="cursor-pointer" @keydown.enter="verAbonos(item.id)" @click="verAbonos(item.id)">
+            <p class="cursor-pointer" @keydown.enter="verAbonos(item)" @click="verAbonos(item)">
               <span class="text-error mx-2">
                 ${{ item.deuda }}
               </span>
@@ -101,7 +139,7 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
-  <v-dialog v-model="openAbonos">
+  <v-dialog v-model="openAbonos" max-width="800">
     <v-card>
       <v-card-title>Historial de abonos realizado al ticket de venta #{{ ventaticketFolio }}</v-card-title>
       <v-card-text>
@@ -138,7 +176,8 @@
                 </v-list-item>
               </v-list>
             </v-menu>
-            <v-btn @click="facturarAbono(item)" size="small" v-if="!item.facturado_en && selectedDeuda?.ventaticket?.facturado_en">Facturar
+            <v-btn @click="facturarAbono(item)" size="small"
+              v-if="!item.facturado_en && selectedDeuda?.ventaticket?.facturado_en">Facturar
               abono</v-btn>
           </template>
         </v-data-table>

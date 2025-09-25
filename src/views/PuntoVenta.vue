@@ -7,7 +7,7 @@
   <v-toolbar color="neutral200" density="compact">
     <!-- <v-icon color="primary" class="ml-2">mdi-network-pos</v-icon> -->
     <v-toolbar-title class="text-primary_d600">Punto de Venta</v-toolbar-title>
-    <v-btn class="hidden-xs-only" v-if="mdAndDown" variant="outlined" size="small" append-icon="mdi-menu-down"
+    <v-btn class="hidden-xs-only" color="primary"  v-if="mdAndDown" variant="elevated" size="small" append-icon="mdi-menu-down"
       @click="drawer = true">
       <!-- <v-icon >mdi-dots-vertical</v-icon> -->
       Ticket info
@@ -248,7 +248,7 @@
     <v-card v-if="mdAndDown">
       <v-container>
         <v-row class="mb-3">
-          <v-btn @click="abrirCobrarModal" color="accent" block variant="elevated" prepend-icon="mdi-currency-usd"
+          <v-btn @click="abrirCobrarModal" color="primary" block variant="elevated" prepend-icon="mdi-currency-usd"
             class="mb-3">Cobrar
           </v-btn>
           <v-btn @click="borrarTicket" variant="tonal" prepend-icon="mdi-trash-can" block class="mb-3">
@@ -774,11 +774,11 @@
             </template>
           </v-tooltip>
         </template>
-        <v-btn @click="openCobrar = false" size="small">Cancelar</v-btn>
+        <v-btn @click="openCobrar = false" variant="text">Cancelar</v-btn>
 
         <v-menu transition="scale-transition" class="ma-2 pa-2" v-if="smAndDown">
           <template v-slot:activator="{ props }">
-            <v-btn color="accent" v-bind="props" append-icon="mdi-menu-down" :loading="cargando">
+            <v-btn color="primary" v-bind="props" append-icon="mdi-menu-down" :loading="cargando" variant="elevated">
               Vender
             </v-btn>
           </template>

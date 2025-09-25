@@ -3,10 +3,10 @@
     <v-card-title>Corte de Caja</v-card-title>
     <v-card-text>
       <v-btn v-if="!turno_actual?.id" @click="abrirInicial" :loading="cargando" class="mx-2" variant="outlined"
-        color="accent">Habilitar
+        color="primary">Habilitar
         Caja</v-btn>
       <v-btn v-if="turno_actual?.id" @click="abrirCorte" :loading="cargando" class="mx-2" variant="elevated"
-        color="accent">Realizar
+        color="primary">Realizar
         corte</v-btn>
       <v-btn v-if="turno_actual?.id" @click="abrirCaja" :loading="cargando" class="mx-2">Movimiento</v-btn>
     </v-card-text>

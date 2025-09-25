@@ -2,10 +2,11 @@ import Api from "./Api";
 
 export default {
 
-    getCreditos(todos) {
+    getCreditos(todos, keyword) {
         return Api().get(`/creditos/getcreditos`, {
             params: {
-                todos
+                todos, 
+                keyword
             }
         })
     },

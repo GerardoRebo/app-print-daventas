@@ -7,8 +7,10 @@
   </v-card>
   <!-- Tabla -->
   <v-container fluid>
+    <v-text-field v-model="keyword" label="Buscar por nombre" prepend-inner-icon="mdi-magnify" variant="solo-filled" flat
+      hide-details single-line ref="keywordRef" color="accent" clearable></v-text-field>
     <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
-    <v-data-table :headers="tHeaders" :items="creditos" dense>
+    <v-data-table :headers="tHeaders" :items="creditos" dense >
       <template v-slot:item.precio_final="{ item }">
         <span>${{ item.precio_final }}</span>
       </template>
@@ -32,7 +34,8 @@ const s = useUserStore();
 const { handleOpException } = s;
 
 const creditos = ref([]);
-
+const keyword = ref("");
+const timeOut = ref("");
 const todos = ref(null);
 const cargando = ref(false);
 const tHeaders = ref([
@@ -47,9 +50,22 @@ const tHeaders = ref([
 watch(todos, () => {
   getCreditos();
 });
+watch(keyword, () => {
+  const task = () => {
+      getCreditos();
+    };
+    debounce(task, 550);
+});
+  
+function debounce(func, wait = 1000) {
+  cargando.value = true;
+  clearTimeout(timeOut.value);
+  timeOut.value = setTimeout(func, wait);
+}
 function getCreditos() {
-  Creditos.getCreditos(todos.value)
+  Creditos.getCreditos(todos.value, keyword.value)
     .then((response) => {
+      cargando.value = false;
       creditos.value = response.data;
     })
     .catch((error) => {
