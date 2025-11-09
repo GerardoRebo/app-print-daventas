@@ -17,19 +17,9 @@ export default {
             }
         })
     },
-    getDeudas(credito) {
-        return Api().get(`/creditos/getdeudas`, {
-            params: {
-                credito
-            }
-        })
-    },
-    getAllDeudas(page, credito) {
-        return Api().get(`/creditos/getalldeudas`, {
-            params: {
-                page,
-                credito
-            }
+    getDeudas(credito, params) {
+        return Api().get(`/creditos/${credito}/getdeudas`, {
+            params
         })
     },
     getAbonos(deuda) {

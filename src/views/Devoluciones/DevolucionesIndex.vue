@@ -40,7 +40,7 @@ import { useRoute, useRouter } from "vue-router";
 import moment from "moment-timezone"
 import Devoluciones from "../../apis/Devoluciones";
 import TableRow from "@js/views/Devoluciones/TableRow.vue";
-import { useUserStore } from "../../s";
+import { useUserStore } from "../../s/index";
 import useMisFechas from "../../composables/useMisFechas";
 const { dfecha, hfecha, formattedDFecha, formattedHFecha } = useMisFechas();
 const s = useUserStore();

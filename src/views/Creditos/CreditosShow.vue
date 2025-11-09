@@ -1,25 +1,25 @@
 <template>
   <v-card class="mb-2">
-    <v-card-title>Cliente: {{ clienteInfo?.name }}</v-card-title>
+    <v-card-title>Historial creditos, Cliente: {{ clienteInfo?.name }}</v-card-title>
     <v-card-text>
       <router-link :to="{ name: 'CreditosIndex' }">
         <span class="text-decoration-underline text-caption">
+          <v-icon icon="mdi-arrow-left" class="mr-2"></v-icon>
           Regresar a la lista de clientes con credito
         </span>
       </router-link>
       <v-row dense class="mt-4">
-        <v-btn @click="abrirRealizados" class="mx-2">Historial</v-btn>
         <p class="font-semibold content-center mt-4 ml-4">
-          Saldo global del cliente: $<span>{{ saldoGlobal }}</span>
+          <strong> Saldo global del cliente: </strong><span>${{ saldoGlobal }}</span>
         </p>
+        <v-checkbox label="Mostrar liquidados" v-model="show_settled_loan" class="ml-8"
+          @change="search = String(Date.now())" />
       </v-row>
     </v-card-text>
   </v-card>
   <v-container fluid>
-    <p class="content-center text-sm mt-4 ml-4">
-      Lista de ventas con saldo pendiente:
-    </p>
-    <v-data-table :headers="headers" :items="deudas" dense>
+    <v-data-table-server :headers="headers" :items="deudas" :items-per-page="10" :items-length="totalItems" :loading="loading"
+      :search="search" item-value="name" @update:options="getDeudas">
       <template v-slot:item.consecutivo="{ item }">
         <v-tooltip text="Ver" location="top">
           <template v-slot:activator="{ props }">
@@ -41,7 +41,6 @@
       </template>
       <template v-slot:item.acciones="{ item }">
         <div v-if="$vuetify.display.mobile">
-
           <v-menu transition="scale-transition">
             <template v-slot:activator="{ props }">
               <v-btn variant="tonal" v-bind="props" append-icon="mdi-menu-down" size="small">
@@ -49,7 +48,7 @@
               </v-btn>
             </template>
             <v-list>
-              <v-list-item @click="abrirAbono(item)">
+              <v-list-item @click="abrirAbono(item)" :disabled="+item.saldo <= 0">
                 <template v-slot:prepend>
                   <v-icon icon="mdi-plus"></v-icon>
                 </template>
@@ -71,16 +70,16 @@
           </v-menu>
         </div>
         <div v-else>
-
-          <v-btn @click="abrirAbono(item)" class="mx-2" size="small">Realizar abono</v-btn>
+          <v-btn @click="abrirAbono(item)" class="mx-2" size="small" :disabled="item.saldo <= 0">Realizar abono</v-btn>
           <v-btn size="small" @click="imprimirVenta(item)" class="mx-2"
             prepend-icon="mdi-printer-pos">Reimprimir</v-btn>
           <v-btn size="small" @keydown.enter="verAbonos(item)" @click="verAbonos(item)"
             prepend-icon="mdi-eye">Abonos</v-btn>
         </div>
       </template>
-    </v-data-table>
+    </v-data-table-server>
   </v-container>
+  <!-- Dialog para realizar abono a la deuda seleccionada -->
   <v-dialog v-model="openAbono" max-width="600">
     <v-card>
       <v-card-title>Realizar Abono a Ticket, saldo: ${{ selectedDeuda?.saldo }}</v-card-title>
@@ -88,57 +87,18 @@
         <v-text-field label="Cantidad" autocomplete="off" placeholder="" v-model="postData.cantidad"
           ref="cantidadRef" />
         <v-checkbox label="Facturar" v-model="postData.facturar"></v-checkbox>
+        <v-checkbox v-if="+selectedDeuda?.saldo == +postData.cantidad" label="Imprimir al final" v-model="printWhenFinalize"></v-checkbox>
         <v-select :items="pagoFormas" label="Forma de pago" v-model="postData.forma_pago"
           v-if="postData.facturar"></v-select>
         <v-textarea label="Comentarios (opcional)" v-model="postData.comments" variant="outlined"></v-textarea>
       </v-card-text>
       <v-card-actions>
-        <v-btn @click="openAbono = false" :loading="cargando">Cancelar</v-btn>
-        <v-btn @click="realizarAbono" :loading="cargando" color="accent" variant="outlined">Confirmar</v-btn>
+        <v-btn @click="openAbono = false" :loading="loading">Cancelar</v-btn>
+        <v-btn @click="realizarAbono" :loading="loading" color="primary" variant="outlined">Confirmar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
-  <!-- Historial -->
-  <v-dialog v-model="openRealizados" max-width="1200">
-    <v-card>
-      <v-card-title>Historial completo del cliente</v-card-title>
-      <v-card-text>
-        <v-data-table-server :headers="tHeaders" :items="realizados" :items-length="totalItems" :loading="cargando"
-          :search="search" item-value="name" @update:options="getAllDeudas">
-          <template v-slot:item.consecutivo="{ item }">
-            <v-tooltip text="Ver" location="top">
-              <template v-slot:activator="{ props }">
-                <router-link :to="{
-                  name: 'VentasShow',
-                  params: { ventaId: item.ventaticket.id },
-                }">
-                  {{ item.ventaticket.consecutivo }}
-                </router-link>
-              </template>
-            </v-tooltip>
-            <!-- <span>{{ item.ventaticket.consecutivo }}</span> -->
-          </template>
-          <template v-slot:item.deuda="{ item }">
-            <p class="cursor-pointer" @keydown.enter="verAbonos(item)" @click="verAbonos(item)">
-              <span class="text-error mx-2">
-                ${{ item.deuda }}
-              </span>
-              <v-icon size="small">mdi-eye</v-icon>
-            </p>
-          </template>
-          <template v-slot:item.saldo="{ item }">
-            <p :class="item.saldo == 0 ? 'text-success' : 'text-error'">${{ item.saldo }}</p>
-          </template>
-          <template v-slot:item.liquidado="{ item }">
-            <p>{{ item.liquidado ? 'Si' : 'No' }}</p>
-          </template>
-        </v-data-table-server>
-      </v-card-text>
-      <v-card-actions>
-        <v-btn @click="openRealizados = false">Cerrar</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <!-- Historial de abonos realizado al ticket de venta -->
   <v-dialog v-model="openAbonos" max-width="800">
     <v-card>
       <v-card-title>Historial de abonos realizado al ticket de venta #{{ ventaticketFolio }}</v-card-title>
@@ -194,27 +154,26 @@ import Creditos from "@js/apis/Creditos";
 
 import { reactive, ref } from "@vue/reactivity";
 import { onMounted, nextTick, computed } from "@vue/runtime-core";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { watch } from "vue";
 import { useUserStore } from "@js/s";
 const s = useUserStore();
 const { handleOpException } = s;
 
 const route = useRoute();
+const router = useRouter();
 
 watch(() => route.params, (to) => {
   if (!to.id) return;
   creditoId.value = route.params.creditoId;
-  getDeudas(route.params.creditoId);
+  search.value = String(Date.now());
   getClienteInfo()
 })
 const deudas = ref([]);
 const abonos = ref([]);
-const realizados = ref([]);
 const creditoId = ref(null);
 const ventaticketFolio = ref(null);
-const cargando = ref(false);
-const cant = ref(null);
+const loading = ref(false);
 const cantidadRef = ref(null);
 const openAbono = ref(false);
 const openAbonos = ref(false);
@@ -226,8 +185,11 @@ const postData = reactive({
   facturar: false,
   forma_pago: null,
 });
+const show_settled_loan = ref(false);
 const search = ref('')
 const totalItems = ref(0);
+const page = ref(1);
+const printWhenFinalize = ref(false);
 const clienteInfo = ref(null);
 const saldoGlobal = computed(() => {
   const suma = deudas.value.reduce(
@@ -241,13 +203,6 @@ const headers = ref([
   { title: 'Monto del ticket', key: 'deuda', align: 'start', sortable: false },
   { title: 'Saldo pendiente', key: 'pendiente', align: 'start', sortable: false },
   { title: 'Acciones', key: 'acciones', align: 'start', sortable: false },
-]);
-const tHeaders = ref([
-  { title: 'Id', key: 'id', align: 'start', sortable: false },
-  { title: 'Ticket venta folio', key: 'consecutivo', align: 'start', sortable: false },
-  { title: 'Deuda original', key: 'deuda', align: 'start', sortable: false },
-  { title: 'Pendiente', key: 'saldo', align: 'start', sortable: false },
-  { title: 'Liquidado', key: 'liquidado', align: 'start', sortable: false },
 ]);
 const abonosHeaders = ref([
   { title: 'Id', key: 'id', align: 'start', sortable: false },
@@ -281,12 +236,33 @@ const pagoFormas = [
   { "value": "31", "title": "31-Intermediario pagos" },
   { "value": "99", "title": "99-Por definir" }
 ];
-function getDeudas(credito) {
-  Creditos.getDeudas(credito)
+watch(() => openAbono, (newVal) => {
+  if (newVal) {
+    printWhenFinalize.value = false;
+  }
+})
+watch(() => postData.cantidad, (newVal) => {
+  if (+newVal == +selectedDeuda.value?.saldo){
+    printWhenFinalize.value = true;
+  } else {
+    printWhenFinalize.value = false;
+  }
+})
+function getDeudas({ page, itemsPerPage, sortBy }) {
+  loading.value = true;
+  const params = {
+    page: page,
+    show_settled_loan: show_settled_loan.value ? 1 : 0,
+  }
+  router.replace({ query: params });
+  Creditos.getDeudas(creditoId.value, params)
     .then((response) => {
-      deudas.value = response.data;
+      loading.value = false;
+      deudas.value = response.data.data;
+      totalItems.value = response.data.total;
     })
     .catch((error) => {
+      loading.value = false;
       alert("Ha ocurrido un error")
       handleOpException(error);
     });
@@ -327,27 +303,18 @@ function abrirAbono(deuda) {
 function abrirRealizados() {
   openRealizados.value = true;
 }
-function getAllDeudas({ page }) {
-
-  Creditos.getAllDeudas(page, creditoId.value)
-    .then((response) => {
-      realizados.value = response.data.data;
-      totalItems.value = response.data.total;
-    })
-    .catch((error) => {
-      alert("Ha ocurrido un error")
-      handleOpException(error);
-    });
-}
 function realizarAbono() {
   if (+postData.cantidad > +selectedDeuda.value?.saldo) {
     alert("La cantidad es mayor a la deuda");
     return;
   }
-  if (cargando.value) return;
-  cargando.value = true;
+  if (loading.value) return;
+  loading.value = true;
   Creditos.realizarAbono(selectedDeuda.value?.id, postData)
     .then(() => {
+      if (printWhenFinalize.value) {
+        imprimirVenta(selectedDeuda.value);
+      }
       openAbono.value = false;
       selectedDeuda.value = null;
     })
@@ -355,13 +322,13 @@ function realizarAbono() {
       alert("Ha ocurrido un error")
       handleOpException(error);
     }).finally(() => {
-      getDeudas(creditoId.value);
-      cargando.value = false;
+      search.value = String(Date.now());
+      loading.value = false;
     });
 }
 function facturarAbono(abono) {
-  if (cargando.value) return;
-  cargando.value = true;
+  if (loading.value) return;
+  loading.value = true;
   Creditos.facturar(abono)
     .then(() => {
       openAbono.value = false;
@@ -371,15 +338,15 @@ function facturarAbono(abono) {
       alert("Ha ocurrido un error")
       handleOpException(error);
     }).finally(() => {
-      getDeudas(creditoId.value);
-      cargando.value = false;
+      search.value = String(Date.now());
+      loading.value = false;
     });
 }
 function onWatchPdf(abono) {
   console.log(abono.id, 'abono');
 
-  if (cargando.value) return;
-  cargando.value = true;
+  if (loading.value) return;
+  loading.value = true;
   Creditos.downloadPdf(abono.id)
     .then((response) => {
       const file = new Blob([response.data], { type: response.headers['content-type'] });
@@ -390,13 +357,13 @@ function onWatchPdf(abono) {
       alert("Ha ocurrido un error")
       handleOpException(error);
     }).finally(() => {
-      cargando.value = false;
+      loading.value = false;
     });
 
 }
 function onDownloadPdf(abono) {
-  if (cargando.value) return;
-  cargando.value = true;
+  if (loading.value) return;
+  loading.value = true;
   Creditos.downloadPdf(abono.id)
     .then((response) => {
       const blob = new Blob([response.data], { type: "application/pdf" });
@@ -411,12 +378,12 @@ function onDownloadPdf(abono) {
       alert("Ha ocurrido un error");
     })
     .finally(() => {
-      cargando.value = false;
+      loading.value = false;
     });
 }
 function onDownloadXml(abono) {
-  if (cargando.value) return;
-  cargando.value = true;
+  if (loading.value) return;
+  loading.value = true;
   Creditos.downloadXml(abono.id)
     .then((response) => {
       const blob = new Blob([response.data], { type: "application/xml" });
@@ -431,13 +398,15 @@ function onDownloadXml(abono) {
       alert("Ha ocurrido un error");
     })
     .finally(() => {
-      cargando.value = false;
+      loading.value = false;
     });
 }
 
 onMounted(() => {
   creditoId.value = route.params.creditoId;
-  getDeudas(route.params.creditoId);
+  show_settled_loan.value = route.query.show_settled_loan == 1;
+  // getDeudas();
+  search.value = String(Date.now());
   getClienteInfo()
 });
 </script>
