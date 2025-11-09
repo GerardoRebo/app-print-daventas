@@ -18,8 +18,8 @@
     </v-card-text>
   </v-card>
   <v-container fluid>
-    <v-data-table-server :headers="headers" :items="deudas" :items-per-page="10" :items-length="totalItems" :loading="loading"
-      :search="search" item-value="name" @update:options="getDeudas">
+    <v-data-table-server :headers="headers" :items="deudas" :items-per-page="10" :items-length="totalItems"
+      :loading="loading" :search="search" item-value="name" @update:options="getDeudas">
       <template v-slot:item.consecutivo="{ item }">
         <v-tooltip text="Ver" location="top">
           <template v-slot:activator="{ props }">
@@ -87,7 +87,8 @@
         <v-text-field label="Cantidad" autocomplete="off" placeholder="" v-model="postData.cantidad"
           ref="cantidadRef" />
         <v-checkbox label="Facturar" v-model="postData.facturar"></v-checkbox>
-        <v-checkbox v-if="+selectedDeuda?.saldo == +postData.cantidad" label="Imprimir al final" v-model="printWhenFinalize"></v-checkbox>
+        <v-checkbox v-if="+selectedDeuda?.saldo == +postData.cantidad" label="Imprimir al final"
+          v-model="printWhenFinalize"></v-checkbox>
         <v-select :items="pagoFormas" label="Forma de pago" v-model="postData.forma_pago"
           v-if="postData.facturar"></v-select>
         <v-textarea label="Comentarios (opcional)" v-model="postData.comments" variant="outlined"></v-textarea>
@@ -242,13 +243,16 @@ watch(() => openAbono, (newVal) => {
   }
 })
 watch(() => postData.cantidad, (newVal) => {
-  if (+newVal == +selectedDeuda.value?.saldo){
+  if (+newVal == +selectedDeuda.value?.saldo) {
     printWhenFinalize.value = true;
   } else {
     printWhenFinalize.value = false;
   }
 })
 function getDeudas({ page, itemsPerPage, sortBy }) {
+  if (!creditoId.value) {
+    return;
+  }
   loading.value = true;
   const params = {
     page: page,
