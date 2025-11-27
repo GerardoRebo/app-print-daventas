@@ -86,6 +86,7 @@ const NotAuthorized = () => import("../views/NotAuthorized.vue");
 const Admin = () => import("../views/Admin.vue");
 const Front = () => import("../views/Front.vue");
 const VentaImprimir = () => import("../views/VentaImprimir.vue");
+const TicketPublico = () => import("../views/TicketPublico.vue");
 const CotizacionImprimir = () => import("../views/CotizacionImprimir.vue");
 const CorteImprimir = () => import("../views/CorteImprimir.vue");
 // const MisVentasOffline = () => import('../views/MisVentasOffline.vue')
@@ -584,6 +585,7 @@ const routes = [
   // { path: '/email/verify', component: VerificationHandler },
   { path: "/admin", component: Admin, children: adminRoutes },
   { path: "/front", component: Front, children: frontRoutes },
+  { path: "/ticket/:token", name: "ticket", component: TicketPublico },
   {
     path: "/ventatickets/imprimir/:id",
     name: "ventaImprimir",

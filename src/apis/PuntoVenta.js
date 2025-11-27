@@ -121,6 +121,9 @@ export default {
   getSpecificVTForPrinting(ventaticket) {
     return Api().get("/puntoventa/getSpecificVTForPrinting/" + ventaticket);
   },
+  getVentaticketByToken(token) {
+    return Api().get("/ticket-publico/" + token);
+  },
   syncLocalVentas(post) {
     return Api().post("/puntoventa/syncLocalVentas/", { tickets: post });
   },

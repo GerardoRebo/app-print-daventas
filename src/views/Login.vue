@@ -73,10 +73,10 @@ const form = reactive({
 });
 const errors = ref([]);
 function login() {
-  if (!navigator.onLine) {
-    alert('No estas conectado a internet')
-    return;
-  }
+  // if (!navigator.onLine) {
+  //   alert('No estas conectado a internet')
+  //   return;
+  // }
   if (cargando.value) return;
   cargando.value = true
   User.login(form)

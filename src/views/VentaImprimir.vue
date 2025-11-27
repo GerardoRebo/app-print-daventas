@@ -94,6 +94,10 @@
     </p>
   </div>
 
+  <div>
+    <canvas ref="qrCanvas"></canvas>
+  </div>
+
   <p class="text-caption font-italic">Gracias por tu compra</p>
 
   <br />
@@ -110,8 +114,10 @@ import PuntoVenta from "../apis/PuntoVenta";
 import moment from "moment-timezone";
 import { appWindow } from "@tauri-apps/api/window";
 import { useUserStore } from "../s";
+import QRCode from 'qrcode';
 const ventaticketId = ref(null);
 const ventaticket = ref(null);
+const qrCanvas = ref(null);
 const s = useUserStore();
 const { handleOpException } = s;
 
@@ -119,10 +125,24 @@ watch(ventaticketId, () => {
   getSpecificVT(ventaticketId.value);
 });
 
+const generateQRCode = async (qrString) => {
+  try {
+    await QRCode.toCanvas(qrCanvas.value, qrString, {
+      width: 200,
+      margin: 4,
+      errorCorrectionLevel: 'H' // opción recomendada
+    });
+} catch (error) {
+  console.error('Could not generate QR code:', error);
+}
+}
+
 function getSpecificVT(vt) {
   PuntoVenta.getSpecificVTForPrinting(vt)
     .then((response) => {
       ventaticket.value = response.data;
+      let qrString = ventaticket.value.public_url
+      generateQRCode(qrString)
       console.log(ventaticket.value);
       if (!ventaticket.value?.organization?.image?.url) {
         nextTick(() => {
@@ -131,6 +151,8 @@ function getSpecificVT(vt) {
       }
     })
     .catch((error) => {
+      console.log(error);
+
       handleOpException(error);
       alert("Ha ocurrido un error");
     });
@@ -138,13 +160,13 @@ function getSpecificVT(vt) {
 const route = useRoute();
 onMounted(() => {
   ventaticketId.value = route.params.id;
-  addEventListener("afterprint", (event) => {
-    window.close();
-    if (window.__TAURI__) {
-      appWindow.close();
-      return;
-    }
-  });
+  // addEventListener("afterprint", (event) => {
+  //   window.close();
+  //   if (window.__TAURI__) {
+  //     appWindow.close();
+  //     return;
+  //   }
+  // });
 });
 // Image load event handler
 function onImageLoaded() {
