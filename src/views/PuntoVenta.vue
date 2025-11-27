@@ -512,7 +512,7 @@
           <v-text-field @input="makeUpdate" label="Buscar Producto" prepend-inner-icon="mdi-magnify" hide-details
             single-line ref="keyw"></v-text-field>
         </v-row>
-        <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
+        <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
         <v-data-table :headers="headers" :items="products" items-per-page="100" density="compact" fixed-header
           keyboard-navigation="false" height="50vh">
           <template v-slot:item.name="{ item }" tabindex="-1">
@@ -580,7 +580,7 @@
   <v-dialog v-model="openPendiente" max-width="1200">
     <v-card>
       <v-card-title>Pendientes</v-card-title>
-      <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
+      <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
       <v-card-text>
         <v-data-table :headers="pendientesHeaders" :items="pendientes" items-per-page="5">
           <template v-slot:item.consecutivo="{ item }">
@@ -653,7 +653,7 @@
           @keydown.stop.enter="editarArticulo" type="number" />
       </v-card-text>
       <v-card-actions>
-        <v-btn @click="editarArticulo" color="accent" variant="outlined" :loading="cargando">Confirmar</v-btn>
+        <v-btn @click="editarArticulo" color="primary" variant="outlined" :loading="cargando">Confirmar</v-btn>
         <v-btn @click="edicion = false" variant="text" :loading="cargando">Cancelar</v-btn>
       </v-card-actions>
     </v-card>
@@ -675,7 +675,7 @@
       </v-card-text>
       <v-card-actions>
         <v-btn @click="openConversion = false" variant="text" :loading="cargando">Cancelar</v-btn>
-        <v-btn @click="aceptarConversion" color="accent" variant="outlined" :loading="cargando">Confirmar</v-btn>
+        <v-btn @click="aceptarConversion" color="primary" variant="outlined" :loading="cargando">Confirmar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -757,19 +757,19 @@
         <template v-if="mdAndUp">
           <v-tooltip text="Vender" location="top">
             <template v-slot:activator="{ props }">
-              <v-btn @click="guardarVenta(false)" size="small" variant="outlined" color="accent" prepend-icon="mdi-cash"
+              <v-btn @click="guardarVenta(false)" size="small" variant="outlined" color="primary" prepend-icon="mdi-cash"
                 class="ring">Vender</v-btn>
             </template>
           </v-tooltip>
           <v-tooltip text="Vender e imprimir" location="top">
             <template v-slot:activator="{ props }">
-              <v-btn @click="guardarVenta(true)" size="small" variant="outlined" color="accent"
+              <v-btn @click="guardarVenta(true)" size="small" variant="outlined" color="primary"
                 prepend-icon="mdi-printer-pos" class="ring" v-bind="props">Vender</v-btn>
             </template>
           </v-tooltip>
           <v-tooltip text="Vender y mandar whatsapp" location="top">
             <template v-slot:activator="{ props }">
-              <v-btn @click="guardarVentaWha(false)" size="small" variant="outlined" color="accent"
+              <v-btn @click="guardarVentaWha(false)" size="small" variant="outlined" color="primary"
                 prepend-icon="mdi-whatsapp" class="ring" v-bind="props">Vender</v-btn>
             </template>
           </v-tooltip>
@@ -921,7 +921,7 @@
             </v-list-item-action>
           </v-list-item>
         </v-list>
-        <v-alert type="info" variant="tonal" color="accent" class="mt-4 text-body-2">
+        <v-alert type="info" variant="tonal" color="primary" class="mt-4 text-body-2">
           <p class="text-secondary">
 
             Nota: Algunos atajos como <strong>F1</strong>, <strong>F2</strong>, etc., pueden requerir que mantengas
