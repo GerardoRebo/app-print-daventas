@@ -11,8 +11,11 @@
       hide-details single-line ref="keywordRef" color="accent" clearable></v-text-field>
     <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
     <v-data-table :headers="tHeaders" :items="creditos" dense >
-      <template v-slot:item.precio_final="{ item }">
-        <span>${{ item.precio_final }}</span>
+      <template v-slot:item.saldo_actual="{ item }">
+        <span>${{ formatNumber(item.saldo_actual) }}</span>
+      </template>
+      <template v-slot:item.limite_credito="{ item }">
+        <span>${{ formatNumber(item.limite_credito) }}</span>
       </template>
       <template v-slot:item.actions="{ item }">
         <router-link :to="{ name: 'CreditosShow', params: { creditoId: item.id } }">
@@ -30,6 +33,8 @@ import Creditos from "@js/apis/Creditos";
 import { ref } from "@vue/reactivity";
 import { onMounted, watch } from "@vue/runtime-core";
 import { useUserStore } from "@js/s";
+import { useUserStore } from "@js/s";
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 const s = useUserStore();
 const { handleOpException } = s;
 

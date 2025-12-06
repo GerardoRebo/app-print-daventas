@@ -1,6 +1,8 @@
 <script setup>
 import { toRef, toRefs } from 'vue';
 import moment from "moment-timezone"
+import { useCurrency } from '@js/composables/useCurrency';
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 const props = defineProps(['devolucion']);
 defineEmits(['imprimirMovimiento', 'cancelarMovimiento'])
 const { devolucion } = toRefs(props);
@@ -13,7 +15,7 @@ const { devolucion } = toRefs(props);
         <td>{{ devolucion.ventaticket_id }}</td>
         <td>{{ devolucion?.ventaticket?.almacen?.name }}</td>
         <td>{{ devolucion?.ventaticket?.cliente?.name }}</td>
-        <td>{{ devolucion?.total_devuelto }}</td>
+        <td>{{ formatNumber(devolucion?.total_devuelto) }}</td>
         <td>
             <p v-if="devolucion.tipo_devolucion == 'P'">Pendiente</p>
             <p v-else class="text-green-500">Realizada</p>

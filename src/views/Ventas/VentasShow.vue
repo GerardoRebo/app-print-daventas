@@ -108,14 +108,14 @@
           <p>Cliente: {{ ticketActual?.cliente?.name }}</p>
         </div>
         <div>
-          <p>Subtotal: ${{ ticketActual.subtotal }}</p>
-          <p>Descuento: ${{ ticketActual.descuento }}</p>
-          <p>Impuesto Retenido: ${{ ticketActual.impuesto_retenido }}</p>
-          <p>Impuesto Trasladado: ${{ ticketActual.impuesto_traslado }}</p>
-          <p>Total: ${{ ticketActual.total }}</p>
+          <p>Subtotal: ${{ formatNumber(ticketActual.subtotal) }}</p>
+          <p>Descuento: ${{ formatNumber(ticketActual.descuento) }}</p>
+          <p>Impuesto Retenido: ${{ formatNumber(ticketActual.impuesto_retenido) }}</p>
+          <p>Impuesto Trasladado: ${{ formatNumber(ticketActual.impuesto_traslado) }}</p>
+          <p>Total: ${{ formatNumber(ticketActual.total) }}</p>
         </div>
         <p class="mx-4 text-error" v-if="ticketActual.total_devuelto > 0">
-          Total Devuelto: ${{ ticketActual.total_devuelto }}
+          Total Devuelto: ${{ formatNumber(ticketActual.total_devuelto) }}
         </p>
         <p class="mx-4">
           Pagado en:
@@ -264,10 +264,10 @@
         </router-link>
       </template>
       <template v-slot:item.precio_usado="{ item }">
-        <span>${{ item.precio_usado }}</span>
+        <span>${{ formatNumber(item.precio_usado) }}</span>
       </template>
       <template v-slot:item.precio_final="{ item }">
-        <span>${{ item.precio_final }}</span>
+        <span>${{ formatNumber(item.precio_final) }}</span>
       </template>
       <template v-slot:item.fue_devuelto="{ item }">
         <span>{{ item.fue_devuelto ? "Si" : "No" }}</span>
@@ -289,10 +289,10 @@
             @click.prevent="setCliente(item.id)"><span color="primary">{{ item.name }}</span></a>
         </template>
         <template v-slot:item.saldo_actual="{ item }">
-          <span>${{ item.saldo_actual }}</span>
+          <span>${{ formatNumber(item.saldo_actual) }}</span>
         </template>
         <template v-slot:item.limite_credito="{ item }">
-          <span>${{ item.limite_credito }}</span>
+          <span>${{ formatNumber(item.limite_credito) }}</span>
         </template>
         <template v-slot:item.actions="{ item }">
           <v-btn prepend-icon="mdi-check" size="small" tabindex="-1" @click="setCliente(item.id)" color="primary">
@@ -390,32 +390,32 @@
       <v-card-title>Formas de pago</v-card-title>
       <v-card-text>
         <p>
-          Efectivo: ${{ ticketActual.fp_efectivo }}
+          Efectivo: ${{ formatNumber(ticketActual.fp_efectivo) }}
           {{ ticketActual.fp_efectivo_ref }}
         </p>
         <v-divider></v-divider>
         <p>
-          Transferencia: ${{ ticketActual.fp_transferencia }}
+          Transferencia: ${{ formatNumber(ticketActual.fp_transferencia) }}
           {{ ticketActual.fp_transferencia_ref }}
         </p>
         <v-divider></v-divider>
         <p>
-          Tarjeta Débito: ${{ ticketActual.fp_tarjeta_debito }}
+          Tarjeta Débito: ${{ formatNumber(ticketActual.fp_tarjeta_debito) }}
           {{ ticketActual.fp_tarjeta_debito_ref }}
         </p>
         <v-divider></v-divider>
         <p>
-          Tarjeta Crédito: ${{ ticketActual.fp_tarjeta_credito }}
+          Tarjeta Crédito: ${{ formatNumber(ticketActual.fp_tarjeta_credito) }}
           {{ ticketActual.fp_tarjeta_credito_ref }}
         </p>
         <v-divider></v-divider>
         <p>
-          Cheque: ${{ ticketActual.fp_cheque }}
+          Cheque: ${{ formatNumber(ticketActual.fp_cheque) }}
           {{ ticketActual.fp_cheque_ref }}
         </p>
         <v-divider></v-divider>
         <p>
-          Vales de despensa: ${{ ticketActual.fp_vales_de_despensa }}
+          Vales de despensa: ${{ formatNumber(ticketActual.fp_vales_de_despensa) }}
           {{ ticketActual.fp_vales_de_despensa_ref }}
         </p>
         <v-divider></v-divider>
@@ -457,6 +457,8 @@ import moment from "moment-timezone";
 import Organizacion from "@js/apis/Organizacion";
 import PuntoVenta from "../../apis/PuntoVenta";
 import { vMaska } from "maska/vue"
+import { useCurrency } from '@js/composables/useCurrency';
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 
 const s = useUserStore();
 const { handleOpException } = s;

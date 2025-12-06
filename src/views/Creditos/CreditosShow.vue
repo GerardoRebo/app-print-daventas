@@ -10,7 +10,7 @@
       </router-link>
       <v-row dense class="mt-4">
         <p class="font-semibold content-center mt-4 ml-4">
-          <strong> Saldo global del cliente: </strong><span>${{ saldoGlobal }}</span>
+          <strong> Saldo global del cliente: </strong><span>${{ formatNumber(saldoGlobal) }}</span>
         </p>
         <v-checkbox label="Mostrar liquidados" v-model="show_settled_loan" class="ml-8"
           @change="search = String(Date.now())" />
@@ -34,10 +34,10 @@
         <!-- <span>{{ item.ventaticket.consecutivo }}</span> -->
       </template>
       <template v-slot:item.deuda="{ item }">
-        <span>${{ item.deuda }}</span>
+        <span>${{ formatNumber(item.deuda) }}</span>
       </template>
       <template v-slot:item.pendiente="{ item }">
-        <span class="text-error mx-2">${{ item.saldo }}</span>
+        <span class="text-error mx-2">${{ formatNumber(item.saldo) }}</span>
       </template>
       <template v-slot:item.acciones="{ item }">
         <div v-if="$vuetify.display.mobile">
@@ -82,7 +82,7 @@
   <!-- Dialog para realizar abono a la deuda seleccionada -->
   <v-dialog v-model="openAbono" max-width="600">
     <v-card>
-      <v-card-title>Realizar Abono a Ticket, saldo: ${{ selectedDeuda?.saldo }}</v-card-title>
+      <v-card-title>Realizar Abono a Ticket, saldo: ${{ formatNumber(selectedDeuda?.saldo) }}</v-card-title>
       <v-card-text>
         <v-text-field label="Cantidad" autocomplete="off" placeholder="" v-model="postData.cantidad"
           ref="cantidadRef" />
@@ -158,6 +158,8 @@ import { onMounted, nextTick, computed } from "@vue/runtime-core";
 import { useRoute, useRouter } from "vue-router";
 import { watch } from "vue";
 import { useUserStore } from "@js/s";
+const { formatNumber } = useCurrency('es-MX', 'MXN');
+const props = defineProps(['devolucion']);
 const s = useUserStore();
 const { handleOpException } = s;
 

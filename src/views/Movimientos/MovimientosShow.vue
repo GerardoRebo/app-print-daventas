@@ -34,9 +34,9 @@
           </p>
         </div>
         <div>
-          <p>Subtotal: ${{ movimientoActual.subtotal }}</p>
-          <p>Impuestos: ${{ movimientoActual.impuestos_enviado }}</p>
-          <p>Total: ${{ movimientoActual.total }}</p>
+          <p>Subtotal: ${{ formatNumber(movimientoActual.subtotal) }}</p>
+          <p>Impuestos: ${{ formatNumber(movimientoActual.impuestos_enviado) }}</p>
+          <p>Total: ${{ formatNumber(movimientoActual.total) }}</p>
         </div>
       </v-row>
     </v-card-text>
@@ -85,9 +85,9 @@
             <p class="text-red-700" v-if="movimientoActual.estado == 'C'">Cancelada</p>
           </div>
           <div>
-            <p>Subtotal: ${{ movimientoActual.subtotal }}</p>
-            <p>Impuestos: ${{ movimientoActual.impuestos_enviado }}</p>
-            <p>Total: ${{ movimientoActual.total }}</p>
+            <p>Subtotal: ${{ formatNumber(movimientoActual.subtotal) }}</p>
+            <p>Impuestos: ${{ formatNumber(movimientoActual.impuestos_enviado) }}</p>
+            <p>Total: ${{ formatNumber(movimientoActual.total) }}</p>
           </div>
         </v-row>
       </v-container>
@@ -103,10 +103,10 @@
         </router-link>
       </template>
       <template v-slot:item.precio_usado="{ item }">
-        <span>${{ item.precio_usado }}</span>
+        <span>${{ formatNumber(tem.precio_usado) }}</span>
       </template>
       <template v-slot:item.precio_final="{ item }">
-        <span>${{ item.precio_final }}</span>
+        <span>${{ formatNumber(tem.precio_final )}}</span>
       </template>
       <template v-slot:item.fue_devuelto="{ item }">
         <span>{{ item.fue_devuelto ? 'Si' : 'No' }}</span>
@@ -135,6 +135,8 @@ import { useRoute } from "vue-router";
 import Movimientos from "../../apis/Movimientos";
 import { useUserStore } from "../../s";
 import { useDisplay } from "vuetify";
+import { useCurrency } from '@js/composables/useCurrency';
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 const { xs, mdAndUp, mdAndDown, smAndDown } = useDisplay()
 const s = useUserStore();
 const { handleOpException } = s;

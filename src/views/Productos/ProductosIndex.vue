@@ -191,7 +191,7 @@
                 <span>{{ item.product?.codigo }}</span>
               </template>
               <template v-slot:item.pcosto="{ item }">
-                <span>${{ item.product?.pcosto }}</span>
+                <span>${{ formatNumber(item.product?.pcosto) }}</span>
               </template>
             </v-data-table>
           </v-col>
@@ -215,7 +215,7 @@
           v-model="inventario_form.pcosto" @keydown.enter="ajusteInventarioGeneral" />
         <v-text-field :label="inventario_form.precio_sugerido
           ? 'Precio Venta (Sugerido: $' +
-          inventario_form.precio_sugerido +
+          (formatNumber(inventario_form.precio_sugerido)) +
           ')'
           : 'Precio Venta'
           " id="pcosto" autocomplete="off" placeholder="" density="compact" v-model="inventario_form.pventa"
@@ -253,6 +253,8 @@ import useQuery from "@js/composables/useQuery";
 import User from "@js/apis/User";
 import { useDisplay } from "vuetify";
 import TableRow from "@js/views/Productos/Components/TableRow.vue";
+import { useCurrency } from '@js/composables/useCurrency';
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 const { xs, mdAndUp, mdAndDown } = useDisplay();
 let { pushQuery } = useQuery();
 

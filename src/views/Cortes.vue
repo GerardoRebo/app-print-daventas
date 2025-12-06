@@ -25,7 +25,7 @@
   </v-container>
   <v-dialog v-model="isVisible" max-width="600">
     <v-card>
-      <v-card-title>Efectivo en caja ${{ efectivoCaja }}</v-card-title>
+      <v-card-title>Efectivo en caja ${{ formatNumber(efectivoCaja) }}</v-card-title>
       <v-card-text>
         <v-text-field label="Efectivo al cierre" autocomplete="off" placeholder="" v-model="efectivoCierre"
           ref="efectivoCierreRef" @keydown.enter.prevent="realizarCorte"
@@ -86,6 +86,8 @@ import ModMovCaja from "@js/components/ModMovCaja.vue";
 import CortesSumary from "@js/components/CortesSumary.vue";
 import Chart from 'chart.js/auto'
 import { useUserStore } from "../s";
+import { useCurrency } from "@js/composables/useCurrency";
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 const s = useUserStore();
 const { handleOpException } = s;
 const turno_actual = ref(null);

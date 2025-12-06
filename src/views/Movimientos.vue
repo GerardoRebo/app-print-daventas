@@ -218,7 +218,7 @@
         <v-col cols="1">
           <div>
             <label class="text-xs"> SubTotal: </label>
-            <p class="font-semibold">${{ subtotalComputed }}</p>
+            <p class="font-semibold">${{ formatNumber(subtotalComputed) }}</p>
           </div>
         </v-col>
         <v-col cols="1">
@@ -230,11 +230,11 @@
         <v-col cols="1">
           <div>
             <label class="text-xs"> Impuesto: </label>
-            <p class="font-semibold">${{ impuestoComputed }}</p>
+            <p class="font-semibold">${{ formatNumber(impuestoComputed) }}</p>
           </div>
         </v-col>
         <v-col cols="1">
-          <p>Total: ${{ totalComputed }}</p>
+          <p>Total: ${{ formatNumber(totalComputed) }}</p>
         </v-col>
         <v-spacer />
       </v-row>
@@ -494,7 +494,7 @@
         <v-divider></v-divider>
         <p class="font-semibold">
           <span class="font-weight-medium">SubTotal:</span> ${{
-            subtotalComputed
+            formatNumber(subtotalComputed)
           }}
         </p>
         <p class="font-semibold">
@@ -502,12 +502,12 @@
         </p>
         <p class="font-semibold">
           <span class="font-weight-medium">Impuesto:</span> ${{
-            impuestoComputed
+            formatNumber(impuestoComputed)
           }}
         </p>
         <v-divider></v-divider>
         <p class="text-h6 text-secondary">
-          <span class="font-weight-bold">Total: </span> ${{ totalComputed }}
+          <span class="font-weight-bold">Total: </span> ${{ formatNumber(totalComputed) }}
         </p>
       </v-container>
     </v-card>
@@ -563,16 +563,16 @@
         </router-link>
       </template>
       <template v-slot:item.costo_al_ordenar="{ item }">
-        <span>${{ item.costo_al_ordenar }}</span>
+        <span>${{ formatNumber(item.costo_al_ordenar) }}</span>
       </template>
       <template v-slot:item.total_al_ordenar="{ item }">
-        <span class="font-weight-bold">${{ item.total_al_ordenar }}</span>
+        <span class="font-weight-bold">${{ formatNumber(item.total_al_ordenar) }}</span>
       </template>
       <template v-slot:item.impuesto_al_enviar="{ item }">
-        <span>${{ item.impuesto_al_enviar }}</span>
+        <span>${{ formatNumber(item.impuesto_al_enviar) }}</span>
       </template>
       <template v-slot:item.precio="{ item }">
-        <span>${{ item.precio }}</span>
+        <span>${{ formatNumber(item.precio) }}</span>
       </template>
       <template v-slot:item.actions="{ item }">
         <v-icon
@@ -639,11 +639,11 @@
             </a>
           </template>
           <template v-slot:item.precio="{ item }">
-            <span>${{ item.precio }}</span>
+            <span>${{ formatNumber(item.precio) }}</span>
           </template>
 
           <template v-slot:item.precio_final="{ item }">
-            <span>${{ item.precio_final }}</span>
+            <span>${{ formatNumber(item.precio_final) }}</span>
           </template>
           <template v-slot:item.actions="{ item }">
             <button
@@ -696,10 +696,10 @@
             @click.prevent="setProveedor(item.id)"><span color="primary">{{ item.consecutivo }}</span></a>
         </template>
         <template v-slot:item.saldo_actual="{ item }">
-          <span>${{ item.saldo_actual }}</span>
+          <span>${{ formatNumber(item.saldo_actual) }}</span>
         </template>
         <template v-slot:item.limite_credito="{ item }">
-          <span>${{ item.limite_credito }}</span>
+          <span>${{ formatNumber(item.limite_credito) }}</span>
         </template>
         <template v-slot:item.actions="{ item }">
           <v-btn prepend-icon="mdi-plus" size="small" tabindex="-1" @click="setProveedor(item.id)" color="primary">
@@ -740,7 +740,7 @@
           <span>{{ item.almacen_origen?.name }}</span>
         </template>
         <template v-slot:item.total_enviado="{ item }">
-          <span>${{ item.total_enviado }}</span>
+          <span>${{ formatNumber(item.total_enviado) }}</span>
         </template>
         <template v-slot:item.actions="{ item }">
           <v-btn prepend-icon="mdi-check" size="small" tabindex="-1" @click="getSpecificVT(item.id)" color="primary">
@@ -784,7 +784,7 @@
           <span>{{ item.almacen?.name }}</span>
         </template>
         <template v-slot:item.pcosto="{ item }">
-          <span>${{ item.product?.pcosto }}</span>
+          <span>${{ formatNumber(item.product?.pcosto) }}</span>
         </template>
       </v-data-table>
     </v-card>
@@ -861,7 +861,7 @@
           placeholder="Ingresa la cantidad"
           :suffix="`${
             product_form.precio_sugerido
-              ? 'Sugerido: $' + product_form.precio_sugerido
+              ? 'Sugerido: $' + formatNumber(product_form.precio_sugerido)
               : ''
           }`"
           density="compact"
@@ -895,6 +895,8 @@ import Almacen from "../apis/Almacen";
 import Proveedor from "../apis/Proveedor";
 import { useUserStore } from "../s";
 import { useDisplay } from "vuetify";
+import { useCurrency } from "@js/composables/useCurrency";
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 
 const { xs, mdAndUp, mdAndDown } = useDisplay();
 const router = useRouter();

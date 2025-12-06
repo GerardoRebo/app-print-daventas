@@ -148,24 +148,24 @@
         <v-col cols="1">
           <div>
             <label> SubTotal: </label>
-            <p class="font-weight-bold">${{ subtotalComputed }}</p>
+            <p class="font-weight-bold">${{ formatNumber(subtotalComputed) }}</p>
           </div>
         </v-col>
         <v-col cols="1">
           <div>
             <label> Descuento: </label>
-            <p class="font-weight-bold">${{ descuentoComputed }}</p>
+            <p class="font-weight-bold">${{ formatNumber(descuentoComputed) }}</p>
           </div>
         </v-col>
         <v-col cols="1">
           <div>
             <label> Impuesto: </label>
-            <p class="font-weight-bold">${{ impuestoComputed }}</p>
+            <p class="font-weight-bold">${{ formatNumber(impuestoComputed) }}</p>
           </div>
         </v-col>
         <v-col cols="1">
           <p class="font-weight-bold text-primary_l300 text-h6">
-            Total: ${{ totalComputed }}
+            Total: ${{ formatNumber(totalComputed) }}
           </p>
         </v-col>
         <v-spacer />
@@ -371,22 +371,22 @@
         <v-divider></v-divider>
         <p class="font-weight-bold">
           <span class="font-weight-medium">SubTotal:</span> ${{
-            subtotalComputed
+            formatNumber(subtotalComputed)
           }}
         </p>
         <p class="font-weight-bold">
           <span class="font-weight-medium">Descuento:</span> ${{
-            descuentoComputed
+            formatNumber(descuentoComputed)
           }}
         </p>
         <p class="font-weight-bold">
           <span class="font-weight-medium">Impuesto:</span> ${{
-            impuestoComputed
+            formatNumber(impuestoComputed)
           }}
         </p>
         <v-divider></v-divider>
         <p class="text-h6 text-primary_l200">
-          <span class="font-weight-bold">Total: </span> ${{ totalComputed }}
+          <span class="font-weight-bold">Total: </span> ${{ formatNumber(totalComputed) }}
         </p>
       </v-container>
     </v-card>
@@ -440,21 +440,21 @@
           <td>{{ articulo.alto }}</td>
           <td>{{ articulo.area_total }}</td>
           <td>
-            <div :title="`Descuento aplicado: $${articulo.descuento}`">
-              ${{ articulo.precio_usado }}
+            <div :title="`Descuento aplicado: $${formatNumber(articulo.descuento)}`">
+              ${{ formatNumber(articulo.precio_usado) }}
             </div>
           </td>
           <td>
-            <p class="font-weight-bold">${{ articulo.precio_final }}</p>
+            <p class="font-weight-bold">${{ formatNumber(articulo.precio_final) }}</p>
           </td>
-          <td>${{ articulo.importe_descuento }}</td>
+          <td>${{ formatNumber(articulo.importe_descuento) }}</td>
           <td>
             <v-tooltip :text="`Trasladado: $${articulo.impuesto_traslado}, Retenido: $${articulo.impuesto_retenido}`"
               location="top">
               <template v-slot:activator="{ props }">
                 <span v-bind="props">
                   ${{
-                    articulo.impuesto_traslado - articulo.impuesto_retenido
+                    formatNumber(articulo.impuesto_traslado - articulo.impuesto_retenido)
                   }}</span>
 
                 <!-- <v-text-field label="Nombre" id="name" autocomplete="off" placeholder="" readonly hide-details
@@ -533,10 +533,10 @@
             </router-link>
           </template>
           <template v-slot:item.precio="{ item }">
-            <span>${{ item.precio }}</span>
+            <span>${{ formatNumber(item.precio) }}</span>
           </template>
           <template v-slot:item.precio_final="{ item }">
-            <span>${{ item.precio_final }}</span>
+            <span>${{ formatNumber(item.precio_final) }}</span>
           </template>
           <template v-slot:item.es_kit="{ item }">
             <span>{{ item.es_kit ? "Sí" : "No" }}</span>
@@ -562,10 +562,10 @@
               @click.prevent="setCliente(item.id)"><span color="primary">{{ item.name }}</span></a>
           </template>
           <template v-slot:item.saldo_actual="{ item }">
-            <span>${{ item.saldo_actual }}</span>
+            <span>${{ formatNumber(item.saldo_actual) }}</span>
           </template>
           <template v-slot:item.limite_credito="{ item }">
-            <span>${{ item.limite_credito }}</span>
+            <span>${{ formatNumber(item.limite_credito) }}</span>
           </template>
           <template v-slot:item.actions="{ item }">
             <v-btn prepend-icon="mdi-check" size="small" tabindex="-1" @click="setCliente(item.id)" color="primary">
@@ -594,7 +594,7 @@
             <span>{{ item.almacen?.name }}</span>
           </template>
           <template v-slot:item.total="{ item }">
-            <span>${{ item.total }}</span>
+            <span>${{ formatNumber(item.total) }}</span>
           </template>
           <template v-slot:item.actions="{ item }">
             <v-btn prepend-icon="mdi-check" size="small" tabindex="-1" @click="getSpecificVT(item.id)" color="primary">
@@ -631,7 +631,7 @@
             <span>{{ item.product?.codigo }}</span>
           </template>
           <template v-slot:item.pcosto="{ item }">
-            <span>${{ item.product?.pcosto }}</span>
+            <span>${{ formatNumber(item.product?.pcosto) }}</span>
           </template>
         </v-data-table>
       </v-card-text>
@@ -1018,6 +1018,9 @@ import Articulo from "../apis/Articulo";
 import { useSnackBar } from "../composables/SnackBar";
 import DynamicSnack from "../components/DynamicSnack.vue";
 import { useDisplay } from "vuetify";
+import { useUserStore } from "@js/s";
+import { useCurrency } from "@js/composables/useCurrency";
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 const { xs, mdAndUp, mdAndDown, lgAndUp, smAndDown } = useDisplay();
 const { productsData, lastFetchTimes } = storeToRefs(store);
 const { isOpException, getExceptionMsg, handleOpException } = store;

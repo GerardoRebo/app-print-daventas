@@ -120,10 +120,10 @@
               " size="small" prepend-icon="mdi-cash-refund">Devolver</v-btn>
           </template>
           <template v-slot:item.precio_usado="{ item }">
-            <span>${{ item.precio_usado }}</span>
+            <span>${{ formatNumber(item.precio_usado) }}</span>
           </template>
           <template v-slot:item.precio_final="{ item }">
-            <span>${{ item.precio_final }}</span>
+            <span>${{ formatNumber(item.precio_final) }}</span>
           </template>
           <template v-slot:item.es_kit="{ item }">
             <span>{{ item.es_kit ? 'Sí' : 'No' }}</span>
@@ -146,10 +146,10 @@
             <span>{{ item.product?.codigo }}</span>
           </template>
           <template v-slot:item.precio_usado="{ item }">
-            <span>${{ item.precio_usado }}</span>
+            <span>${{ formatNumber(item.precio_usado) }}</span>
           </template>
           <template v-slot:item.precio_final="{ item }">
-            <span>${{ item.precio_final }}</span>
+            <span>${{ formatNumber(item.precio_final) }}</span>
           </template>
           <template v-slot:item.es_kit="{ item }">
             <span>{{ item.es_kit ? 'Sí' : 'No' }}</span>
@@ -193,6 +193,8 @@ import PuntoVenta from "../../apis/PuntoVenta";
 import Devoluciones from "../../apis/Devoluciones";
 import { useUserStore } from "../../s";
 import { useDisplay } from "vuetify";
+const { formatNumber } = useCurrency('es-MX', 'MXN');
+const props = defineProps(['devolucion']);
 const s = useUserStore();
 const { handleOpException } = s;
 const { xs, mdAndUp, smAndDown } = useDisplay()

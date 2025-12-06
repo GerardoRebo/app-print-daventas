@@ -1,6 +1,8 @@
 <script setup>
 import { toRef, toRefs, computed } from 'vue';
 import moment from 'moment';
+import { useCurrency } from "@js/composables/useCurrency";
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 const props = defineProps(['turno_actual']);
 defineEmits(['openVMovCaja'])
 const { turno_actual } = toRefs(props);
@@ -47,7 +49,7 @@ const efectivoCaja = computed(
                   </v-col>
                   <v-col cols="4" class="text-right">
                     <p>
-                      ${{ turno_actual?.ventas_efectivo }}
+                      ${{ formatNumber(turno_actual?.ventas_efectivo) }}
                     </p>
                   </v-col>
                   <v-divider></v-divider>
@@ -58,7 +60,7 @@ const efectivoCaja = computed(
                   </v-col>
                   <v-col cols="4" class="text-right">
                     <p>
-                      ${{ turno_actual?.ventas_tarjeta_credito }}
+                      ${{ formatNumber(turno_actual?.ventas_tarjeta_credito) }}
                     </p>
                   </v-col>
                   <v-divider></v-divider>
@@ -69,7 +71,7 @@ const efectivoCaja = computed(
                   </v-col>
                   <v-col cols="4" class="text-right">
                     <p>
-                      ${{ turno_actual?.ventas_tarjeta_debito }}
+                      ${{ formatNumber(turno_actual?.ventas_tarjeta_debito) }}
                     </p>
                   </v-col>
                   <v-divider></v-divider>
@@ -80,7 +82,7 @@ const efectivoCaja = computed(
                   </v-col>
                   <v-col cols="4" class="text-right">
                     <p>
-                      ${{ turno_actual?.ventas_vales_de_despensa }}
+                      ${{ formatNumber(turno_actual?.ventas_vales_de_despensa) }}
                     </p>
                   </v-col>
                   <v-divider></v-divider>
@@ -91,7 +93,7 @@ const efectivoCaja = computed(
                   </v-col>
                   <v-col cols="4" class="text-right">
                     <p>
-                      ${{ turno_actual?.ventas_transferencia }}
+                      ${{ formatNumber(turno_actual?.ventas_transferencia) }}
                     </p>
                   </v-col>
                   <v-divider></v-divider>
@@ -102,7 +104,7 @@ const efectivoCaja = computed(
                   </v-col>
                   <v-col cols="4" class="text-right">
                     <p>
-                      ${{ turno_actual?.ventas_cheque }}
+                      ${{ formatNumber(turno_actual?.ventas_cheque) }}
                     </p>
                   </v-col>
                   <v-divider></v-divider>
@@ -121,7 +123,7 @@ const efectivoCaja = computed(
                   </v-col>
                   <v-col cols="4" class="text-right">
                     <p>
-                      ${{ turno_actual?.ventas_credito }}
+                      ${{ formatNumber(turno_actual?.ventas_credito) }}
                     </p>
                   </v-col>
                   <v-divider></v-divider>
@@ -139,7 +141,7 @@ const efectivoCaja = computed(
                   </v-col>
                   <v-col cols="4" class="text-right">
                     <p>
-                      - ${{ turno_actual?.devoluciones_ventas_efectivo }}
+                      - ${{ formatNumber(turno_actual?.devoluciones_ventas_efectivo) }}
                     </p>
                   </v-col>
                   <v-divider></v-divider>
@@ -152,7 +154,7 @@ const efectivoCaja = computed(
                   </v-col>
                   <v-col cols="4" class="text-right">
                     <p>
-                      - ${{ turno_actual?.devoluciones_ventas_credito }}
+                      - ${{ formatNumber(turno_actual?.devoluciones_ventas_credito) }}
                     </p>
                   </v-col>
                   <v-divider></v-divider>
@@ -161,7 +163,7 @@ const efectivoCaja = computed(
               <v-row dense justify="space-between">
                 <p class="font-weight-bold text-h6">Total</p>
                 <p class="font-weight-bold text-h6">
-                  ${{ turno_actual?.acumulado_ventas }}
+                  ${{ formatNumber(turno_actual?.acumulado_ventas) }}
                 </p>
               </v-row>
             </v-card-text>
@@ -179,7 +181,7 @@ const efectivoCaja = computed(
                 </v-col>
                 <v-col cols="4" class="text-right">
                   <p>
-                    ${{ turno_actual?.ventas_efectivo }}
+                    ${{ formatNumber(turno_actual?.ventas_efectivo) }}
                   </p>
                 </v-col>
                 <v-divider></v-divider>
@@ -190,7 +192,7 @@ const efectivoCaja = computed(
                 </v-col>
                 <v-col cols="4" class="text-right">
                   <p>
-                    - ${{ turno_actual?.devoluciones_ventas_efectivo }}
+                    - ${{ formatNumber(turno_actual?.devoluciones_ventas_efectivo) }}
                   </p>
                 </v-col>
                 <v-divider></v-divider>
@@ -201,7 +203,7 @@ const efectivoCaja = computed(
                 </v-col>
                 <v-col cols="4" class="text-right">
                   <p>
-                    ${{ turno_actual?.abonos_efectivo }}
+                    ${{ formatNumber(turno_actual?.abonos_efectivo )}}
                   </p>
                 </v-col>
                 <v-divider></v-divider>
@@ -212,7 +214,7 @@ const efectivoCaja = computed(
                 </v-col>
                 <v-col cols="4" class="text-right">
                   <p>
-                    - ${{ turno_actual?.devoluciones_ventas_credito }}
+                    - ${{ formatNumber(turno_actual?.devoluciones_ventas_credito) }}
                   </p>
                 </v-col>
                 <v-divider></v-divider>
@@ -223,7 +225,7 @@ const efectivoCaja = computed(
                 </v-col>
                 <v-col cols="4" class="text-right">
                   <p>
-                    ${{ turno_actual?.acumulado_entradas }}
+                    ${{ formatNumber(turno_actual?.acumulado_entradas) }}
                   </p>
                 </v-col>
                 <v-divider></v-divider>
@@ -234,7 +236,7 @@ const efectivoCaja = computed(
                 </v-col>
                 <v-col cols="4" class="text-right">
                   <p>
-                    - ${{ turno_actual?.acumulado_salidas }}
+                    - ${{ formatNumber(turno_actual?.acumulado_salidas) }}
                   </p>
                 </v-col>
                 <v-divider></v-divider>
@@ -242,7 +244,7 @@ const efectivoCaja = computed(
               <v-row dense justify="space-between">
                 <p class="font-weight-bold text-h6">Total</p>
                 <p class="font-weight-bold text-h6">
-                  ${{ efectivoCaja }}
+                  ${{ formatNumber(efectivoCaja )}}
                 </p>
               </v-row>
             </v-card-text>
@@ -262,7 +264,7 @@ const efectivoCaja = computed(
               <v-row dense justify="space-between">
                 <p>Ingresos Efectivo </p>
                 <p>
-                  ${{ turno_actual?.acumulado_entradas }}
+                  ${{ formatNumber(turno_actual?.acumulado_entradas) }}
                 </p>
                 <v-divider></v-divider>
               </v-row>
@@ -282,7 +284,7 @@ const efectivoCaja = computed(
                 <p>Salidas de Efectivo
                 </p>
                 <p>
-                  ${{ turno_actual?.acumulado_salidas }}
+                  ${{ formatNumber(turno_actual?.acumulado_salidas) }}
                 </p>
                 <v-divider></v-divider>
               </v-row>
@@ -298,7 +300,7 @@ const efectivoCaja = computed(
               <v-row dense justify="space-between">
                 <p>Compras Mercancia</p>
                 <p>
-                  ${{ turno_actual?.compras }}
+                  ${{ formatNumber(turno_actual?.compras) }}
                 </p>
                 <v-divider></v-divider>
               </v-row>
@@ -314,7 +316,7 @@ const efectivoCaja = computed(
               <v-row dense justify="space-between">
                 <p>Total</p>
                 <p>
-                  ${{ turno_actual?.acumulado_ganancias }}
+                  ${{ formatNumber(turno_actual?.acumulado_ganancias) }}
                 </p>
                 <v-divider></v-divider>
               </v-row>

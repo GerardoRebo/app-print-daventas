@@ -2,6 +2,8 @@
 import { toRef, toRefs } from 'vue';
 import moment from "moment-timezone"
 import { useDisplay } from 'vuetify';
+import { useCurrency } from '@js/composables/useCurrency';
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 const props = defineProps(['venta']);
 defineEmits(['imprimirVenta', 'cancelarVenta', 'createDevolucion'])
 const { venta } = toRefs(props);
@@ -17,7 +19,7 @@ const { xs, mdAndUp, mdAndDown, smAndDown } = useDisplay()
         <td>{{ venta.nombre }}</td>
         <td>{{ venta?.cliente?.name }}</td>
         <td>{{ venta?.almacen?.name }}</td>
-        <td>${{ venta.total }}</td>
+        <td>${{ formatNumber(venta.total) }}</td>
         <td>
             {{ venta.total_devuelto > 0 ? "Sí" : "No" }}
         </td>

@@ -1,5 +1,7 @@
 <script setup>
 import {computed, toRef, toRefs } from 'vue';
+import { useCurrency } from '@js/composables/useCurrency';
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 
 const props = defineProps(['product']);
 defineEmits(['ajusteProduct', 'abrirExistencias', 'destroyProduct'])
@@ -32,8 +34,8 @@ const ObjetoImp = computed(()=>{
                     product.name
                 }}</span>
         </td>
-        <td>${{ product.pcosto }}</td>
-        <td>${{ product.precio }}</td>
+        <td>${{ formatNumber(product.pcosto) }}</td>
+        <td>${{ formatNumber(product.precio) }}</td>
         <td>
             <v-icon size="small" class="mx-2" @click="$emit('abrirExistencias', product.id)"
                 @keydown.enter="$emit('abrirExistencias', product.id)">mdi-eye</v-icon>

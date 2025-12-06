@@ -1,6 +1,8 @@
 <script setup>
 import { toRef, toRefs } from 'vue';
 import moment from "moment-timezone"
+import { useCurrency } from '@js/composables/useCurrency';
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 const props = defineProps(['movimiento']);
 defineEmits(['imprimirMovimiento', 'cancelarMovimiento'])
 const { movimiento } = toRefs(props);
@@ -20,7 +22,7 @@ const { movimiento } = toRefs(props);
                 ? movimiento.almacen_destino.name
                 : ""
         }}</td>
-        <td>{{ movimiento.total_enviado }}</td>
+        <td>{{ formatNumber(movimiento.total_enviado) }}</td>
         <td class="font-bold" v-if="movimiento.tipo == 'C'">{{
             "Compra"
             }}</td>
