@@ -33,8 +33,9 @@ import Creditos from "@js/apis/Creditos";
 import { ref } from "@vue/reactivity";
 import { onMounted, watch } from "@vue/runtime-core";
 import { useUserStore } from "@js/s";
-import { useUserStore } from "@js/s";
+import { useCurrency } from '@js/composables/useCurrency';
 const { formatNumber } = useCurrency('es-MX', 'MXN');
+
 const s = useUserStore();
 const { handleOpException } = s;
 
