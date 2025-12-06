@@ -81,16 +81,6 @@ const fechaFinLabel = computed({
   },
 });
 
-// Menús del date picker
-
-
-
-
-
-// Strings bonitos para mostrar en los text-fields
-// const fechaInicioLabel = computed(() => formatDate(fecha_inicio.value));
-// const fechaFinLabel = computed(() => formatDate(fecha_fin.value));
-
 
 const fetchUsers = async () => {
   try {

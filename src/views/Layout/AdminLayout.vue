@@ -104,7 +104,7 @@ const drawer = ref(false);
 const links = computed(() => {
   if (isAdmin.value) {
     return [
-      { icon: 'mdi-network-pos', title: 'Punto de Venta', href: "PuntoVenta" },
+      { icon: 'mdi-arrow-left-bold', title: 'Punto de Venta', href: "PuntoVenta" },
       { icon: 'mdi-domain', title: 'Mi Organización', href: "MiOrganizacion" },
       { icon: 'mdi-invoice-list', title: 'Datos Fiscales', href: "Facturacion" },
       { icon: 'mdi-cash-check', title: 'Cortes', href: "AdminCortesIndex" },

@@ -4,34 +4,53 @@
     <v-card-text>
       <v-row dense class="mt-4">
         <v-col cols="12" md="3">
-          <v-date-input label="Desde" v-model="dfecha" max-width="368" hide-details></v-date-input>
+          <v-menu v-model="menuInicio" :close-on-content-click="false" transition="scale-transition" offset-y>
+            <template #activator="{ props }">
+              <v-text-field v-bind="props" v-model="formattedDFecha" label="Fecha inicio"
+                prepend-inner-icon="mdi-calendar" readonly clearable />
+            </template>
+
+            <v-date-picker v-model="dfecha" @update:model-value="menuInicio = false" />
+          </v-menu>
         </v-col>
         <v-col cols="12" md="3">
-          <v-date-input label="Hasta" v-model="hfecha" max-width="368" hide-details></v-date-input>
+          <v-menu v-model="menuFin" :close-on-content-click="false" transition="scale-transition" offset-y>
+            <template #activator="{ props }">
+              <v-text-field v-bind="props" v-model="formattedHFecha" label="Fecha fin" prepend-inner-icon="mdi-calendar"
+                readonly clearable />
+            </template>
+
+            <v-date-picker v-model="hfecha" @update:model-value="menuFin = false" />
+          </v-menu>
         </v-col>
       </v-row>
     </v-card-text>
   </v-card>
   <!-- Tabla -->
   <v-container fluid>
-    <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
-    <v-table density="compact" color="primary_d700" fixed-header height="45vh">
-      <thead>
-        <tr>
-          <th class="text-left" v-for="header in tHeaders" :key="header">
-            {{ header }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <TableRow v-for="venta in misventas.data" :key="venta.id" :venta="venta" @imprimir-venta="imprimirVenta"
-          @cancelar-venta="cancelarVenta" @create-devolucion="createDevolucion">
-        </TableRow>
-      </tbody>
-    </v-table>
-    <v-row class=" ma-1" justify="end">
-      <v-pagination v-model="page" :length="misventas.last_page" :total-visible="3"></v-pagination>
-    </v-row>
+    <template v-if="loadingInitial">
+      <v-skeleton-loader type="table" />
+    </template>
+    <template v-else>
+      <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
+      <v-table density="compact" color="secondary" fixed-header height="45vh">
+        <thead>
+          <tr>
+            <th class="text-left" v-for="header in tHeaders" :key="header">
+              {{ header }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <TableRow v-for="venta in misventas.data" :key="venta.id" :venta="venta" @imprimir-venta="imprimirVenta"
+            @cancelar-venta="cancelarVenta" @create-devolucion="createDevolucion">
+          </TableRow>
+        </tbody>
+      </v-table>
+      <v-row class=" ma-1" justify="end">
+        <v-pagination v-model="page" :length="misventas.last_page" :total-visible="3"></v-pagination>
+      </v-row>
+    </template>
   </v-container>
 
 </template>
@@ -48,6 +67,9 @@ import useMisFechas from "../../composables/useMisFechas";
 import { useDisplay } from "vuetify";
 
 const s = useUserStore();
+const menuInicio = ref(false);
+const menuFin = ref(false);
+const loadingInitial = ref(true);
 const { dfecha, hfecha, formattedDFecha, formattedHFecha } = useMisFechas();
 
 const page = ref(1);
@@ -86,15 +108,15 @@ watch(() => route.query, () => {
   getMisVentas();
 })
 
-function getMisVentas() {
-  PuntoVenta.getMisVentas(page.value, formattedDFecha.value, formattedHFecha.value)
-    .then((response) => {
-      misventas.value = response.data;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+async function getMisVentas() {
+  try {
+    const { data } = await PuntoVenta.getMisVentas(page.value, formattedDFecha.value, formattedHFecha.value)
+    misventas.value = data;
+
+  } catch (error) {
+    handleOpException(error);
+    alert("Ha ocurrido un error")
+  }
 }
 function cancelarVenta(venta) {
   if (cargando.value) {
@@ -143,7 +165,7 @@ function imprimirVenta(ticketActual) {
   );
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (route.query.dfecha) {
     dfecha.value = moment(route.query.dfecha, 'YYYY-MM-DD').toDate();
   }
@@ -153,7 +175,8 @@ onMounted(() => {
   if (route.query.page) {
     page.value = parseInt(route.query.page);
   }
-  getMisVentas()
+  await getMisVentas()
+  loadingInitial.value = false;
 });
 
 

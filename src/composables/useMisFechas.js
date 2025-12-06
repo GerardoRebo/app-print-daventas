@@ -7,10 +7,10 @@ export default function useMisFechas() {
   const dfecha = ref(new Date);
   const hfecha = ref(new Date);
   const formattedDFecha = computed(() => {
-    return moment(dfecha.value).format('YYYY-MM-DD');
+    return moment(dfecha.value).format('DD-MM-YYYY');
   })
   const formattedHFecha = computed(() => {
-    return moment(hfecha.value).format('YYYY-MM-DD');
+    return moment(hfecha.value).format('DD-MM-YYYY');
   })
   watch(dfecha, () => {
     if (dfecha.value) {

@@ -246,7 +246,7 @@ if (mobile.value) {
             </template>
             <!-- Loop through the children of the current link -->
             <v-list-item v-for="(child, childIndex) in link.children" v-if="link.children" :key="childIndex"
-              :prepend-icon="child.icon" :title="child.title" :to="{ name: child.href }" exact
+              :prepend-icon="child.icon" :title="child.title" :to="{ name: child.href }" 
               @click="rail = false"></v-list-item>
           </v-list-group>
           <div v-else>

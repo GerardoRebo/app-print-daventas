@@ -712,7 +712,7 @@
   <!-- Cobrar -->
   <v-dialog v-model="openCobrar" max-width="600">
     <v-card>
-      <v-card-title>Cobrar ${{ totalComputed }}</v-card-title>
+      <v-card-title>Cobrar ${{ formatNumber(totalComputed) }}</v-card-title>
       <v-card-text>
         <v-tabs v-model="tab" color="primary" class="mb-2">
           <v-tab value="basico">Básico</v-tab>
