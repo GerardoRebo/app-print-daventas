@@ -243,8 +243,7 @@ onMounted(() => {
                 v-model="myOrganization.codigo_postal" />
             </v-row>
             <v-row dense>
-              <v-select :items="fiscalRegimenes" label="Régimen Fiscal"
-                v-model="myOrganization.regimen_fiscal"></v-select>
+        <v-select :items="fiscalRegimenes" label="Régimen Fiscal" v-model="cliente_form.regimen_fiscal"></v-select>
             </v-row>
             <v-row dense>
               <v-select :items="c_periodicidad" label="Realizar facturas globales por"

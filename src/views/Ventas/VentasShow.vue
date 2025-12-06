@@ -252,54 +252,92 @@
       </v-container>
     </v-card>
   </v-navigation-drawer>
+  <v-progress-linear color="primary" indeterminate v-if="cargando" class="mb-4"></v-progress-linear>
   <v-container fluid>
-    <v-data-table :headers="tHeaders" :items="articulos" dense>
-      <template v-slot:item.product_name="{ item }">
-        <router-link :to="{
-          name: 'ProductosIndex',
-          query: { keyword: item.product_name ?? item.product.name },
-        }">
-          <span class="text-primary text-decoration-underline cursor-pointer font-weight-medium">{{ item.product_name ??
-            item.product?.name }}</span>
-        </router-link>
-      </template>
-      <template v-slot:item.precio_usado="{ item }">
-        <span>${{ formatNumber(item.precio_usado) }}</span>
-      </template>
-      <template v-slot:item.precio_final="{ item }">
-        <span>${{ formatNumber(item.precio_final) }}</span>
-      </template>
-      <template v-slot:item.fue_devuelto="{ item }">
-        <span>{{ item.fue_devuelto ? "Si" : "No" }}</span>
-      </template>
-    </v-data-table>
-  </v-container>
-  <!-- Clientes -->
-  <v-dialog v-model="openCliente" max-width="1200">
-    <v-card>
-      <v-card-title>Clientes</v-card-title>
-      <v-card-text>
-        <v-text-field v-model="keycliente" label="Cliente" prepend-inner-icon="mdi-magnify" variant="outlined"
-          placeholder="Ingresa nombre del cliente" hide-details single-line id="keycliente"></v-text-field>
-      </v-card-text>
-      <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
-      <v-data-table :headers="clienteHeaders" :items="clients" items-per-page="5">
-        <template v-slot:item.name="{ item }">
-          <a href="" class="decoration-none" @keydown.enter.prevent="setCliente(item.id)"
-            @click.prevent="setCliente(item.id)"><span color="primary">{{ item.name }}</span></a>
+    <template v-if="loadingInitial">
+      <v-skeleton-loader type="card, list-item@5" />
+    </template>
+    <template v-else>
+      <v-data-table :headers="tHeaders" :items="articulos" dense>
+        <template v-slot:item.product_name="{ item }">
+          <router-link :to="{
+            name: 'ProductosIndex',
+            query: { keyword: item.product_name ?? item.product.name },
+          }">
+            <span class="text-primary text-decoration-underline cursor-pointer font-weight-medium">{{ item.product_name
+              ??
+              item.product?.name }}</span>
+          </router-link>
         </template>
-        <template v-slot:item.saldo_actual="{ item }">
-          <span>${{ formatNumber(item.saldo_actual) }}</span>
+        <template v-slot:item.precio_usado="{ item }">
+          <span>${{ formatNumber(item.precio_usado) }}</span>
         </template>
-        <template v-slot:item.limite_credito="{ item }">
-          <span>${{ formatNumber(item.limite_credito) }}</span>
+        <template v-slot:item.precio_final="{ item }">
+          <span>${{ formatNumber(item.precio_final) }}</span>
         </template>
-        <template v-slot:item.actions="{ item }">
-          <v-btn prepend-icon="mdi-check" size="small" tabindex="-1" @click="setCliente(item.id)" color="primary">
-            Agregar
-          </v-btn>
+        <template v-slot:item.fue_devuelto="{ item }">
+          <span>{{ item.fue_devuelto ? "Si" : "No" }}</span>
         </template>
       </v-data-table>
+    </template>
+  </v-container>
+  <!-- Modal Clientes -->
+  <v-dialog v-model="openCliente" max-width="1200">
+    <v-card class="">
+
+      <!-- HEADER -->
+      <v-card-title class="d-flex justify-space-between align-center">
+        <span class="text-h6">Seleccionar Cliente</span>
+
+        <!-- Botón para crear cliente -->
+        <router-link :to="{
+          name: 'Clientes',
+        }">
+          <v-btn color="primary" variant="flat" size="small" prepend-icon="mdi-account-plus">
+            Nuevo cliente
+          </v-btn>
+        </router-link>
+      </v-card-title>
+
+      <v-divider></v-divider>
+
+      <v-card-text class="pt-4">
+
+        <!-- BUSCADOR -->
+        <v-text-field v-model="keycliente" prepend-inner-icon="mdi-magnify" label="Buscar cliente"
+          placeholder="Ingresa nombre, teléfono o email" variant="outlined" density="compact" class="mb-4"
+          hide-details></v-text-field>
+
+        <!-- LOADING -->
+        <v-progress-linear color="primary" indeterminate v-if="cargando" class="mb-4"></v-progress-linear>
+
+        <!-- TABLA -->
+        <v-data-table :headers="clienteHeaders" :items="clients" items-per-page="10" hover density="compact">
+          <!-- Nombre clickable -->
+          <template #item.name="{ item }">
+            <v-btn variant="text" color="primary" class="text-capitalize px-0" @click="setCliente(item.id)">
+              {{ item.name }}
+            </v-btn>
+          </template>
+
+          <!-- Formatos -->
+          <template #item.saldo_actual="{ item }">
+            <span>${{ formatNumber(item.saldo_actual) }}</span>
+          </template>
+
+          <template #item.limite_credito="{ item }">
+            <span>${{ formatNumber(item.limite_credito) }}</span>
+          </template>
+
+          <!-- Acciones -->
+          <template #item.actions="{ item }">
+            <v-btn color="primary" size="small" prepend-icon="mdi-check" tabindex="-1" @click="setCliente(item.id)">
+              Seleccionar
+            </v-btn>
+          </template>
+
+        </v-data-table>
+      </v-card-text>
     </v-card>
   </v-dialog>
   <v-dialog v-model="isFacturaInfoOpen" max-width="800">
@@ -476,6 +514,7 @@ const cancelacionData = ref({
 });
 const isFacturaInfoOpen = ref(false);
 const isFormasDePagoOpen = ref(false);
+const loadingInitial = ref(true)
 const isCancelarFacturaOpen = ref(false);
 const cargando = ref(false);
 const errors = ref([]);
@@ -608,8 +647,9 @@ const tHeaders = ref([
 const ticketActual = ref({});
 
 const articulos = ref([]);
-watch(ventaId, () => {
-  getSpecificVT(ventaId.value);
+watch(ventaId, async () => {
+  await getSpecificVT(ventaId.value);
+  loadingInitial.value = false;
 });
 watch(isFacturaInfoOpen, () => {
   if (ticketActual.value.forma_de_pago == "C") {
@@ -829,11 +869,16 @@ function cancelarVenta() {
   if (!confirm('Estas seguro de cancelar esta venta?')) {
     return;
   }
+  if (cargando.value) return;
+  cargando.value = true;
+    
   PuntoVenta.cancelarVenta(ticketActual.value.id)
     .then(() => {
+      cargando.value = false; 
       getSpecificVT(ticketActual.value.id);
     })
     .catch((error) => {
+      cargando.value = false; 
       handleOpException(error);
       alert("Ha ocurrido un error");
     });

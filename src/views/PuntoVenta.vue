@@ -547,31 +547,61 @@
     </v-card>
   </v-dialog>
 
-  <!-- Clientes -->
+  <!-- Modal Clientes -->
   <v-dialog v-model="openCliente" max-width="1200">
-    <v-card>
-      <v-card-title>Clientes</v-card-title>
-      <v-card-text>
-        <v-text-field v-model="keycliente" label="Cliente" prepend-inner-icon="mdi-magnify" variant="outlined"
-          placeholder="Ingresa nombre del cliente" hide-details single-line id="keycliente"></v-text-field>
-        <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
-        <v-data-table :headers="clienteHeaders" :items="clients" items-per-page="10">
-          <!-- Dollar sign formatting for "Importe" column -->
-          <template v-slot:item.name="{ item }">
-            <a href="" class="decoration-none" @keydown.enter.prevent="setCliente(item.id)"
-              @click.prevent="setCliente(item.id)"><span color="primary">{{ item.name }}</span></a>
-          </template>
-          <template v-slot:item.saldo_actual="{ item }">
-            <span>${{ formatNumber(item.saldo_actual) }}</span>
-          </template>
-          <template v-slot:item.limite_credito="{ item }">
-            <span>${{ formatNumber(item.limite_credito) }}</span>
-          </template>
-          <template v-slot:item.actions="{ item }">
-            <v-btn prepend-icon="mdi-check" size="small" tabindex="-1" @click="setCliente(item.id)" color="primary">
-              Agregar
+    <v-card class="">
+
+      <!-- HEADER -->
+      <v-card-title class="d-flex justify-space-between align-center">
+        <span class="text-h6">Seleccionar Cliente</span>
+
+        <!-- Botón para crear cliente -->
+        <router-link :to="{
+          name: 'Clientes',
+        }">
+          <v-btn color="primary" variant="flat" size="small" prepend-icon="mdi-account-plus">
+            Nuevo cliente
+          </v-btn>
+        </router-link>
+      </v-card-title>
+
+      <v-divider></v-divider>
+
+      <v-card-text class="pt-4">
+
+        <!-- BUSCADOR -->
+        <v-text-field v-model="keycliente" prepend-inner-icon="mdi-magnify" label="Buscar cliente"
+          placeholder="Ingresa nombre, teléfono o email" variant="outlined" density="compact" class="mb-4"
+          hide-details></v-text-field>
+
+        <!-- LOADING -->
+        <v-progress-linear color="primary" indeterminate v-if="cargando" class="mb-4"></v-progress-linear>
+
+        <!-- TABLA -->
+        <v-data-table :headers="clienteHeaders" :items="clients" items-per-page="10" hover density="compact">
+          <!-- Nombre clickable -->
+          <template #item.name="{ item }">
+            <v-btn variant="text" color="primary" class="text-capitalize px-0" @click="setCliente(item.id)">
+              {{ item.name }}
             </v-btn>
           </template>
+
+          <!-- Formatos -->
+          <template #item.saldo_actual="{ item }">
+            <span>${{ formatNumber(item.saldo_actual) }}</span>
+          </template>
+
+          <template #item.limite_credito="{ item }">
+            <span>${{ formatNumber(item.limite_credito) }}</span>
+          </template>
+
+          <!-- Acciones -->
+          <template #item.actions="{ item }">
+            <v-btn color="primary" size="small" prepend-icon="mdi-check"   tabindex="-1" @click="setCliente(item.id)">
+              Seleccionar
+            </v-btn>
+          </template>
+
         </v-data-table>
       </v-card-text>
     </v-card>

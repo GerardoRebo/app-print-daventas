@@ -59,7 +59,7 @@
           :error-messages="errors.rfc ? errors.rfc[0] : null"></v-text-field>
         <v-text-field v-model="cliente_form.razon_social" label="Razon social" density="compact"
           :error-messages="errors.razon_social ? errors.razon_social[0] : null"></v-text-field>
-        <v-select :items="fiscalRegimenes" label="Régimen Fiscal" v-model="cliente_form.regimen_fiscal"></v-select>
+        <v-autocomplete :items="fiscalRegimenes" label="Régimen Fiscal" v-model="cliente_form.regimen_fiscal" density="compact" variant="outlined" clearable></v-autocomplete>
         <v-text-field v-model="cliente_form.limite_credito" label="Límite de crédito" density="compact"
           :error-messages="errors.limite_credito ? errors.limite_credito[0] : null"></v-text-field>
         <v-radio-group v-model="cliente_form.price_type" mandatory label="Cliente usa precio">
