@@ -1048,7 +1048,6 @@ import Articulo from "../apis/Articulo";
 import { useSnackBar } from "../composables/SnackBar";
 import DynamicSnack from "../components/DynamicSnack.vue";
 import { useDisplay } from "vuetify";
-import { useUserStore } from "@js/s";
 import { useCurrency } from "@js/composables/useCurrency";
 const { formatNumber } = useCurrency('es-MX', 'MXN');
 const { xs, mdAndUp, mdAndDown, lgAndUp, smAndDown } = useDisplay();
