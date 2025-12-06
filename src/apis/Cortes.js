@@ -48,10 +48,11 @@ export default {
             diferencia
         })
     },
-    realizarMovimiento(tipo, cantidad, comments, concepto) {
+    realizarMovimiento(tipo, cantidad, es_gasto, comments, concepto) {
         return Api().post(`/cortes/realizarmovimiento`, {
             tipo,
             cantidad,
+            es_gasto,
             comments,
             concepto
         })
