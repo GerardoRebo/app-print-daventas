@@ -158,6 +158,7 @@ import { onMounted, nextTick, computed } from "@vue/runtime-core";
 import { useRoute, useRouter } from "vue-router";
 import { watch } from "vue";
 import { useUserStore } from "@js/s";
+import { useCurrency } from "@js/composables/useCurrency";
 const { formatNumber } = useCurrency('es-MX', 'MXN');
 const props = defineProps(['devolucion']);
 const s = useUserStore();
