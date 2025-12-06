@@ -111,6 +111,7 @@ const links = computed(() => {
       { icon: 'mdi-chart-bar', title: 'Reportes', href: "Reportes" },
       { icon: 'mdi-account-group', title: 'Usuarios', href: "UsuariosIndex" },
       { icon: 'mdi-file-presentation-box', title: 'Tabulares', href: "MiTabular" },
+            { icon: 'mdi-receipt', title: 'Gastos', href: "GastosIndex" },
       { icon: 'mdi-file-excel', title: 'Datos', href: "MisDatos" },
       { icon: 'mdi-list-box', title: 'Impuestos', href: "Impuestos" },
       { icon: 'mdi-invoice-list', title: 'Facturas', href: "FacturasIndex" },

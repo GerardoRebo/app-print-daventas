@@ -66,6 +66,7 @@ const AdminCortesShow = () =>
 const Reportes = () => import("../views/admin/Reportes.vue");
 const UsuariosShow = () => import("../views/admin/Usuarios/UsuariosShow.vue");
 const MiTabular = () => import("../views/admin/MiTabular.vue");
+const GastosIndex = () => import('../views/admin/Gastos/GastosIndex.vue')
 const Impuestos = () => import("../views/admin/Impuestos.vue");
 const ImpuestosAsignacionMasiva = () =>
   import("../views/admin/ImpuestosAsignacionMasiva.vue");
@@ -559,6 +560,7 @@ const adminRoutes = [
       requireAdministrationRole: true,
     },
   },
+  { path: 'gastos', name: 'GastosIndex', component: GastosIndex, meta: { hasOrganization: true, requiresAuth: true, requireAdministrationRole: true } },
   {
     path: "mitabular",
     name: "MiTabular",
