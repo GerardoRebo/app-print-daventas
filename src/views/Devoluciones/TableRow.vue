@@ -4,7 +4,7 @@ import moment from "moment-timezone"
 import { useCurrency } from '@js/composables/useCurrency';
 const { formatNumber } = useCurrency('es-MX', 'MXN');
 const props = defineProps(['devolucion']);
-defineEmits(['imprimirMovimiento', 'cancelarMovimiento'])
+defineEmits(['imprimirDevolucion', 'eliminarDevolucion'])
 const { devolucion } = toRefs(props);
 
 </script>
@@ -41,9 +41,9 @@ const { devolucion } = toRefs(props);
                     </v-btn>
                 </template>
             </v-tooltip>
-            <v-tooltip text="Eliminar" location="top" v-else @click="$emit('eliminarDevolucion', devolucion.id)">
+            <v-tooltip text="Eliminar" location="top" v-else >
                 <template v-slot:activator="{ props }">
-                    <v-btn size="x-small" icon color="error" v-bind="props">
+                    <v-btn size="x-small" icon color="error" v-bind="props" @click="$emit('eliminarDevolucion', devolucion.id)">
                         <v-icon>mdi-trash-can</v-icon>
                     </v-btn>
                 </template>

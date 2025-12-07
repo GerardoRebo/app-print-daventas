@@ -305,6 +305,7 @@
 
   <!-- Tabla -->
   <v-container fluid>
+        <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
     <v-data-table :headers="tHeaders" :items="articulos" items-per-page="5" show-select select-strategy="single"
       class="" density="compact">
       <template v-slot:item.data-table-select="{ internalItem, isSelected, toggleSelect, index }">

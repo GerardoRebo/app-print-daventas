@@ -1,6 +1,6 @@
 <template>
   <v-card class="mb-2" v-if="mdAndUp">
-    <v-card-title>Venta # {{ ticketActual?.id }} Devolucion #</v-card-title>
+        <v-card-title>Venta # {{ ticketActual?.consecutivo }} Devolucion # {{ devolucionActual?.id }}</v-card-title>
     <v-card-text>
       <router-link :to="{ name: 'DevolucionesIndex' }">
         <span class="text-decoration-underline text-caption">
@@ -23,7 +23,7 @@
         <p class="text-error mx-4" v-if="devolucionRealizada">Devolucion Realizada</p>
         <div class="flex mx-4">
           <p class="font-weight-bold">Ticket Venta</p>
-          <p class="">Folio: {{ ticketActual.id }}</p>
+          <p class="">Folio:<router-link :to="{name: 'VentasShow', params: {ventaId: ticketActual?.id ?? 1}}"> {{ ticketActual.consecutivo }} </router-link></p>
           <p class="">Almacén: {{ ticketActual.miAlmacenName }}</p>
           <p class="">Total: {{ ticketActual.total }}</p>
           <p>Fecha y Hora: {{ ticketActual.pagado_en }}</p>
@@ -238,6 +238,7 @@ const ticketActual = reactive({
   miAlmacenName: "",
   cancelada: null,
   pagado_en: null,
+  consecutivo: null,
 });
 const devolucionActual = reactive({
   id: null,
@@ -307,6 +308,7 @@ function rellenaTicket(response) {
   ticketActual.nombre = response.nombre;
   ticketActual.total = response.total;
   ticketActual.pagado_en = response.pagado_en;
+  ticketActual.consecutivo = response.consecutivo;
 
   if (ticketActual.miAlmacenId) {
     ticketActual.miAlmacenName = response.almacen.name;

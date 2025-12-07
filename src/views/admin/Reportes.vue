@@ -1,169 +1,225 @@
 <template>
   <v-card class="mb-2">
-    <v-card-title>Cortes</v-card-title>
+    <v-card-title>Reportes</v-card-title>
     <v-card-text>
       <v-row dense class="mt-4">
-        <v-col cols="12" sm="2">
-          <v-date-input label="Desde" v-model="dfecha" hide-details></v-date-input>
+        <!-- Fecha inicio -->
+        <v-col cols="12" md="3">
+          <v-menu v-model="menuInicio" :close-on-content-click="false" transition="scale-transition" offset-y
+            color="primary">
+            <template #activator="{ props }">
+              <v-text-field color="primary" v-bind="props" v-model="formattedDFecha" @update:model-value="updateDFecha"
+                label="Fecha inicio" prepend-inner-icon="mdi-calendar" readonly clearable />
+            </template>
+            <v-date-picker v-model="dfecha" @update:model-value="menuInicio = false" color="primary" />
+          </v-menu>
         </v-col>
-        <v-col cols="12" sm="2">
-          <v-date-input label="Hasta" v-model="hfecha" hide-details></v-date-input>
+
+        <!-- Fecha fin -->
+        <v-col cols="12" md="3">
+          <v-menu v-model="menuFin" :close-on-content-click="false" transition="scale-transition" offset-y
+            color="primary">
+            <template #activator="{ props }">
+              <v-text-field v-bind="props" v-model="formattedHFecha" @update:model-value="updateHFecha"
+                label="Fecha fin" prepend-inner-icon="mdi-calendar" readonly clearable color="primary" />
+            </template>
+            <v-date-picker v-model="hfecha" @update:model-value="menuFin = false" color="primary" />
+          </v-menu>
+        </v-col>
+        <v-col cols="12" sm="8" class="flex items-center space-x-2">
+          <v-row class="gap-2">
+            <!-- Botones rápidos -->
+            <v-btn size="small" variant="outlined" @click="setQuickRange('today')">Hoy</v-btn>
+            <v-btn size="small" variant="outlined" @click="setQuickRange('week')">Semana</v-btn>
+            <v-btn size="small" variant="outlined" @click="setQuickRange('month')">Mes</v-btn>
+            <v-btn size="small" variant="outlined" @click="setQuickRange('lastMonth')">Mes pasado</v-btn>
+            <p class="mx-2">
+              Nota: El rango máximo es de dos años.
+            </p>
+          </v-row>
         </v-col>
       </v-row>
     </v-card-text>
   </v-card>
+
   <div class="flex flex-col px-4">
-    <div class="w-full px-4 min-w-0 bg-gray-100 rounded-md my-4"><canvas id="dailyTotals"></canvas></div>
-    <div class="w-full px-4 min-w-0 bg-gray-100 rounded-md"><canvas id="totals"></canvas></div>
+    <v-skeleton-loader v-if="loading" type="card"></v-skeleton-loader>
+
+    <template v-else>
+      <v-card>
+        <v-card-title>Totales</v-card-title>
+        <v-card-text>
+          En este reporte se muestran las ventas, compras, ganancias, abonos y devoluciones de clientes
+          en el rango de fechas seleccionado.
+          <div class="w-full px-4 min-w-0 bg-gray-100 rounded-md my-4">
+            <canvas ref="dailyTotalsRef"></canvas>
+          </div>
+        </v-card-text>
+      </v-card>
+
+      <v-card class="my-4">
+        <v-card-title>Totales acumulados</v-card-title>
+        <v-card-text>
+          En este reporte se muestran los totales acumulados de ventas, compras, ganancias,
+          abonos y devoluciones de clientes en el rango de fechas seleccionado.
+          <div class="w-full px-4 min-w-0 bg-gray-100 rounded-md">
+            <canvas ref="totalsRef"></canvas>
+          </div>
+        </v-card-text>
+      </v-card>
+    </template>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from "vue";
-import moment from "moment-timezone"
+import { nextTick, onMounted, ref, watch } from "vue";
+import moment from "moment-timezone";
 import Cortes from "@js/apis/Cortes";
-import Chart from 'chart.js/auto'
+import Chart from "chart.js/auto";
 import useMisFechas from "@js/composables/useMisFechas";
 import { useRoute, useRouter } from "vue-router";
 import useQuery from "../../composables/useQuery";
 
 const router = useRouter();
 const route = useRoute();
-const { dfecha, hfecha, formattedDFecha } = useMisFechas();
+const { dfecha, hfecha, formattedDFecha, formattedHFecha, updateDFecha, updateHFecha } = useMisFechas();
 const { pushQuery } = useQuery();
 
+const loading = ref(false);
+const dailyTotalsRef = ref(null)
+const totalsRef = ref(null)
+const menuInicio = ref(false);
+const menuFin = ref(false);
 
-watch(() => route.query, () => getAcumulados())
+watch(() => route.query, () => getAcumulados());
 watch(dfecha, () => {
-  pushQuery('dfecha', formattedDFecha.value)
+  pushQuery("dfecha", formattedDFecha.value);
+  localStorage.setItem("report_dfecha", formattedDFecha.value);
 });
 watch(hfecha, () => {
-  pushQuery('hfecha', dfecha.value)
+  pushQuery("hfecha", moment(hfecha.value).format("YYYY-MM-DD"));
+  localStorage.setItem("report_hfecha", moment(hfecha.value).format("YYYY-MM-DD"));
 });
-function getAcumulados() {
-  Cortes.getAcumulados(dfecha.value, hfecha.value)
-    .then((response) => {
-      loadChart(response.data.dailyTotals);
-      loadChartTotals(response.data.totals);
-    })
-    .catch((error) => {
-      console.log(error);
-      return
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
-}
-let chartInstance = null;
 
-const loadChart = (data) => {
-  const ctx = document.getElementById('dailyTotals');
+function setQuickRange(type) {
+  let start, end;
+  const today = moment();
 
-  // Destroy the previous chart instance if it exists
-  if (chartInstance) {
-    chartInstance.destroy();
+  switch (type) {
+    case "today":
+      start = today.clone();
+      end = today.clone();
+      break;
+    case "week":
+      start = today.clone().startOf("week");
+      end = today.clone().endOf("week");
+      break;
+    case "month":
+      start = today.clone().startOf("month");
+      end = today.clone().endOf("month");
+      break;
+    case "lastMonth":
+      start = today.clone().subtract(1, "month").startOf("month");
+      end = today.clone().subtract(1, "month").endOf("month");
+      break;
   }
 
-  // Create a new chart instance
+  dfecha.value = start.toDate();
+  hfecha.value = end.toDate();
+}
+
+async function getAcumulados() {
+  loading.value = true;
+  try {
+    const response = await Cortes.getAcumulados(dfecha.value, hfecha.value);
+
+    // primero apagamos el loader
+    loading.value = false;
+
+    // esperamos a que Vue pinte los canvas en el DOM
+    await nextTick();
+
+    // ahora sí, ya existen los canvas
+    loadChart(response.data.dailyTotals);
+    loadChartTotals(response.data.totals);
+  } catch (error) {
+    console.error(error);
+    alert("Ha ocurrido un error");
+    loading.value = false;
+  }
+}
+
+let chartInstance = null;
+const loadChart = (data) => {
+  const ctx = dailyTotalsRef.value?.getContext("2d");
+  if (!ctx) return;
+
+  if (chartInstance) chartInstance.destroy();
+
   chartInstance = new Chart(ctx, {
-    type: 'line',
+    type: "line",
     data: {
-      labels: data.map(row => row.date),
+      labels: data.map((row) => row.date),
       datasets: [
         {
-          label: 'Ventas',
-          data: data.map(row => row.acumulado_ventas),
-          // You can also customize the dataset (color, etc.) here if needed
-          borderColor: 'rgba(0, 128, 0, 1)',
+          label: "Ventas",
+          data: data.map((row) => row.acumulado_ventas),
+          borderColor: "rgba(0, 200, 0, 1)",
           borderWidth: 2,
-          fill: false
+          fill: false,
         },
-        {
-          label: 'Abonos de clientes',
-          data: data.map(row => row.abonos_efectivo),
-          // You can also customize the dataset (color, etc.) here if needed
-          borderColor: 'rgba(0,255,255, 1)',
-          borderWidth: 2,
-          fill: false
-        },
-        {
-          label: 'Ganacias',
-          data: data.map(row => row.acumulado_ganancias),
-          // You can also customize the dataset (color, etc.) here if needed
-          borderColor: 'rgba(0,0,255, 1)',
-          borderWidth: 2,
-          fill: false
-        },
-        {
-          label: 'Compras de mercancia',
-          data: data.map(row => row.compras),
-          // You can also customize the dataset (color, etc.) here if needed
-          borderColor: 'rgba(128,0,0, 10)',
-          borderWidth: 2,
-          fill: false
-        },
-        {
-          label: 'Devoluciones',
-          data: data.map(row => row.devoluciones_ventas_efectivo),
-          // You can also customize the dataset (color, etc.) here if needed
-          borderColor: 'rgba(128,128,0, 10)',
-          borderWidth: 2,
-          fill: false
-        }
-      ]
-    }
+        // ... tus demás datasets
+      ],
+    },
   });
-}
+};
+
 let chartTotalsInstance = null;
 const loadChartTotals = (data) => {
-  const ctx = document.getElementById('totals');
+  const ctx = totalsRef.value?.getContext("2d");
+  if (!ctx) return;
 
-  // Destroy the previous chart instance if it exists
-  if (chartTotalsInstance) {
-    chartTotalsInstance.destroy();
-  }
 
-  // Create a new chart instance
+  if (chartTotalsInstance) chartTotalsInstance.destroy();
+
   chartTotalsInstance = new Chart(ctx, {
-    type: 'bar',
+    type: "bar",
     data: {
-      labels: ['Ventas', 'Compras', 'Ganancias', 'Abonos Cliente', 'Devoluciones Cliente'],
-      datasets: [{
-        label: 'Totales',
-        data: Object.values(data),
-        backgroundColor: [
-          'rgba(75, 192, 192, 0.2)',
-          'rgba(255, 99, 132, 0.2)',
-          'rgba(255, 206, 86, 0.2)',
-          'rgba(54, 162, 235, 0.2)',
-          'rgba(153, 102, 255, 0.2)'
-        ],
-        borderColor: [
-          'rgba(75, 192, 192, 1)',
-          'rgba(255, 99, 132, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(153, 102, 255, 1)'
-        ],
-        borderWidth: 1
-      }]
+      labels: ["Ventas", "Compras", "Ganancias", "Abonos Cliente", "Devoluciones Cliente"],
+      datasets: [
+        {
+          label: "Totales",
+          data: Object.values(data),
+          backgroundColor: [
+            "rgba(0,200,0,0.3)",
+            "rgba(255,0,0,0.3)",
+            "rgba(0,200,200,0.3)",
+            "rgba(0,120,255,0.3)",
+            "rgba(200,200,0,0.3)",
+          ],
+          borderColor: [
+            "rgba(0,200,0,1)",
+            "rgba(255,0,0,1)",
+            "rgba(0,200,200,1)",
+            "rgba(0,120,255,1)",
+            "rgba(200,200,0,1)",
+          ],
+          borderWidth: 1,
+        },
+      ],
     },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
   });
-}
+};
 
 onMounted(() => {
   if (route.query.dfecha) {
-    dfecha.value = moment(route.query.dfecha, 'YYYY-MM-DD').toDate();
+    dfecha.value = moment(route.query.dfecha, "YYYY-MM-DD").toDate();
   }
+
   if (route.query.hfecha) {
-    hfecha.value = moment(route.query.hfecha, 'YYYY-MM-DD').toDate();
+    hfecha.value = moment(route.query.hfecha, "YYYY-MM-DD").toDate();
   }
+
   getAcumulados();
 });
 </script>

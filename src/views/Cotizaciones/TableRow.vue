@@ -25,7 +25,7 @@ const { cotization } = toRefs(props);
             }">
                 <v-btn prepend-icon="mdi-eye" size="small">ver</v-btn>
             </router-link>
-            <v-btn @click="imprimircotization(cotization.id)" prepend-icon="mdi-print-pos" size="small">
+            <v-btn @click="$emit('imprimirCotizacion', cotizacion.id)" prepend-icon="mdi-pos-print" size="small">
                 Imprimir
             </v-btn>
         </td>

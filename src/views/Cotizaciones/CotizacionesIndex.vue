@@ -3,19 +3,36 @@
     <v-card-title>Historial Cotizaciones</v-card-title>
     <v-card-text>
       <v-row dense class="mt-4">
+        <!-- Fecha inicio -->
         <v-col cols="12" md="3">
-          <v-date-input label="Desde" v-model="dfecha" max-width="368" hide-details></v-date-input>
+          <v-menu v-model="menuInicio" :close-on-content-click="false" transition="scale-transition" offset-y
+            color="primary">
+            <template #activator="{ props }">
+              <v-text-field color="primary" v-bind="props" v-model="formattedDFecha" @update:model-value="updateDFecha"
+                label="Fecha inicio" prepend-inner-icon="mdi-calendar" readonly clearable />
+            </template>
+            <v-date-picker v-model="dfecha" @update:model-value="menuInicio = false" color="primary" />
+          </v-menu>
         </v-col>
+
+        <!-- Fecha fin -->
         <v-col cols="12" md="3">
-          <v-date-input label="Hasta" v-model="hfecha" max-width="368" hide-details></v-date-input>
+          <v-menu v-model="menuFin" :close-on-content-click="false" transition="scale-transition" offset-y
+            color="primary">
+            <template #activator="{ props }">
+              <v-text-field v-bind="props" v-model="formattedHFecha" @update:model-value="updateHFecha"
+                label="Fecha fin" prepend-inner-icon="mdi-calendar" readonly clearable color="primary" />
+            </template>
+            <v-date-picker v-model="hfecha" @update:model-value="menuFin = false" color="primary" />
+          </v-menu>
         </v-col>
       </v-row>
     </v-card-text>
   </v-card>
   <!-- Tabla -->
   <v-container fluid>
-    <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
-    <v-table density="compact" color="primary_d700">
+    <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
+    <v-table density="compact" color="secondary">
       <thead>
         <tr>
           <th class="text-left" v-for="header in tHeaders" :key="header">
@@ -24,8 +41,8 @@
         </tr>
       </thead>
       <tbody>
-        <TableRow v-for="venta in misventas.data" :key="venta.id" :cotization="venta" @imprimir-venta="imprimirVenta"
-          @cancelar-venta="cancelarVenta" >
+        <TableRow v-for="venta in misventas.data" :key="venta.id" :cotizacion="venta" @imprimir-cotizacion="imprimirVenta"
+          @cancelar-venta="cancelarVenta">
         </TableRow>
       </tbody>
     </v-table>
@@ -61,9 +78,14 @@ const tHeaders = ref([
   'Total',
   'Status',
   '',
+  '',
 ]);
+// Menús fechas
+const menuInicio = ref(false);
+const menuFin = ref(false);
 
-const { dfecha, hfecha } = useMisFechas();
+// Composable fechas
+const { dfecha, hfecha, formattedDFecha, formattedHFecha, updateDFecha, updateHFecha } = useMisFechas();
 
 const page = ref(1);
 watch(page, (newVal) => {
@@ -83,11 +105,14 @@ watch(() => route.query, () => {
 })
 
 function getMisVentas() {
+  cargando.value = true;
   Cotizacion.getMisVentas(page.value, dfecha.value, hfecha.value)
     .then((response) => {
+      cargando.value = false;
       misventas.value = response.data;
     })
     .catch((error) => {
+      cargando.value = false;
       handleOpException(error);
       alert("Ha ocurrido un error")
     });
