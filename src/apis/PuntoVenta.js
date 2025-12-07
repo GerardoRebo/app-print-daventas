@@ -15,13 +15,9 @@ export default {
   getLastTicket(ventaticket) {
     return Api().get("/puntoventa/lastTicket");
   },
-  getMisVentas(page, dfecha, hfecha) {
+  getMisVentas(params) {
     return Api().get("/puntoventa/misventas", {
-      params: {
-        page,
-        dfecha,
-        hfecha,
-      },
+      params,
     });
   },
   getAllPendientes() {
