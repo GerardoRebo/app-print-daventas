@@ -62,6 +62,11 @@ export default createVuetify({
         variant: 'outlined',
 
       },
+      VAutocomplete: {
+        color: 'secondary',
+        density: 'compact',
+        variant: 'outlined',
+      },
       // VCardTitle: {
       //   class: 'text-secondary',
       // },
@@ -77,6 +82,11 @@ export default createVuetify({
       }
     },
     VTextField: {
+      color: 'secondary',
+      density: 'compact',
+      variant: 'outlined',
+    },
+    VAutocomplete: {
       color: 'secondary',
       density: 'compact',
       variant: 'outlined',

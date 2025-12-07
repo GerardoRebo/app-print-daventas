@@ -22,13 +22,9 @@ export default {
             }
         })
     },
-    getMisCortes(page, dfecha, hfecha) {
+    getMisCortes(params) {
         return Api().get(`/cortes/getMisCortes`, {
-            params: {
-                page,
-                dfecha,
-                hfecha
-            }
+            params 
         })
     },
     getUserMovimientos(turno) {

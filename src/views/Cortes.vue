@@ -168,6 +168,7 @@ function habilitarCaja() {
       Cortes.realizarMovimiento(
         "entrada",
         efInicial.value,
+        null,
         "Ingreso Inicial",
         "Ingreso Inicial"
       )
