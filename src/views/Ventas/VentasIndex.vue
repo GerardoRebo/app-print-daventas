@@ -35,6 +35,12 @@
       </v-row>
 
       <v-row dense>
+        <!-- Usuario -->
+        <v-col cols="12" md="2" v-if="isAdmin">
+          <v-autocomplete prepend-inner-icon="mdi-account" v-model="filters.cliente" :items="clientes" item-title="name" item-value="id" label="Cliente"
+            return-object clearable @update:model-value="val => filters.cliente_id = val ? val.id : null"
+            density="compact" variant="outlined" />
+        </v-col>
         <!-- Cliente -->
         <v-col cols="12" md="2">
           <v-autocomplete prepend-inner-icon="mdi-account" v-model="filters.cliente" :items="clientes" item-title="name" item-value="id" label="Cliente"
@@ -163,6 +169,9 @@ const filters = reactive({
   consecutivo: "",
   tipo: 'efectivo',
   turno_id: null,
+});
+const isAdmin = computed(() => {
+  return s.roles.includes("Admin") || s.roles.includes("Owner");
 });
 
 

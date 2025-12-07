@@ -4,31 +4,53 @@
     <v-card-text>
       <v-row dense class="mt-4">
         <v-col cols="12" sm="2">
-          <v-date-input label="Desde" v-model="dfecha" hide-details></v-date-input>
+          <v-menu v-model="menuInicio" :close-on-content-click="false" transition="scale-transition" offset-y
+            color="primary">
+            <template #activator="{ props }">
+              <v-text-field color="primary" v-bind="props" v-model="formattedDFecha" @update:model-value="updateDFecha"
+                label="Fecha inicio" prepend-inner-icon="mdi-calendar" readonly clearable />
+            </template>
+            <v-date-picker v-model="dfecha" @update:model-value="menuInicio = false" color="primary" />
+          </v-menu>
         </v-col>
         <v-col cols="12" sm="2">
-          <v-date-input label="Hasta" v-model="hfecha" hide-details></v-date-input>
+          <v-menu v-model="menuFin" :close-on-content-click="false" transition="scale-transition" offset-y
+            color="primary">
+            <template #activator="{ props }">
+              <v-text-field v-bind="props" v-model="formattedHFecha" @update:model-value="updateHFecha"
+                label="Fecha fin" prepend-inner-icon="mdi-calendar" readonly clearable color="primary" />
+            </template>
+            <v-date-picker v-model="hfecha" @update:model-value="menuFin = false" color="primary" />
+          </v-menu>
         </v-col>
-        <v-col cols="12" sm="1">
+      </v-row>
+      <v-row dense>
+        <v-col cols="12" sm="2">
           <v-select :items="[
             { value: '', title: 'Cualquier estado' },
             { value: 'P', title: 'Pendiente' },
             { value: 'R', title: 'Recibida' },
             { value: 'C', title: 'Cancelada' },
-          ]" label="Estado" v-model="estadomovimiento" max-width="200" hide-details></v-select>
-        </v-col>
-        <v-col cols="12" sm="1">
-          <v-select :items="proveedorsItems" label="Proveedor" v-model="proveedor" max-width="200"
-            hide-details></v-select>
-        </v-col>
-        <v-col cols="12" sm="1">
-          <v-select :items="almacensItems" label="Almacén" v-model="almacen" max-width="200" hide-details></v-select>
+          ]" label="Estado" clearable prepend-inner-icon="mdi-list-status" v-model="estadomovimiento" hide-details></v-select>
         </v-col>
         <v-col cols="12" sm="2">
-          <v-text-field label="Buscar por folio" placeholder="Ingresa folio + Enter" v-model="folio" hide-details
-            @keydown.stop.enter="getOcById" autocomplete="password" :append-inner-icon="'mdi-magnify'"
-            @click:append-inner="getOcById" />
+          <v-select prepend-inner-icon="mdi-handshake" clearable :items="proveedorsItems" label="Proveedor" v-model="proveedor"
+            hide-details></v-select>
         </v-col>
+        <v-col cols="12" sm="2">
+          <v-select :items="almacensItems" prepend-inner-icon="mdi-warehouse" clearable label="Almacén" v-model="almacen"
+            hide-details></v-select>
+        </v-col>
+        <v-col cols="12" sm="2">
+          <v-select :items="tipoMovimientoItems" label="Tipo movimiento" clearable v-model="tipoMovimiento"
+            hide-details></v-select>
+        </v-col>
+        <v-col cols="12" sm="2">
+          <v-text-field label="Buscar por consecutivo" placeholder="Ingresa folio + Enter" v-model="folio" hide-details
+            @keydown.stop.enter="getMisMovimientos" autocomplete="password" :append-inner-icon="'mdi-magnify'"
+            @click:append-inner="getMisMovimientos" />
+        </v-col>
+
       </v-row>
     </v-card-text>
   </v-card>
@@ -68,33 +90,115 @@
             <v-select :items="almacensItems" label="Almacén" v-model="almacen" max-width="200" hide-details></v-select>
           </v-col>
           <v-col cols="12" sm="2">
-            <v-text-field label="Buscar por folio" placeholder="Ingresa folio + Enter" v-model="folio" hide-details
-              @keydown.stop.enter="getOcById" autocomplete="password" :append-inner-icon="'mdi-magnify'"
-              @click:append-inner="getOcById" />
+            <v-text-field label="Buscar por consecutivo" placeholder="Ingresa folio + Enter" v-model="folio" hide-details
+              @keydown.stop.enter="getMisMovimientos" autocomplete="password" :append-inner-icon="'mdi-magnify'"
+              @click:append-inner="getMisMovimientos" />
           </v-col>
         </v-row>
       </v-container>
     </v-card>
   </v-navigation-drawer>
   <v-container fluid>
-    <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
-    <v-table density="compact" color="primary_d700">
-      <thead>
-        <tr>
-          <th class="text-left" v-for="header in tHeaders" :key="header">
-            {{ header }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <TableRow v-for="movimiento in mismovimientos.data" :key="movimiento.id" :movimiento="movimiento"
-          @imprimir-movimiento="imprimirMovimiento" @cancelar-movimiento="cancelarMovimiento">
-        </TableRow>
-      </tbody>
-    </v-table>
-    <v-row class=" ma-1" justify="end">
-      <v-pagination v-model="page" :length="mismovimientos.last_page" :total-visible="3"></v-pagination>
-    </v-row>
+    <v-data-table-server :headers="tHeaders" :items="mismovimientos.data" :items-length="mismovimientos.total ?? 0"
+      :loading="cargando" :search="search" @update:options="getMisMovimientos" fixed-header height="60vh"
+      density="compact" hover color="primary">
+
+      <!-- ID -->
+      <template #item.id="{ item }">
+        {{ item.id }}
+      </template>
+
+      <!-- Consecutivo -->
+      <template #item.consecutivo="{ item }">
+        {{ item.consecutivo }}
+      </template>
+
+      <!-- Fecha -->
+      <template #item.enviada_en="{ item }">
+        {{ moment(item.enviada_en).format("DD-MM-YYYY h:mm:ssa") }}
+      </template>
+
+      <!-- Usuario -->
+      <template #item.user.name="{ item }">
+        {{ item.user?.name }}
+      </template>
+
+      <!-- Origen -->
+      <template #item.almacen_origen.name="{ item }">
+        <strong>{{ item.almacen_origen?.name }}</strong>
+      </template>
+
+      <!-- Destino -->
+      <template #item.almacen_destino.name="{ item }">
+        <strong>{{ item.almacen_destino?.name ?? "" }}</strong>
+      </template>
+
+      <!-- Total -->
+      <template #item.total_enviado="{ item }">
+        <strong>{{ formatNumber(item.total_enviado) }}</strong>
+      </template>
+
+      <!-- Tipo -->
+      <template #item.tipo="{ item }">
+        <span class="font-bold">
+          {{ item.tipo === "C" ? "Compra" :
+            item.tipo === "T" ? "Transferencia" :
+              item.tipo === "S" ? "S. Trans" : "" }}
+        </span>
+      </template>
+
+      <!-- Proveedor -->
+      <template #item.proveedor.name="{ item }">
+        {{ item.proveedor?.name ?? "" }}
+      </template>
+
+      <!-- Estado -->
+      <template #item.estado="{ item }">
+        <span>
+          {{
+            item.estado === "C" ? "Cancelada" :
+              item.estado === "P" ? "Pendiente" :
+                item.estado === "R" ? "Recibida" :
+                  "Borrador"
+          }}
+        </span>
+      </template>
+
+      <!-- Acciones -->
+      <template #item.actions="{ item }">
+        <router-link :to="{ name: 'MovimientosShow', params: { movimientoId: item.id } }" class="mx-1">
+          <v-tooltip text="Ver" location="top">
+            <template #activator="{ props }">
+              <v-btn icon size="x-small" v-bind="props">
+                <v-icon>mdi-eye</v-icon>
+              </v-btn>
+            </template>
+          </v-tooltip>
+        </router-link>
+
+        <v-tooltip text="Imprimir" location="top">
+          <template #activator="{ props }">
+            <v-btn icon size="x-small" class="mx-1" v-bind="props" @click="imprimirMovimiento(item.id)">
+              <v-icon>mdi-cloud-print</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+
+        <v-tooltip text="Cancelar" location="top" v-if="item.estado != 'C'">
+          <template #activator="{ props }">
+            <v-btn icon size="x-small" class="mx-1" v-bind="props" @click="cancelarMovimiento(item.id)">
+              <v-icon>mdi-cancel</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+
+        <p class="text-error" v-if="item.estado == 'C'">
+          Cancelada
+        </p>
+      </template>
+
+    </v-data-table-server>
+
   </v-container>
 </template>
 
@@ -109,17 +213,24 @@ import useQuery from "@js/composables/useQuery";
 import useDebounce from "@js/composables/useDebounce";
 import { useUserStore } from "@js/s";
 import useMisFechas from "@js/composables/useMisFechas";
-import TableRow from "./TableRow.vue";
 import { useDisplay } from "vuetify";
+import { reactive } from "vue";
 const { xs, smAndDown, mdAndUp, mdAndDown } = useDisplay()
-
+import { useCurrency } from '@js/composables/useCurrency';
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 const s = useUserStore();
 const { handleOpException } = s;
 const route = useRoute();
 const router = useRouter();
-const { dfecha, hfecha, formattedDFecha, formattedHFecha } = useMisFechas();
+const { dfecha, hfecha, formattedDFecha, formattedHFecha, updateDFecha, updateHFecha } = useMisFechas();
+const menuInicio = ref(false);
+const menuFin = ref(false);
 const { pushQuery } = useQuery();
 let { debounce } = useDebounce();
+// Composable fechas
+const isAdmin = computed(() => {
+  return s.roles.includes("Admin") || s.roles.includes("Owner");
+});
 
 const estadomovimiento = ref("");
 const drawer = ref(true);
@@ -128,39 +239,54 @@ const proveedors = ref([]);
 const mismovimientos = ref([]);
 const almacens = ref([]);
 const almacen = ref(null);
+const tipoMovimiento = ref(null);
 const folio = ref(null);
 const cargando = ref(false);
+const users = ref([]);
 const page = ref(1);
-watch(page, (newVal) => {
-  onPagination(newVal)
-})
-const onPagination = (page) => {
-  router
-    .push({ name: route.name, query: { ...route.query, page } })
-    .catch(() => {
-    }).finally(() => {
-      getMisMovimientos()
-    });
-};
+const search = ref('');
+// Filtros que sí deben ir a la URL
+const filters = reactive({
+  cliente: null,
+  cliente_id: null,
+  user: null,
+  user_id: null,
+  almacen_id: null,
+  consecutivo: "",
+  tipo: 'efectivo',
+  turno_id: null,
+});
 const tHeaders = ref([
-  'Id',
-  'Folio',
-  'Fecha',
-  'Usuario',
-  'Almacén Origen',
-  'Almacen Destino',
-  'Total',
-  'Tipo',
-  'Proveedor',
-  'Satus',
-  'Acciones',
+  { title: 'ID', key: 'id' },
+  { title: 'Consecutivo', key: 'consecutivo' },
+  { title: 'Fecha', key: 'enviada_en' },
+  { title: 'Usuario', key: 'user.name' },
+  { title: 'Almacén Origen', key: 'almacen_origen.name' },
+  { title: 'Almacén Destino', key: 'almacen_destino.name' },
+  { title: 'Total', key: 'total_enviado' },
+  { title: 'Tipo', key: 'tipo' },
+  { title: 'Proveedor', key: 'proveedor.name' },
+  { title: 'Estado', key: 'estado' },
+  { title: 'Acciones', key: 'actions', sortable: false },
 ]);
+const options = ref({
+  page: 1,
+  itemsPerPage: 10,
+  sortBy: [],
+});
+
 const almacensItems = computed(() => [
   { title: 'Selecciona', value: null },
   ...almacens.value.map((item) => ({
     title: item.name,
     value: item.id.toString(),
   })),
+]);
+const tipoMovimientoItems = computed(() => [
+  { title: 'Todos', value: null },
+  { title: 'Compra', value: 'C' },
+  { title: 'Transferencia', value: 'T' },
+  { title: 'Solicitud de Transferencia', value: 'S' },
 ]);
 const proveedorsItems = computed(() => [
   { title: 'Selecciona', value: null },
@@ -186,16 +312,28 @@ watch(proveedor, () => {
 watch(almacen, () => {
   pushQuery('almacen', almacen.value)
 });
+watch(tipoMovimiento, () => {
+  pushQuery('tipoMovimiento', tipoMovimiento.value)
+});
 // const store = useStore();
 
-function getMisMovimientos() {
-  Movimientos.getMisMovimientos(
-    page.value,
-    dfecha.value,
-    hfecha.value,
-    estadomovimiento.value,
-    proveedor.value,
-    almacen.value
+function getMisMovimientos(newOptions) {
+  if (newOptions) {
+    options.value = { ...options.value, ...newOptions };
+  }
+  const { page, itemsPerPage } = options.value;
+  cargando.value = true;
+  Movimientos.getMisMovimientos({
+    page: page,
+    dfecha: dfecha.value,
+    hfecha: hfecha.value,
+    estadomovimiento: estadomovimiento.value,
+    proveedor: proveedor.value,
+    almacen: almacen.value,
+    tipoMovimiento: tipoMovimiento.value,
+    consecutivo: folio.value,
+    items_per_page: itemsPerPage
+  }
   )
     .then((response) => {
       mismovimientos.value = response.data;
@@ -227,23 +365,6 @@ function getAllProveedors() {
       alert("Ha ocurrido un error")
     });
 }
-function getOcById() {
-  cargando.value = true;
-  Movimientos.getOcById(folio.value)
-    .then((response) => {
-      if (response.data.total === 0) {
-        console.log(response.data);
-        return alert("Ningun movimiento encontrado");
-      }
-      mismovimientos.value = response.data;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    }).finally(() => {
-      cargando.value = false;
-    });
-}
 function imprimirMovimiento(movimiento) {
   if (window.__TAURI__) {
     const webview = new WebviewWindow('ImprimirMovimientos', {
@@ -265,6 +386,7 @@ function cancelarMovimiento(movimiento) {
     .then(() => {
       cargando.value = false;
       inicializacion();
+      getMisMovimientos(options.value);
     })
     .catch((error) => {
       handleOpException(error);
@@ -294,11 +416,14 @@ function inicializacion() {
   if (route.query.almacen) {
     almacen.value = route.query.almacen;
   }
-  getMisMovimientos();
+  if (route.query.tipoMovimiento) {
+    tipoMovimiento.value = route.query.tipoMovimiento;
+  }
+  // getMisMovimientos();
   getAllAlmacens();
   getAllProveedors();
 }
+inicializacion();
 onMounted(() => {
-  inicializacion();
 });
 </script>

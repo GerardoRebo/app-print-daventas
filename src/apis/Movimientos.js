@@ -24,17 +24,9 @@ export default {
     getSpecificTicketForPrinting(ticket) {
         return Api().get("/movimientos/getSpecificTicketForPrinting/" + ticket);
     },
-    getMisMovimientos(page, dfecha, hfecha, estadomovimiento, proveedor, almacen) {
-
+    getMisMovimientos(params) {
         return Api().get("/movimientos/mismovimientos", {
-            params: {
-                page,
-                dfecha,
-                hfecha,
-                estadomovimiento,
-                proveedor,
-                almacen
-            }
+            params
         });
     },
     // getArticulos(movimiento, almacen) {
