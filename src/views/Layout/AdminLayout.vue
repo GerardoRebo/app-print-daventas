@@ -99,7 +99,7 @@ onUnmounted(() => {
 
 });
 
-const drawer = ref(false);
+const drawer = ref(true);
 
 const links = computed(() => {
   if (isAdmin.value) {
@@ -218,7 +218,7 @@ const links = computed(() => {
       </template>
       <v-spacer></v-spacer>
     </v-app-bar>
-    <v-navigation-drawer :location="$vuetify.display.mobile ? 'bottom' : undefined" temporary v-model="drawer">
+    <v-navigation-drawer :location="$vuetify.display.mobile ? 'bottom' : undefined" v-model="drawer">
       <v-list nav color="primary">
         <!-- Loop through the main links array -->
         <div v-for="(link, index) in links" :key="index" :prepend-icon="link.icon" :value="link.title">

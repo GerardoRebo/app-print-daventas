@@ -174,7 +174,7 @@ function getMyOrganization() {
 }
 async function loadInitialData() {
   const { data } = await Organizacion.loadFacturacionData();
-  saldo.value = data?.saldo|| 0;
+  saldo.value = data?.saldo || 0;
   paquetes.value = data?.paquetes || [];
 }
 const fillValues = (response) => {
@@ -194,24 +194,24 @@ const fillValues = (response) => {
 };
 const onBuyPack = async (item) => {
   try {
-  if (cargando.value) {
-    return;
-  }
-  cargando.value = true;
-  
-  const { data } = await Organizacion.buyPacket(item)
-  console.log(data);
-  
-  window.location.href = data.init_point
+    if (cargando.value) {
+      return;
+    }
+    cargando.value = true;
 
-  isModalOpen.value = false;
-  loadInitialData();
+    const { data } = await Organizacion.buyPacket(item)
+    console.log(data);
+
+    window.location.href = data.init_point
+
+    isModalOpen.value = false;
+    loadInitialData();
 
   } catch (error) {
     console.error(error);
     handleOpException(error);
     alert("Ha ocurrido un error al comprar el paquete");
-  }finally {
+  } finally {
     cargando.value = false;
   }
 };
@@ -243,7 +243,8 @@ onMounted(() => {
                 v-model="myOrganization.codigo_postal" />
             </v-row>
             <v-row dense>
-        <v-select :items="fiscalRegimenes" label="Régimen Fiscal" v-model="cliente_form.regimen_fiscal"></v-select>
+              <v-autocomplete :items="fiscalRegimenes" label="Régimen Fiscal" v-model="myOrganization.regimen_fiscal"
+                variant="outlined" density="compact" clearable></v-autocomplete>
             </v-row>
             <v-row dense>
               <v-select :items="c_periodicidad" label="Realizar facturas globales por"

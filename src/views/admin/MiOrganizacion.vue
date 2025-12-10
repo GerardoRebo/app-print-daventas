@@ -29,6 +29,7 @@
           <v-card-title>Mi organización</v-card-title>
           <v-card-text>
             <v-text-field label="Nombre Comercial" autocomplete="off" placeholder="" v-model="myOrganization.name" />
+            <v-text-field label="Email"  placeholder="" v-model="myOrganization.email" :error-messages="errors.email ? errors.email[0] : null" />
           </v-card-text>
           <v-card-actions>
             <v-btn @click.prevent="updateMyOrganization" color="primary" variant="outlined"
@@ -121,6 +122,7 @@ const fillValues = (response) => {
   const data = response.data;
   myOrganizationId.value = data.id;
   myOrganization.name = data.name;
+  myOrganization.email = data.email;
   myOrganization.razon_social = data?.facturacion_info?.razon_social;
   myOrganization.regimen_fiscal = data?.facturacion_info?.regimen_fiscal;
   myOrganization.clave_privada_sat = data?.facturacion_info?.clave_privada_sat;

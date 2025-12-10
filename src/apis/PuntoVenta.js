@@ -132,6 +132,9 @@ export default {
   verificarEstadoCancelacion(ticket) {
     return Api().post("/puntoventa/verificar_estado_cancelacion/" + ticket);
   },
+  sendEmail(ticket, emailData) {
+    return Api().post("/puntoventa/sendEmail/" + ticket, emailData);
+  },
   descargarXml(ticket) {
     return Api().get("/puntoventa/descargarXml/" + ticket);
   },

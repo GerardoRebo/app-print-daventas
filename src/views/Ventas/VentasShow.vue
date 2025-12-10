@@ -45,6 +45,13 @@
                 <v-list-item-title>
                   Ver PDF</v-list-item-title>
               </v-list-item>
+              <v-list-item @click="isEmailOpen = true">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-email"></v-icon>
+                </template>
+                <v-list-item-title>
+                  Enviar por correo </v-list-item-title>
+              </v-list-item>
               <v-list-item @click="descargarPdf()">
                 <template v-slot:prepend>
                   <v-icon icon="mdi-file-pdf-box"></v-icon>
@@ -95,10 +102,10 @@
               name: 'FacturasGlobalesShow',
               params: {
                 facturaId:
-                  ticketActual.latest_pre_factura.pre_factura_global_id,
+                  ticketActual?.latest_pre_factura?.pre_factura_global_id ?? 1,
               },
             }">
-              {{ ticketActual.latest_pre_factura.pre_factura_global_id }}
+              {{ ticketActual?.latest_pre_factura?.pre_factura_global_id }}
             </router-link>
           </p>
         </template>
@@ -176,7 +183,7 @@
           <template v-else-if="!ticketActual.esta_cancelado">
             <v-menu transition="scale-transition" size="small">
               <template v-slot:activator="{ props }">
-                <v-btn variant="tonal" v-bind="props" append-icon="mdi-menu-down" size="small">
+                <v-btn variant="tonal" v-bind="props" append-icon="mdi-menu-down" size="small" block>
                   Factura
                 </v-btn>
               </template>
@@ -188,6 +195,13 @@
                   <v-list-item-title>
                     Ver PDF</v-list-item-title>
                 </v-list-item>
+                <v-list-item @click="isEmailOpen = true">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-email"></v-icon>
+                </template>
+                <v-list-item-title>
+                  Enviar por correo </v-list-item-title>
+              </v-list-item>
                 <v-list-item @click="descargarPdf()">
                   <template v-slot:prepend>
                     <v-icon icon="mdi-file-pdf-box"></v-icon>
@@ -223,7 +237,7 @@
                 name: 'FacturasGlobalesShow',
                 params: {
                   facturaId:
-                    ticketActual.latest_pre_factura.pre_factura_global_id,
+                    ticketActual?.latest_pre_factura?.pre_factura_global_id ??1,
                 },
               }">
                 {{ ticketActual.latest_pre_factura.pre_factura_global_id }}
@@ -478,6 +492,67 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+  <v-dialog v-model="isEmailOpen" max-width="600">
+    <v-card>
+      <v-card-title class="text-h6">
+        Enviar factura por correo
+      </v-card-title>
+
+      <v-divider />
+
+      <v-card-text>
+        <v-container fluid class="pa-0">
+          <!-- Sender section -->
+          <div class="text-subtitle-1 mb-2 font-weight-medium">
+            De
+          </div>
+
+          <v-row dense>
+            <v-col cols="12">
+              <v-text-field label="Email del remitente" v-model="emailData.fromEmail" variant="outlined"
+                density="comfortable" :error-messages="errors.fromEmail" />
+            </v-col>
+
+            <v-col cols="12">
+              <v-text-field label="Nombre del remitente" v-model="emailData.fromName" variant="outlined"
+                density="comfortable" :error-messages="errors.fromName" />
+            </v-col>
+          </v-row>
+
+          <v-divider class="my-4" />
+
+          <!-- Receiver section -->
+          <div class="text-subtitle-1 mb-2 font-weight-medium">
+            Para
+          </div>
+
+          <v-row dense>
+            <v-col cols="12">
+              <v-text-field label="Email del destinatario" v-model="emailData.toEmail" variant="outlined"
+                density="comfortable" :error-messages="errors.toEmail" />
+            </v-col>
+
+            <v-col cols="12">
+              <v-text-field label="Nombre del destinatario" v-model="emailData.toName" variant="outlined"
+                density="comfortable" :error-messages="errors.toName" />
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card-text>
+
+      <v-divider />
+
+      <v-card-actions class="justify-end">
+        <v-btn variant="text" :loading="cargando" @click="isEmailOpen = false">
+          Cerrar
+        </v-btn>
+
+        <v-btn color="primary" variant="flat" :loading="cargando" prepend-icon="mdi-email" @click="sendEmail">
+          Enviar
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 <script setup>
 import {
@@ -512,6 +587,7 @@ const cancelacionData = ref({
   motivo: '01',
   sustitucion: '',
 });
+const isEmailOpen = ref(false)
 const isFacturaInfoOpen = ref(false);
 const isFormasDePagoOpen = ref(false);
 const loadingInitial = ref(true)
@@ -644,6 +720,12 @@ const tHeaders = ref([
   { title: "Cantidad devuelta", key: "cantidad_devuelta", sortable: false },
   { title: "Devolución", key: "fue_devuelto", sortable: false },
 ]);
+const emailData = ref({
+  fromEmail: '',
+  fromName: '',
+  toName: '',
+  toEmail: '',
+});
 const ticketActual = ref({});
 
 const articulos = ref([]);
@@ -820,6 +902,21 @@ async function cancelarFactura() {
     cargando.value = false;
   }
 }
+async function sendEmail() {
+  try {
+    cargando.value = true;
+    const { data } = await PuntoVenta.sendEmail(ticketActual.value.id, emailData.value)
+    isEmailOpen.value = false;
+    alert(data.message);
+
+  } catch (error) {
+    handleOpException(error);
+    errors.value = error.response?.data?.errors || [];
+    console.log(error);
+  } finally {
+    cargando.value = false;
+  }
+}
 async function verificarEstadoCancelacion() {
   try {
     cargando.value = true;
@@ -839,6 +936,10 @@ async function getSpecificVT(ventaticket) {
     const { data } = await PuntoVenta.getSpecificVT(ventaticket);
     ticketActual.value = data[0];
     articulos.value = data[1];
+    emailData.value.fromName = ticketActual.value.organization?.name ?? ticketActual.value.almacen?.name;
+    emailData.value.fromEmail = ticketActual.value.organization?.email ?? ticketActual.value.almacen?.email;
+    emailData.value.toEmail = ticketActual.value.cliente?.email;
+    emailData.value.toName = ticketActual.value.cliente?.name;
     const { data: newData } = await Organizacion.getFoliosSaldo();
     saldo.value = newData?.saldo;
   } catch (error) {

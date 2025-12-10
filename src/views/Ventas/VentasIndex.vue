@@ -100,6 +100,9 @@
 
         <!-- Total -->
         <template #item.total="{ item }">
+          <v-chip v-if="item.facturado_en" variant="flat" color="success" label size="x-small">
+            Facturado
+          </v-chip><br></br>
           ${{ formatNumber(item.total) }}
         </template>
 
@@ -137,6 +140,7 @@ import VentaRowActions from "./VentaRowActions.vue";
 import useMisFechas from "@js/composables/useMisFechas";
 import { useUserStore } from "@js/s";
 import { useCurrency } from '@js/composables/useCurrency';
+import { computed } from "vue";
 const { formatNumber } = useCurrency('es-MX', 'MXN');
 
 const s = useUserStore();
