@@ -37,9 +37,9 @@
       <v-row dense>
         <!-- Usuario -->
         <v-col cols="12" md="2" v-if="isAdmin">
-          <v-autocomplete prepend-inner-icon="mdi-account" v-model="filters.cliente" :items="clientes" item-title="name" item-value="id" label="Cliente"
-            return-object clearable @update:model-value="val => filters.cliente_id = val ? val.id : null"
-            density="compact" variant="outlined" />
+          <v-autocomplete prepend-inner-icon="mdi-account-key" v-model="filters.user" :items="users" item-title="name"
+            item-value="id" label="Usuario" return-object clearable
+            @update:model-value="val => filters.user_id = val ? val.id : null" density="compact" variant="outlined" />
         </v-col>
         <!-- Cliente -->
         <v-col cols="12" md="2">
@@ -154,6 +154,7 @@ const menuInicio = ref(false);
 const menuFin = ref(false);
 const search = ref("");
 const clientes = ref([]);
+const users = ref([]);
 const almacenes = ref([]);
 
 // Composable fechas
@@ -251,6 +252,7 @@ async function getMisVentas(newOptions) {
     misventas.value = data.ventas;
     clientes.value = data.clientes;
     almacenes.value = data.almacenes;
+    users.value = data.users;
 
     // Mantener cliente seleccionado
     if (clientes.value.length && filters.cliente_id) {
