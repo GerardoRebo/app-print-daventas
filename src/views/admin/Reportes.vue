@@ -168,6 +168,20 @@ const loadChart = (data) => {
           borderWidth: 2,
           fill: false,
         },
+        {
+          label: "Compras",
+          data: data.map((row) => row.compras),
+          borderColor: "rgba(255, 0, 0, 1)",
+          borderWidth: 2,
+          fill: false,
+        },
+        {
+          label: "Gastos",
+          data: data.map((row) => row.gastos),
+          borderColor: "rgba(255, 100, 0, 1)",
+          borderWidth: 2,
+          fill: false,
+        },
         // ... tus demás datasets
       ],
     },
@@ -185,14 +199,15 @@ const loadChartTotals = (data) => {
   chartTotalsInstance = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: ["Ventas", "Compras", "Ganancias", "Abonos Cliente", "Devoluciones Cliente"],
+      labels: ["Ventas", "Compras", "Gastos", "Ganancias", "Abonos Cliente", "Devoluciones Cliente"],
       datasets: [
         {
           label: "Totales",
-          data: Object.values(data),
+          data: [data.acumulado_ventas, data.compras, data.gastos, data.acumulado_ganancias, data.abonos_efectivo, data.devoluciones_ventas_efectivo],
           backgroundColor: [
             "rgba(0,200,0,0.3)",
             "rgba(255,0,0,0.3)",
+            "rgba(255,100,0,0.3)",
             "rgba(0,200,200,0.3)",
             "rgba(0,120,255,0.3)",
             "rgba(200,200,0,0.3)",
@@ -200,6 +215,7 @@ const loadChartTotals = (data) => {
           borderColor: [
             "rgba(0,200,0,1)",
             "rgba(255,0,0,1)",
+            "rgba(255,100,0,1)",
             "rgba(0,200,200,1)",
             "rgba(0,120,255,1)",
             "rgba(200,200,0,1)",

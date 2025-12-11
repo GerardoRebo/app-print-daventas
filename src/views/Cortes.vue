@@ -137,6 +137,7 @@ const efectivoCaja = computed(
       +turno_actual.value?.ventas_efectivo +
       +turno_actual.value?.acumulado_entradas -
       +turno_actual.value?.devoluciones_ventas_efectivo -
+      +turno_actual.value?.gastos -
       +turno_actual.value?.acumulado_salidas +
       +turno_actual.value?.abonos_efectivo;
     return eC.toLocaleString()

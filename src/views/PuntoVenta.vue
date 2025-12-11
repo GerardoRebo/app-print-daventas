@@ -499,7 +499,12 @@
   <!-- Busca Producto Nombre-->
   <v-dialog v-model="isVisible" max-width="1200">
     <v-card max-height="500">
-      <v-card-title>Busca producto por nombre</v-card-title>
+      <v-card-title class="d-flex justify-space-between align-center">
+        <span>Busca producto por nombre</span>
+        <v-btn prepend-icon="mdi-plus" size="small" variant="tonal" color="accent" @click="crearNuevoProducto">
+          Crear nuevo producto
+        </v-btn>
+      </v-card-title>
       <v-card-text :scrollable="false">
         <p class="text-caption">
           Informacion actualizada por ultima vez hace
@@ -1927,6 +1932,9 @@ async function abrirModalBuscaProductsNombre() {
   await nextTick(() => {
     keyw.value.focus()
   });
+}
+function crearNuevoProducto() {
+  router.push({ name: "ProductosIndex" });
 }
 function asignarAlmacen(almacenId) {
   if (cargando.value) return;

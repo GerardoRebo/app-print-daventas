@@ -12,9 +12,10 @@ const efectivoCaja = computed(
       +turno_actual.value?.ventas_efectivo +
       +turno_actual.value?.acumulado_entradas -
       +turno_actual.value?.devoluciones_ventas_efectivo -
-      +turno_actual.value?.acumulado_salidas +
+      +(turno_actual.value?.acumulado_salidas ?? 0) -
+      +(turno_actual.value?.gastos ?? 0) +
       +turno_actual.value?.abonos_efectivo;
-    return eC.toLocaleString()
+    return eC
   }
 );
 </script>
@@ -230,13 +231,24 @@ const efectivoCaja = computed(
                 </v-col>
                 <v-divider></v-divider>
               </v-row>
-              <v-row dense justify="space-between" hover>
+              <v-row dense justify="space-between">
                 <v-col cols="8">
-                  <p>Movimiento de caja salida</p>
+                  <p>Movimiento de caja salida (operativo)</p>
                 </v-col>
                 <v-col cols="4" class="text-right">
                   <p>
                     - ${{ formatNumber(turno_actual?.acumulado_salidas) }}
+                  </p>
+                </v-col>
+                <v-divider></v-divider>
+              </v-row>
+              <v-row dense justify="space-between">
+                <v-col cols="8">
+                  <p>Gastos</p>
+                </v-col>
+                <v-col cols="4" class="text-right">
+                  <p>
+                    - ${{ formatNumber(turno_actual?.gastos) }}
                   </p>
                 </v-col>
                 <v-divider></v-divider>
@@ -280,13 +292,27 @@ const efectivoCaja = computed(
               </v-icon>
             </v-card-title>
             <v-card-text>
+              <v-row dense justify="space-between" class="mb-2">
+                <p class="font-weight-medium text-caption">Desglose</p>
+              </v-row>
               <v-row dense justify="space-between">
-                <p>Salidas de Efectivo
-                </p>
+                <p>Operativas</p>
                 <p>
                   ${{ formatNumber(turno_actual?.acumulado_salidas) }}
                 </p>
-                <v-divider></v-divider>
+              </v-row>
+              <v-row dense justify="space-between">
+                <p>Gastos</p>
+                <p>
+                  ${{ formatNumber(turno_actual?.gastos) }}
+                </p>
+              </v-row>
+              <v-divider class="my-2"></v-divider>
+              <v-row dense justify="space-between">
+                <p class="font-weight-bold">Total Salidas</p>
+                <p class="font-weight-bold">
+                  ${{ formatNumber((+turno_actual?.acumulado_salidas ?? 0) + (+turno_actual?.gastos ?? 0)) }}
+                </p>
               </v-row>
             </v-card-text>
           </v-card>

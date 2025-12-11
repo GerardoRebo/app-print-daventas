@@ -608,7 +608,12 @@
   <!-- Busca Producto Nombre-->
   <v-dialog v-model="isVisible" max-width="1200">
     <v-card>
-      <v-card-title>Busca producto por nombre</v-card-title>
+      <v-card-title class="d-flex justify-space-between align-center">
+        <span>Busca producto por nombre</span>
+        <v-btn prepend-icon="mdi-plus" size="small" variant="tonal" color="accent" @click="crearNuevoProducto">
+          Crear nuevo producto
+        </v-btn>
+      </v-card-title>
       <v-card-text>
         <v-text-field
           v-model="product_form.name"
@@ -1428,6 +1433,9 @@ function abrirModalBuscaProductsNombre() {
   getAllProducts();
   nextTick(() => keywordRef.value.focus());
   // nextTick(() => document.getElementById("keyword").focus());
+}
+function crearNuevoProducto() {
+  router.push({ name: "ProductosIndex" });
 }
 function asignarAlmacen() {
   Movimientos.asignarAlmacen(movimientoActual.id, almacen.id, almacenDestino.id)
