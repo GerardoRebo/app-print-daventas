@@ -37,6 +37,9 @@
           </v-card-actions>
         </v-card>
       </v-col>
+      <v-col cols="12">
+        <TelegramConfig />
+      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -46,6 +49,7 @@ import { reactive } from "@vue/reactivity";
 import { onMounted } from '@vue/runtime-core';
 
 import Organizacion from "@js/apis/Organizacion";
+import TelegramConfig from "./TelegramConfig.vue";
 import { ref, watch } from "vue";
 import { useUserStore } from "@js/s";
 const store = useUserStore();
