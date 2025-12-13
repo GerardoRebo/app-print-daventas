@@ -16,7 +16,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        run: VITE_BASE_URL=https://print.daventas.com npm run build
 
       - name: Upload dist to server
         uses: appleboy/scp-action@v0.1.7
