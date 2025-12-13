@@ -25,5 +25,5 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "dist/*"
-          target: "/var/www/daventas/app-print-daventas/dist"
+          source: "dist"
+          target: "/var/www/daventas/app-print-daventas"
