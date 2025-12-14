@@ -71,6 +71,9 @@
           <v-expansion-panel :title="editingId ? 'Editar Configuración' : 'Agregar Nueva Configuración'">
             <template v-slot:text>
               <v-form @submit.prevent="saveConfig">
+                <v-overlay :model-value="loading" absolute contained class="align-center justify-center">
+                  <v-progress-circular indeterminate color="primary"></v-progress-circular>
+                </v-overlay>
                 <v-container>
                   <v-row>
                     <v-col cols="12" md="6">
@@ -78,12 +81,33 @@
                         v-model="formData.telegram_bot_token"
                         label="Token del Bot de Telegram"
                         hint="Obtén el token de @BotFather en Telegram"
-                        type="password"
+                        :type="showPassword ? 'text' : 'password'"
                         persistent-hint
                         required
                         density="compact"
                         variant="outlined"
-                      ></v-text-field>
+                        :disabled="loading"
+                      >
+                        <template v-slot:prepend-inner>
+                          <v-icon
+                            :icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                            @click="showPassword = !showPassword"
+                            class="cursor-pointer"
+                            size="small"
+                          ></v-icon>
+                        </template>
+                        <template v-slot:append-inner>
+                          <v-icon
+                            icon="mdi-magnify"
+                            @click="fetchChatIdFromToken"
+                            class="cursor-pointer"
+                            :class="{ 'opacity-50': !formData.telegram_bot_token }"
+                            :disabled="!formData.telegram_bot_token || fetchingChatId"
+                            size="small"
+                            title="Obtener Chat ID automáticamente"
+                          ></v-icon>
+                        </template>
+                      </v-text-field>
                     </v-col>
 
                     <v-col cols="12" md="6">
@@ -95,6 +119,7 @@
                         required
                         density="compact"
                         variant="outlined"
+                        :disabled="loading"
                       ></v-text-field>
                     </v-col>
                   </v-row>
@@ -105,6 +130,7 @@
                         v-model="formData.notify_delivery_today"
                         label="Recibir notificaciones a las 10 AM de entregas para hoy"
                         density="compact"
+                        :disabled="loading"
                       ></v-checkbox>
                     </v-col>
 
@@ -113,16 +139,17 @@
                         v-model="formData.notify_delivery_tomorrow"
                         label="Recibir notificaciones a las 7 PM de entregas para mañana"
                         density="compact"
+                        :disabled="loading"
                       ></v-checkbox>
                     </v-col>
                   </v-row>
 
                   <v-row class="mt-4">
                     <v-col cols="12" class="d-flex gap-2">
-                      <v-btn color="primary" type="submit" :loading="loading">
+                      <v-btn color="primary" type="submit" :loading="loading" :disabled="loading">
                         {{ editingId ? "Actualizar" : "Agregar" }}
                       </v-btn>
-                      <v-btn variant="outlined" @click="resetForm">
+                      <v-btn variant="outlined" @click="resetForm" :disabled="loading">
                         Cancelar
                       </v-btn>
                     </v-col>
@@ -167,6 +194,8 @@ const telegramConfigs = ref([]);
 const showForm = ref(null);
 const editingId = ref(null);
 const loading = ref(false);
+const showPassword = ref(false);
+const fetchingChatId = ref(false);
 
 const formData = ref({
   telegram_bot_token: "",
@@ -192,6 +221,7 @@ const maskToken = (token) => {
 
 // Cargar configuraciones
 const loadConfigs = async () => {
+  loading.value = true;
   try {
     const response = await TelegramConfig.getAll();
     telegramConfigs.value = response.data;
@@ -199,6 +229,8 @@ const loadConfigs = async () => {
     console.log(error);
     
     showMessage("Error al cargar configuraciones", "error");
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -231,7 +263,12 @@ const saveConfig = async () => {
 // Editar configuración
 const editConfig = (config) => {
   editingId.value = config.id;
-  formData.value = { ...config };
+  formData.value = {
+    telegram_bot_token: config.telegram_bot_token,
+    telegram_chat_id: config.telegram_chat_id,
+    notify_delivery_today: config.notify_delivery_today === 1 || config.notify_delivery_today === true,
+    notify_delivery_tomorrow: config.notify_delivery_tomorrow === 1 || config.notify_delivery_tomorrow === true,
+  };
   showForm.value = 0;
 };
 
@@ -241,12 +278,15 @@ const deleteConfig = async (config) => {
     return;
   }
 
+  loading.value = true;
   try {
     await TelegramConfig.delete(config.id);
     showMessage("Configuración eliminada correctamente", "success");
     await loadConfigs();
   } catch (error) {
     showMessage("Error al eliminar la configuración", "error");
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -273,6 +313,60 @@ const resetForm = () => {
     notify_delivery_tomorrow: true,
   };
   showForm.value = null;
+};
+
+// Obtener Chat ID del token
+const fetchChatIdFromToken = async () => {
+  if (!formData.value.telegram_bot_token) {
+    showMessage("Por favor ingresa el token primero", "warning");
+    return;
+  }
+
+  fetchingChatId.value = true;
+  try {
+    loading.value = true;
+    const token = formData.value.telegram_bot_token.trim();
+    const response = await fetch(`https://api.telegram.org/bot${token}/getUpdates`);
+    const data = await response.json();
+
+    if (!data.ok) {
+      showMessage("Token inválido. Verifica que sea correcto", "error");
+      return;
+    }
+
+    // Buscar el primer mensaje/actualización con chat ID
+    let chatId = null;
+    if (data.result && data.result.length > 0) {
+      // Buscar en mensajes
+      const message = data.result.find(update => update.message?.chat?.id);
+      if (message) {
+        chatId = message.message.chat.id;
+      }
+      // Si no hay mensaje, buscar en callback_query
+      else {
+        const callback = data.result.find(update => update.callback_query?.from?.id);
+        if (callback) {
+          chatId = callback.callback_query.from.id;
+        }
+      }
+    }
+
+    if (chatId) {
+      formData.value.telegram_chat_id = chatId.toString();
+      showMessage(`Chat ID obtenido: ${chatId}`, "success");
+    } else {
+      showMessage(
+        "No se encontró Chat ID. Asegúrate de haber enviado un mensaje a tu bot primero",
+        "warning"
+      );
+    }
+  } catch (error) {
+    console.error(error);
+    showMessage("Error al obtener el Chat ID. Verifica tu conexión y el token", "error");
+  } finally {
+    fetchingChatId.value = false;
+    loading.value = false;
+  }
 };
 
 // Mostrar mensaje
