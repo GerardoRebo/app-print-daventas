@@ -172,7 +172,7 @@ const filters = reactive({
   cliente_id: null,
   almacen_id: null,
   consecutivo: "",
-  tipo: 'efectivo',
+  tipo: null,
   turno_id: null,
 });
 const isAdmin = computed(() => {
