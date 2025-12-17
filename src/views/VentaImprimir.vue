@@ -47,47 +47,48 @@
       ") " +
       " = " +
       "$" +
-      item?.precio_final
+      formatNumber(item?.precio_final)
     }}
     <br />
     <span v-if="item.fue_devuelto">
-      Devolución -{{ item?.cantidad_devuelta }}
+      Devolución -{{ formatNumber(item?.cantidad_devuelta) }}
       <br />
     </span>
     <v-divider class="my-1" length="40" v-if="!(index == ventaticket?.ventaticket_articulos.length - 1)"></v-divider>
   </span>
   <hr style="border: 1px dashed black; opacity: 0.33" class="my-2" />
-  <p class="mb-1"><strong>Subtotal: </strong>${{ ventaticket?.subtotal }}</p>
+  <p class="mb-1"><strong>Subtotal: </strong>${{ formatNumber(ventaticket?.subtotal) }}</p>
   <p v-if="ventaticket?.descuento != '0.00'" class="mb-1">
-    <strong>Descuento:</strong> ${{ ventaticket?.descuento }}
+    <strong>Descuento:</strong> ${{ formatNumber(ventaticket?.descuento) }}
   </p>
   <p v-if="ventaticket?.total_devuelto != '0.00'" class="mb-1">
-    <strong>Devolucion:</strong> ${{ ventaticket?.total_devuelto }}
+    <strong>Devolucion:</strong> ${{ formatNumber(ventaticket?.total_devuelto) }}
   </p>
-  <p v-if="ventaticket?.impuesto_traslado" class="mb-1">
-    <strong>Impuesto Trasladado:</strong> ${{ ventaticket.impuesto_traslado }}
+  <!-- decimal impuesto_traslado 0.00 -->
+  <p v-if="+ventaticket?.impuesto_traslado" class="mb-1">
+    <strong>Impuesto Trasladado:</strong> ${{ formatNumber(ventaticket.impuesto_traslado) }}
   </p>
   <p class="mb-1">
-    <strong>Total: ${{ ventaticket?.total }}</strong>
+    <strong>Total: ${{ formatNumber(ventaticket?.total) }}</strong>
   </p>
   <div v-if="!ventaticket?.deuda">
-    <p><strong>Pagó con:</strong> ${{ ventaticket?.pago_con }}</p>
+    <p><strong>Pagó con:</strong> ${{ formatNumber(ventaticket?.pago_con) }}</p>
     <p class="mb-1">
       <strong>Su cambio:</strong> ${{
-        ventaticket?.total - ventaticket?.pago_con
+        formatNumber(ventaticket?.total - ventaticket?.pago_con)
       }}
     </p>
   </div>
 
   <div v-if="ventaticket?.deuda">
-    <p class="mb-1">
+    <p class="mb-1" v-if="ventaticket?.deuda?.abonos?.length > 0">
       <strong>Abonos venta a crédito:</strong>
     </p>
     <div v-for="abono in ventaticket?.deuda?.abonos">
-      {{ moment(abono.fecha).format("DD-MM-YYYY h:mm:ssa") }} - ${{ abono.abono.toLocaleString() }}
+      {{ moment(abono.fecha).format("DD-MM-YYYY h:mm:ssa") }} - ${{ formatNumber(abono.abono) }}
     </div>
-    <p class="mb-1" v-if="!ventaticket?.deuda?.liquidado">
-      <strong>Saldo:</strong> ${{ ventaticket?.deuda?.saldo }}
+    <p class="mb-1" v-if="ventaticket?.deuda && !ventaticket?.deuda?.liquidado">
+      <strong>Saldo:</strong> ${{ formatNumber(ventaticket?.deuda?.saldo) }}
     </p>
     <p class="mb-1" v-if="ventaticket?.deuda?.liquidado">
       <strong>Liquidado</strong>
@@ -115,6 +116,8 @@ import moment from "moment-timezone";
 import { appWindow } from "@tauri-apps/api/window";
 import { useUserStore } from "../s";
 import QRCode from 'qrcode';
+import { useCurrency } from "@js/composables/useCurrency";
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 const ventaticketId = ref(null);
 const ventaticket = ref(null);
 const qrCanvas = ref(null);
