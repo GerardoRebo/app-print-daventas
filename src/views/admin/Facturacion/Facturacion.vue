@@ -34,7 +34,20 @@ const myOrganization = reactive({
   rfc: "",
   c_periodicidad: "04",
   image: null,
+  show_fiscal_info: true,
 });
+watch(() => myOrganization.show_fiscal_info, (newVal) => {
+  if (!myOrganizationId.value) return;
+  cargando.value = true;
+  Organizacion.update(myOrganizationId.value, myOrganization)
+    .catch((error) => {
+      handleOpException(error);
+      console.error('Error al actualizar configuración de tickets:', error);
+    })
+    .finally(() => {
+      cargando.value = false;
+    });
+}, { flush: 'post' })
 function handleFileUpload(event) {
   console.log(event.target);
   if (event.target.name == 'cer') {
@@ -191,6 +204,8 @@ const fillValues = (response) => {
   myOrganization.codigo_postal = data.facturacion_info?.codigo_postal;
   myOrganization.c_periodicidad = data.facturacion_info?.c_periodicidad;
   myOrganization.image = data.image;
+  myOrganization.show_fiscal_info = !!data.show_fiscal_info;
+  console.log('show_fiscal_info cargado:', myOrganization.show_fiscal_info, 'valor de DB:', data.show_fiscal_info);
 };
 const onBuyPack = async (item) => {
   try {
@@ -260,7 +275,7 @@ onMounted(() => {
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-card>
+        <v-card :loading="cargando">
           <v-card-title>Configuración de Tickets</v-card-title>
           <v-card-text>
             <div class="d-flex align-center justify-space-between">
@@ -268,13 +283,9 @@ onMounted(() => {
                 <p class="mb-1"><strong>Mostrar información fiscal en tickets</strong></p>
                 <p class="text-caption">Mostrar RFC y Razón Social en los tickets impresos</p>
               </div>
-              <v-switch v-model="myOrganization.show_fiscal_info" color="primary"></v-switch>
+              <v-switch v-model="myOrganization.show_fiscal_info" color="primary" :disabled="cargando"></v-switch>
             </div>
           </v-card-text>
-          <v-card-actions>
-            <v-btn @click.prevent="updateMyOrganization" color="primary" variant="outlined"
-              :loading="cargando">Guardar</v-btn>
-          </v-card-actions>
         </v-card>
       </v-col>
     </v-row>
