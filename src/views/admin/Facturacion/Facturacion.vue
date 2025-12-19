@@ -259,6 +259,26 @@ onMounted(() => {
       </v-col>
     </v-row>
     <v-row>
+      <v-col cols="12">
+        <v-card>
+          <v-card-title>Configuración de Tickets</v-card-title>
+          <v-card-text>
+            <div class="d-flex align-center justify-space-between">
+              <div>
+                <p class="mb-1"><strong>Mostrar información fiscal en tickets</strong></p>
+                <p class="text-caption">Mostrar RFC y Razón Social en los tickets impresos</p>
+              </div>
+              <v-switch v-model="myOrganization.show_fiscal_info" color="primary"></v-switch>
+            </div>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn @click.prevent="updateMyOrganization" color="primary" variant="outlined"
+              :loading="cargando">Guardar</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="6" class="d-flex flex-column">
         <v-card class="pa-4 h-100">
           <v-card-title>Clave privada (Sat Mexico)</v-card-title>

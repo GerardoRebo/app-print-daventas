@@ -67,6 +67,7 @@ const myOrganization = reactive({
   rfc: "",
   c_periodicidad: "04",
   image: null,
+  show_fiscal_info: true,
 });
 
 const errors = ref([]);
@@ -137,6 +138,7 @@ const fillValues = (response) => {
   myOrganization.codigo_postal = data.facturacion_info?.codigo_postal;
   myOrganization.c_periodicidad = data.facturacion_info?.c_periodicidad;
   myOrganization.image = data.image;
+  myOrganization.show_fiscal_info = data.show_fiscal_info !== false;
 };
 
 onMounted(() => {

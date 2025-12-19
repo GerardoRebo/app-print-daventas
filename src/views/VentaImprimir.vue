@@ -6,18 +6,18 @@
   <v-img :src="`${ventaticket?.organization?.image?.url}?v=${ventaticket?.organization?.image?.updated_at}`"
     class="my-2 mx-auto" height="150px" width="150px" v-if="ventaticket?.organization?.image?.url"
     @load="onImageLoaded" />
-  <p class="mb-1" v-if="ventaticket?.organization?.facturacion_info?.razon_social">
+  <p class="mb-1" v-if="ventaticket?.organization?.facturacion_info?.razon_social && ventaticket?.organization?.show_fiscal_info">
     <strong>Razón Soc:</strong>
     {{ ventaticket?.organization?.facturacion_info?.razon_social }}
+  </p>
+  <p class="mb-1" v-if="(ventaticket?.almacen?.rfc || ventaticket?.organization?.facturacion_info?.rfc) && ventaticket?.organization?.show_fiscal_info">
+    <strong>RFC:</strong> {{ ventaticket?.almacen?.rfc || ventaticket?.organization?.facturacion_info?.rfc }}
   </p>
   <p class="mb-1">
     <strong>Sucursal:</strong> {{ ventaticket?.almacen?.name }}
   </p>
   <p class="mb-1" v-if="ventaticket?.almacen?.direccion">
     <strong>Dirección: </strong>{{ ventaticket?.almacen?.direccion }}
-  </p>
-  <p class="mb-1" v-if="ventaticket?.almacen?.rfc">
-    <strong>RFC:</strong> {{ ventaticket?.almacen?.rfc }}
   </p>
   <p v-if="ventaticket?.almacen?.telefono">
     <strong>Teléfono:</strong> {{ ventaticket?.almacen?.telefono }}
