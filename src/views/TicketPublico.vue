@@ -72,22 +72,22 @@
 
         <!-- TOTALES -->
         <div class="text-body-1">
-          <div><strong>Subtotal:</strong> ${{ ventaticket?.subtotal }}</div>
+          <div><strong>Subtotal:</strong> ${{ formatNumber(ventaticket?.subtotal) }}</div>
 
           <div v-if="ventaticket?.descuento != '0.00'">
-            <strong>Descuento:</strong> ${{ ventaticket?.descuento }}
+            <strong>Descuento:</strong> ${{ formatNumber(ventaticket?.descuento) }}
           </div>
 
           <div v-if="ventaticket?.total_devuelto != '0.00'">
-            <strong>Devuelto:</strong> ${{ ventaticket?.total_devuelto }}
+            <strong>Devuelto:</strong> ${{ formatNumber(ventaticket?.total_devuelto) }}
           </div>
 
           <div v-if="+ventaticket?.impuesto_traslado">
-            <strong>Impuesto:</strong> ${{ ventaticket?.impuesto_traslado }}
+            <strong>Impuesto:</strong> ${{ formatNumber(ventaticket?.impuesto_traslado) }}
           </div>
 
           <div class="mt-2 text-h6 font-weight-bold">
-            Total: ${{ ventaticket?.total }}
+            Total: ${{ formatNumber(ventaticket?.total) }}
           </div>
         </div>
 
@@ -95,21 +95,35 @@
         <v-divider class="my-4"></v-divider>
 
         <div v-if="!ventaticket?.deuda">
-          <p><strong>Pagó con:</strong> ${{ ventaticket?.pago_con }}</p>
-          <p><strong>Cambio:</strong> ${{ ventaticket?.pago_con - ventaticket?.total }}</p>
+          <p><strong>Pagó con:</strong> ${{ formatNumber(ventaticket?.pago_con) }}</p>
+          <p><strong>Cambio:</strong> ${{ formatNumber(ventaticket?.pago_con - ventaticket?.total) }}</p>
         </div>
 
         <!-- ABONOS -->
         <div v-else>
-          <strong>Venta a crédito:</strong>
-          <div class="text-caption" v-for="a in ventaticket.deuda.abonos" :key="a.id">
-            {{ moment(a.fecha).format("DD-MM-YYYY h:mm:ssa") }} — ${{ a.abono }}
-          </div>
+          <p class="text-body-2 font-weight-bold mb-3">Venta a crédito</p>
+          <v-list density="compact" class="pl-0">
+            <v-list-item v-for="a in ventaticket.deuda.abonos" :key="a.id" class="px-0">
+              <template v-slot:prepend>
+                <v-icon small class="mr-2">mdi-check-circle</v-icon>
+              </template>
+              <v-list-item-title class="text-caption">
+                {{ moment(a.fecha).format("DD-MM-YYYY h:mm:ss a") }}
+              </v-list-item-title>
+              <template v-slot:append>
+                <span class="text-green-600 font-weight-bold text-caption">${{ formatNumber(a.abono) }}</span>
+              </template>
+            </v-list-item>
+          </v-list>
 
-          <div v-if="!ventaticket?.deuda?.liquidado">
-            <strong>Saldo:</strong> ${{ ventaticket?.deuda?.saldo }}
+          <v-divider class="my-3"></v-divider>
+
+          <div v-if="+ventaticket?.deuda?.saldo" class="pa-3">
+            <strong>Saldo pendiente:</strong> <span class="font-weight-bold">${{ formatNumber(ventaticket?.deuda?.saldo) }}</span>
           </div>
-          <div v-else class="text-success"><strong>Liquidado</strong></div>
+          <div v-if="ventaticket?.deuda?.liquidado" class="pa-3 text-center">
+            <span class="text-success font-weight-bold">✓ Liquidado</span>
+          </div>
         </div>
 
         <p class="text-center mt-6 font-italic text-body-2">
@@ -164,10 +178,12 @@ import { nextTick, ref, onMounted, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import PuntoVenta from "../apis/PuntoVenta";
 import moment from "moment-timezone";
+import { useCurrency } from "@js/composables/useCurrency";
 
 const ventaticket = ref(null);
 const token = ref(null);
 const qrSrc = ref(null);
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 
 const route = useRoute();
 const publicUrl = ref(null);
