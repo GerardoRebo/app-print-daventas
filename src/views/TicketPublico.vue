@@ -8,9 +8,17 @@
           :src="`${ventaticket.organization.image.url}?v=${ventaticket.organization.image.updated_at}`" height="130"
           width="130" class="mx-auto mb-2" />
 
-        <h2 class="text-h6 font-weight-bold">
-          {{ ventaticket?.organization?.facturacion_info?.razon_social ?? ventaticket?.almacen?.name }}
+        <h2 class="text-h6 font-weight-bold" v-if="ventaticket?.organization?.show_fiscal_info && ventaticket?.organization?.facturacion_info?.razon_social">
+          {{ ventaticket.organization.facturacion_info.razon_social }}
         </h2>
+
+        <h2 class="text-h6 font-weight-bold">
+          {{ ventaticket?.almacen?.name }}
+        </h2>
+
+        <p class="text-body-2 mb-2" v-if="(ventaticket?.almacen?.rfc || ventaticket?.organization?.facturacion_info?.rfc) && ventaticket?.organization?.show_fiscal_info">
+          <strong>RFC:</strong> {{ ventaticket?.almacen?.rfc || ventaticket?.organization?.facturacion_info?.rfc }}
+        </p>
 
         <p class="text-body-2">
           <span v-if="ventaticket?.almacen?.direccion">{{ ventaticket.almacen.direccion }}</span><br>
@@ -74,7 +82,7 @@
             <strong>Devuelto:</strong> ${{ ventaticket?.total_devuelto }}
           </div>
 
-          <div v-if="ventaticket?.impuesto_traslado">
+          <div v-if="+ventaticket?.impuesto_traslado">
             <strong>Impuesto:</strong> ${{ ventaticket?.impuesto_traslado }}
           </div>
 
