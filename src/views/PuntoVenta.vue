@@ -416,7 +416,7 @@
                 )
                 " />
           </td>
-          <td>{{ articulo.codigo }}</td>
+          <td>{{ articulo.product.codigo }}</td>
           <td>
             <router-link :to="{
               name: 'ProductosIndex',
