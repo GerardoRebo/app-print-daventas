@@ -283,6 +283,9 @@
               item.product?.name }}</span>
           </router-link>
         </template>
+        <template v-slot:item.codigo="{ item }">
+          <span>{{ item.product.codigo }}</span>
+        </template>
         <template v-slot:item.precio_usado="{ item }">
           <span>${{ formatNumber(item.precio_usado) }}</span>
         </template>
