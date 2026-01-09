@@ -252,7 +252,7 @@ watch(() => postData.cantidad, (newVal) => {
     printWhenFinalize.value = false;
   }
 })
-function getDeudas({ page, itemsPerPage, sortBy }) {
+async function getDeudas({ page, itemsPerPage, sortBy }) {
   if (!creditoId.value) {
     return;
   }
@@ -262,17 +262,17 @@ function getDeudas({ page, itemsPerPage, sortBy }) {
     show_settled_loan: show_settled_loan.value ? 1 : 0,
   }
   router.replace({ query: params });
-  Creditos.getDeudas(creditoId.value, params)
-    .then((response) => {
-      loading.value = false;
-      deudas.value = response.data.data;
-      totalItems.value = response.data.total;
-    })
-    .catch((error) => {
-      loading.value = false;
-      alert("Ha ocurrido un error")
-      handleOpException(error);
-    });
+  try {
+    const response = await Creditos.getDeudas(creditoId.value, params);
+    deudas.value = response.data.data;
+    totalItems.value = response.data.total;
+    saldoGlobal.value = response.data.saldo_global;
+    loading.value = false;
+  } catch (error) {
+
+  } finally {
+    loading.value = false;
+  }
 }
 function verAbonos(deuda) {
   ventaticketFolio.value = deuda.ventaticket.consecutivo
