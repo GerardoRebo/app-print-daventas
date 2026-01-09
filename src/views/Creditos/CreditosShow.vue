@@ -195,13 +195,6 @@ const totalItems = ref(0);
 const page = ref(1);
 const printWhenFinalize = ref(false);
 const clienteInfo = ref(null);
-const saldoGlobal = computed(() => {
-  const suma = deudas.value.reduce(
-    (partial_sum, a) => partial_sum + +a.saldo,
-    0
-  );
-  return suma;
-});
 const headers = ref([
   { title: 'Venta Ticket Folio', key: 'consecutivo', align: 'start', sortable: false },
   { title: 'Monto del ticket', key: 'deuda', align: 'start', sortable: false },
