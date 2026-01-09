@@ -183,6 +183,7 @@ const openAbono = ref(false);
 const openAbonos = ref(false);
 const openRealizados = ref(false);
 const selectedDeuda = ref(null);
+const saldoGlobal = ref(0);
 const postData = reactive({
   cantidad: 0,
   comments: '',
