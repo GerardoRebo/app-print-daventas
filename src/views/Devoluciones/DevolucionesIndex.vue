@@ -56,7 +56,7 @@ import moment from "moment-timezone"
 import Devoluciones from "../../apis/Devoluciones";
 import TableRow from "@js/views/Devoluciones/TableRow.vue";
 import { useUserStore } from "../../s";
-import useMisFechas from "../../composables/useMisFechas";
+import useMisFechas from "@js/composables/useMisFechas";
 const s = useUserStore();
 const { handleOpException } = s;
 

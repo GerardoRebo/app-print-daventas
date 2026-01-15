@@ -10,7 +10,7 @@
       </router-link>
       <v-row dense class="mt-4">
         <p class="font-semibold content-center mt-4 ml-4">
-          <strong> Saldo global del cliente: </strong><span>${{ formatNumber(saldoGlobal) }}</span>
+          <strong> Saldo global del cliente: </strong>$<span>{{ formatNumber(saldoGlobal) }}</span>
         </p>
         <v-checkbox label="Mostrar liquidados" v-model="show_settled_loan" class="ml-8"
           @change="search = String(Date.now())" />
@@ -18,8 +18,8 @@
     </v-card-text>
   </v-card>
   <v-container fluid>
-    <v-data-table-server :headers="headers" :items="deudas" :items-per-page="10" :items-length="totalItems"
-      :loading="loading" :search="search" item-value="name" @update:options="getDeudas">
+    <v-data-table-server :headers="headers" :items="deudas" :items-per-page="10" :items-length="totalItems" :loading="loading"
+      :search="search" item-value="name" @update:options="getDeudas">
       <template v-slot:item.consecutivo="{ item }">
         <v-tooltip text="Ver" location="top">
           <template v-slot:activator="{ props }">
@@ -37,7 +37,7 @@
         <span>${{ formatNumber(item.deuda) }}</span>
       </template>
       <template v-slot:item.pendiente="{ item }">
-        <span class="text-error mx-2">${{ formatNumber(item.saldo) }}</span>
+        <span class="font-weight-bold" :class="item.saldo == 0 ? 'text-success' : 'text-error' ">${{ formatNumber(item.saldo) }}</span>
       </template>
       <template v-slot:item.acciones="{ item }">
         <div v-if="$vuetify.display.mobile">
@@ -85,10 +85,10 @@
       <v-card-title>Realizar Abono a Ticket, saldo: ${{ formatNumber(selectedDeuda?.saldo) }}</v-card-title>
       <v-card-text>
         <v-text-field label="Cantidad" autocomplete="off" placeholder="" v-model="postData.cantidad"
-          ref="cantidadRef" />
-        <v-checkbox label="Facturar" v-model="postData.facturar"></v-checkbox>
-        <v-checkbox v-if="+selectedDeuda?.saldo == +postData.cantidad" label="Imprimir al final"
-          v-model="printWhenFinalize"></v-checkbox>
+          ref="cantidadRef" @keydown.enter="realizarAbono" />
+        <v-checkbox label="Facturar" v-model="postData.facturar"
+          v-if="selectedDeuda?.ventaticket?.facturado_en"></v-checkbox>
+          <v-checkbox v-if="+selectedDeuda?.saldo == +postData.cantidad" label="Imprimir al final" v-model="printWhenFinalize"></v-checkbox>
         <v-select :items="pagoFormas" label="Forma de pago" v-model="postData.forma_pago"
           v-if="postData.facturar"></v-select>
         <v-textarea label="Comentarios (opcional)" v-model="postData.comments" variant="outlined"></v-textarea>
@@ -99,8 +99,8 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
-  <!-- Historial de abonos realizado al ticket de venta -->
-  <v-dialog v-model="openAbonos" max-width="800">
+  
+  <v-dialog v-model="openAbonos" max-width="900">
     <v-card>
       <v-card-title>Historial de abonos realizado al ticket de venta #{{ ventaticketFolio }}</v-card-title>
       <v-card-text>
@@ -158,48 +158,59 @@ import { onMounted, nextTick, computed } from "@vue/runtime-core";
 import { useRoute, useRouter } from "vue-router";
 import { watch } from "vue";
 import { useUserStore } from "@js/s";
-import { useCurrency } from "@js/composables/useCurrency";
+import { useCurrency } from '@js/composables/useCurrency';
+import { useProcessRequest } from "@js/composables/useProcessRequest";
+import { useNotification } from '@js/composables/useNotification';
 const { formatNumber } = useCurrency('es-MX', 'MXN');
-const props = defineProps(['devolucion']);
 const s = useUserStore();
-const { handleOpException } = s;
+const { processRequest, concurrentRequest } = useProcessRequest();
+const { notify } = useNotification();
 
 const route = useRoute();
 const router = useRouter();
 
-watch(() => route.params, (to) => {
+watch(() => route.params, async (to) => {
   if (!to.id) return;
   creditoId.value = route.params.creditoId;
   search.value = String(Date.now());
-  getClienteInfo()
+  await getClienteInfo()
 })
 const deudas = ref([]);
 const abonos = ref([]);
 const creditoId = ref(null);
 const ventaticketFolio = ref(null);
 const loading = ref(false);
+const cargandoConcurrent = ref(false);
+const cant = ref(null);
 const cantidadRef = ref(null);
 const openAbono = ref(false);
 const openAbonos = ref(false);
 const openRealizados = ref(false);
 const selectedDeuda = ref(null);
-const saldoGlobal = ref(0);
 const postData = reactive({
   cantidad: 0,
   comments: '',
   facturar: false,
   forma_pago: null,
 });
+const search = ref()
 const show_settled_loan = ref(false);
-const search = ref('')
-const totalItems = ref(0);
 const page = ref(1);
 const printWhenFinalize = ref(false);
+const totalItems = ref(0);
 const clienteInfo = ref(null);
+const saldoGlobal = computed(() => {
+  const suma = deudas.value.reduce(
+    (partial_sum, a) => partial_sum + +a.saldo,
+    0
+  );
+  return suma;
+});
 const headers = ref([
   { title: 'Venta Ticket Folio', key: 'consecutivo', align: 'start', sortable: false },
   { title: 'Monto del ticket', key: 'deuda', align: 'start', sortable: false },
   { title: 'Saldo pendiente', key: 'pendiente', align: 'start', sortable: false },
+  { title: '# Abonos', key: 'abonos_count', align: 'start', sortable: false },
   { title: 'Acciones', key: 'acciones', align: 'start', sortable: false },
 ]);
 const abonosHeaders = ref([
@@ -240,33 +251,27 @@ watch(() => openAbono, (newVal) => {
   }
 })
 watch(() => postData.cantidad, (newVal) => {
-  if (+newVal == +selectedDeuda.value?.saldo) {
+  if (+newVal == +selectedDeuda.value?.saldo){
     printWhenFinalize.value = true;
   } else {
     printWhenFinalize.value = false;
   }
 })
-async function getDeudas({ page, itemsPerPage, sortBy }) {
+function getDeudas({ page, itemsPerPage, sortBy }) {
   if (!creditoId.value) {
     return;
   }
-  loading.value = true;
   const params = {
     page: page,
     show_settled_loan: show_settled_loan.value ? 1 : 0,
   }
   router.replace({ query: params });
-  try {
+  processRequest(async () => {
     const response = await Creditos.getDeudas(creditoId.value, params);
     deudas.value = response.data.data;
     totalItems.value = response.data.total;
-    saldoGlobal.value = response.data.saldo_global;
-    loading.value = false;
-  } catch (error) {
-
-  } finally {
-    loading.value = false;
-  }
+  }, loading, {
+  });
 }
 function verAbonos(deuda) {
   ventaticketFolio.value = deuda.ventaticket.consecutivo
@@ -277,24 +282,18 @@ function imprimirVenta(deuda) {
   window.open(`/ventatickets/imprimir/${deuda.ventaticket.id}`, '_blank');
 }
 function getAbonos(deuda) {
-  Creditos.getAbonos(deuda)
-    .then((response) => {
-      abonos.value = response.data;
-    })
-    .catch((error) => {
-      alert("Ha ocurrido un error")
-      handleOpException(error);
-    });
+  processRequest(async () => {
+    const response = await Creditos.getAbonos(deuda);
+    abonos.value = response.data;
+  }, loading, {
+  });
 }
 function getClienteInfo() {
-  Creditos.getClienteInfo(creditoId.value)
-    .then((response) => {
-      clienteInfo.value = response.data;
-    })
-    .catch((error) => {
-      alert("Ha ocurrido un error")
-      handleOpException(error);
-    });
+  concurrentRequest(async () => {
+    const response = await Creditos.getClienteInfo(creditoId.value);
+    clienteInfo.value = response.data;
+  }, cargandoConcurrent, {
+  });
 }
 function abrirAbono(deuda) {
   selectedDeuda.value = deuda;
@@ -304,109 +303,72 @@ function abrirAbono(deuda) {
 function abrirRealizados() {
   openRealizados.value = true;
 }
+
 function realizarAbono() {
   if (+postData.cantidad > +selectedDeuda.value?.saldo) {
-    alert("La cantidad es mayor a la deuda");
+    notify.warning("La cantidad es mayor a la deuda");
     return;
   }
-  if (loading.value) return;
-  loading.value = true;
-  Creditos.realizarAbono(selectedDeuda.value?.id, postData)
-    .then(() => {
-      if (printWhenFinalize.value) {
-        imprimirVenta(selectedDeuda.value);
-      }
-      openAbono.value = false;
-      selectedDeuda.value = null;
-    })
-    .catch((error) => {
-      alert("Ha ocurrido un error")
-      handleOpException(error);
-    }).finally(() => {
-      search.value = String(Date.now());
-      loading.value = false;
-    });
+  processRequest(async () => {
+    const response = await Creditos.realizarAbono(selectedDeuda.value?.id, postData);
+    loading.value = false;
+    if (printWhenFinalize.value) {
+      imprimirVenta(selectedDeuda.value);
+    }
+    openAbono.value = false;
+    selectedDeuda.value = null;
+    search.value = String(Date.now());
+  }, loading, {
+  });
 }
 function facturarAbono(abono) {
-  if (loading.value) return;
-  loading.value = true;
-  Creditos.facturar(abono)
-    .then(() => {
-      openAbono.value = false;
-      selectedDeuda.value = null;
-    })
-    .catch((error) => {
-      alert("Ha ocurrido un error")
-      handleOpException(error);
-    }).finally(() => {
-      search.value = String(Date.now());
-      loading.value = false;
-    });
+  processRequest(async () => {
+    const response = await Creditos.facturar(abono);
+    openAbono.value = false;
+    selectedDeuda.value = null;
+    search.value = String(Date.now());
+  }, loading, {
+    onError: (error) => notify.error("Ha ocurrido un error")
+  });
 }
 function onWatchPdf(abono) {
   console.log(abono.id, 'abono');
-
-  if (loading.value) return;
-  loading.value = true;
-  Creditos.downloadPdf(abono.id)
-    .then((response) => {
-      const file = new Blob([response.data], { type: response.headers['content-type'] });
-      const fileURL = URL.createObjectURL(file);
-      window.open(fileURL);
-    })
-    .catch((error) => {
-      alert("Ha ocurrido un error")
-      handleOpException(error);
-    }).finally(() => {
-      loading.value = false;
-    });
-
+  processRequest(async () => {
+    const response = await Creditos.downloadPdf(abono.id);
+    const file = new Blob([response.data], { type: response.headers['content-type'] });
+    const fileURL = URL.createObjectURL(file);
+    window.open(fileURL);
+  }, loading, {
+  });
 }
 function onDownloadPdf(abono) {
-  if (loading.value) return;
-  loading.value = true;
-  Creditos.downloadPdf(abono.id)
-    .then((response) => {
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "factura";
-      link.click();
-      URL.revokeObjectURL(link.href);
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error");
-    })
-    .finally(() => {
-      loading.value = false;
-    });
+  processRequest(async () => {
+    const response = await Creditos.downloadPdf(abono.id);
+    const blob = new Blob([response.data], { type: "application/pdf" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "factura";
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }, loading, {
+  });
 }
 function onDownloadXml(abono) {
-  if (loading.value) return;
-  loading.value = true;
-  Creditos.downloadXml(abono.id)
-    .then((response) => {
-      const blob = new Blob([response.data], { type: "application/xml" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "factura";
-      link.click();
-      URL.revokeObjectURL(link.href);
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error");
-    })
-    .finally(() => {
-      loading.value = false;
-    });
+  processRequest(async () => {
+    const response = await Creditos.downloadXml(abono.id);
+    const blob = new Blob([response.data], { type: "application/xml" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "factura";
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }, loading, {
+  });
 }
 
 onMounted(() => {
   creditoId.value = route.params.creditoId;
   show_settled_loan.value = route.query.show_settled_loan == 1;
-  // getDeudas();
   search.value = String(Date.now());
   getClienteInfo()
 });

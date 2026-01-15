@@ -1,6 +1,6 @@
 <template>
   <v-card class="mb-2" v-if="mdAndUp">
-        <v-card-title>Venta # {{ ticketActual?.consecutivo }} Devolucion # {{ devolucionActual?.id }}</v-card-title>
+    <v-card-title>Venta # {{ ticketActual?.consecutivo }} Devolucion # {{ devolucionActual?.id }}</v-card-title>
     <v-card-text>
       <router-link :to="{ name: 'DevolucionesIndex' }">
         <span class="text-decoration-underline text-caption">
@@ -18,21 +18,21 @@
           class="mx-2" size="small">Borrar
           devolucion</v-btn>
         <v-btn prepend-icon="mdi-check-circle" v-if="!devolucionRealizada" @click="realizarDevolucion"
-          :loading="cargando" class="mx-2" size="small" color="accent" variant="elevated">Realizar
+          :loading="cargando" class="mx-2" size="small" color="primary" variant="elevated">Realizar
           devolución</v-btn>
         <p class="text-error mx-4" v-if="devolucionRealizada">Devolucion Realizada</p>
         <div class="flex mx-4">
           <p class="font-weight-bold">Ticket Venta</p>
           <p class="">Folio:<router-link :to="{name: 'VentasShow', params: {ventaId: ticketActual?.id ?? 1}}"> {{ ticketActual.consecutivo }} </router-link></p>
           <p class="">Almacén: {{ ticketActual.miAlmacenName }}</p>
-          <p class="">Total: {{ ticketActual.total }}</p>
+          <p class="">Total: {{ formatNumber(ticketActual.total) }}</p>
           <p>Fecha y Hora: {{ ticketActual.pagado_en }}</p>
           <p v-if="ticketActual.cancelada">Cancelada</p>
         </div>
         <div class="flex">
           <p class="font-weight-bold">Ticket Devolución</p>
           <p class="">Folio: {{ devolucionActual.id }}</p>
-          <p class="">Total: {{ devolucionActual.total }}</p>
+          <p class="">Total: {{ formatNumber(devolucionActual.total) }}</p>
           <p>Fecha y Hora: {{ devolucionActual.pagado_en }}</p>
           <p v-if="devolucionActual.cancelada">Cancelada</p>
         </div>
@@ -70,7 +70,7 @@
       <v-container>
         <v-row dense>
           <v-btn prepend-icon="mdi-check-circle" v-if="!devolucionRealizada" @click="realizarDevolucion"
-            :loading="cargando" class="my-1" block size="small" color="accent" variant="elevated">Realizar
+            :loading="cargando" class="my-1" block size="small" color="primary" variant="elevated">Realizar
             devolución</v-btn>
           <v-btn prepend-icon="mdi-printer-pos" v-if="devolucionRealizada" @click="imprimirVenta" :loading="cargando"
             class="my-1" block size="small">Reimprimir
@@ -86,14 +86,14 @@
             <p class="font-weight-bold">Ticket Venta</p>
             <p class="">Folio: {{ ticketActual.id }}</p>
             <p class="">Almacén: {{ ticketActual.miAlmacenName }}</p>
-            <p class="">Total: {{ ticketActual.total }}</p>
+            <p class="">Total: {{ formatNumber(ticketActual.total) }}</p>
             <p>Fecha y Hora: {{ ticketActual.pagado_en }}</p>
             <p v-if="ticketActual.cancelada">Cancelada</p>
           </div>
           <div class="flex">
             <p class="font-weight-bold">Ticket Devolución</p>
             <p class="">Folio: {{ devolucionActual.id }}</p>
-            <p class="">Total: {{ devolucionActual.total }}</p>
+            <p class="">Total: {{ formatNumber(devolucionActual.total) }}</p>
             <p>Fecha y Hora: {{ devolucionActual.pagado_en }}</p>
             <p v-if="devolucionActual.cancelada">Cancelada</p>
           </div>
@@ -117,7 +117,7 @@
                 item.cantidad,
                 item.cantidad_devuelta
               )
-              " size="small" prepend-icon="mdi-cash-refund">Devolver</v-btn>
+              " size="small" append-icon="mdi-cash-refund" color="secondary" variant="elevated">Devolver</v-btn>
           </template>
           <template v-slot:item.precio_usado="{ item }">
             <span>${{ formatNumber(item.precio_usado) }}</span>
@@ -167,11 +167,11 @@
       <v-card-title>Cantidad Máxima a Devolver: {{ restaGeneral }}</v-card-title>
       <v-card-text>
         <v-text-field label="Ingresa la cantidad que quieres devolver" v-model="cantidad"
-          ref="cantidadRef"></v-text-field>
+          ref="cantidadRef" @keydown.enter="enviarArticuloDevolucion"></v-text-field>
       </v-card-text>
       <v-card-actions>
         <v-btn @click="openDevolucion = false" variant="text" :loading="cargando">Cancelar</v-btn>
-        <v-btn @click="enviarArticuloDevolucion" color="accent" variant="outlined" :loading="cargando">Confirmar</v-btn>
+        <v-btn @click="enviarArticuloDevolucion" color="primary" variant="outlined" :loading="cargando">Confirmar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -193,10 +193,13 @@ import PuntoVenta from "../../apis/PuntoVenta";
 import Devoluciones from "../../apis/Devoluciones";
 import { useUserStore } from "../../s";
 import { useDisplay } from "vuetify";
+import { useCurrency } from '@js/composables/useCurrency';
+import { useProcessRequest } from "@js/composables/useProcessRequest";
+import { useNotification } from "@js/composables/useNotification";
 const { formatNumber } = useCurrency('es-MX', 'MXN');
-const props = defineProps(['devolucion']);
 const s = useUserStore();
-const { handleOpException } = s;
+const { processRequest } = useProcessRequest();
+const { notify } = useNotification();
 const { xs, mdAndUp, smAndDown } = useDisplay()
 
 const router = useRouter();
@@ -276,25 +279,23 @@ function onEscape(e) {
   if (e.key === "F4") {
   }
 }
-function getSpecificDevolucion(venta) {
-  Devoluciones.getSpecificDevolucion(venta)
-    .then((response) => {
-      rellenaTicketDevolucion(response.data[0]);
-      articulosDevolucion.value = response.data[1];
-    })
-    .catch((error) => {
-      handleOpException(error);
-    });
+async function getSpecificDevolucion(venta) {
+  await processRequest(async () => {
+    const response = await Devoluciones.getSpecificDevolucion(venta);
+    rellenaTicketDevolucion(response.data[0]);
+    articulosDevolucion.value = response.data[1];
+  }, cargando, {
+    onError: (error) => notify.error("Ha ocurrido un error")
+  });
 }
 function getSpecificVT(ventaticket) {
-  PuntoVenta.getSpecificVT(ventaticket)
-    .then((response) => {
-      rellenaTicket(response.data[0]);
-      articulos.value = response.data[1];
-    })
-    .catch((error) => {
-      handleOpException(error);
-    });
+  processRequest(async () => {
+    const response = await PuntoVenta.getSpecificVT(ventaticket);
+    rellenaTicket(response.data[0]);
+    articulos.value = response.data[1];
+  }, cargando, {
+    onError: (error) => notify.error("Ha ocurrido un error")
+  });
 }
 async function rellenaTicketDevolucion(response) {
   devolucionActual.id = response.id;
@@ -322,15 +323,14 @@ function abrirDevolucion(articulo, cantidadA, cantidadD) {
   cantidadActual.value = cantidadA;
 }
 function eliminarArticuloDevolucion(id) {
-  Devoluciones.eliminarArticuloDevolucion(id)
-    .then((response) => {
-      getSpecificDevolucion(route.params.devolucion);
-      getSpecificVT(route.params.venta);
-    })
-    .catch((error) => {
-      alert("Ha ocurrido un error")
-      handleOpException(error);
-    });
+  processRequest(async () => {
+    const response = await Devoluciones.eliminarArticuloDevolucion(id);
+    cargando.value = false;
+    await getSpecificDevolucion(route.params.devolucion);
+    await getSpecificVT(route.params.venta);
+  }, cargando, {
+    onError: (error) => notify.error("Ha ocurrido un error")
+  });
 }
 function imprimirVenta() {
   if (window.__TAURI__) {
@@ -361,49 +361,38 @@ function imprimirDevolucion() {
   );
 }
 function eliminarDevolucion() {
-  Devoluciones.eliminarDevolucion(devolucionActual.id)
-    .then(() => {
-      router.push("misDevoluciones");
-    })
-    .catch((error) => {
-      alert("Ha ocurrido un error")
-      handleOpException(error);
-    });
+  processRequest(async () => {
+    const response = await Devoluciones.eliminarDevolucion(devolucionActual.id);
+    router.push("misDevoluciones");
+  }, cargando, {
+  });
 }
 function enviarArticuloDevolucion() {
-  Devoluciones.enviarArticuloDevolucion(
-    devolucionActual.id,
-    articuloActual.value,
-    cantidad.value
-  )
-    .then(() => {
-      getSpecificDevolucion(devolucionActual.id);
-      getSpecificVT(ticketActual.id);
-      openDevolucion.value = false;
-    })
-    .catch((error) => {
-      handleOpException(error);
-    });
+  processRequest(async () => {
+    const response = await Devoluciones.enviarArticuloDevolucion(
+      devolucionActual.id,
+      articuloActual.value,
+      cantidad.value
+    );
+    cargando.value = false;
+    await getSpecificDevolucion(devolucionActual.id);
+    await getSpecificVT(ticketActual.id);
+    openDevolucion.value = false;
+  }, cargando, {
+  });
 }
 function realizarDevolucion() {
-  if (cargando.value) return;
-  cargando.value = true;
-
-  Devoluciones.realizarDevolucion(devolucionActual.id)
-    .then(() => {
-      getSpecificDevolucion(devolucionActual.id);
-      openDevolucion.value = false;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    }).finally(() => {
-      cargando.value = false
-    });
+  processRequest(async () => {
+    const response = await Devoluciones.realizarDevolucion(devolucionActual.id);
+    cargando.value =false;
+    getSpecificDevolucion(devolucionActual.id);
+    openDevolucion.value = false;
+  }, cargando, {
+  });
 }
-onMounted(() => {
-  getSpecificDevolucion(route.params.devolucion);
-  getSpecificVT(route.params.venta);
+onMounted(async () => {
+  await getSpecificDevolucion(route.params.devolucion);
+  await getSpecificVT(route.params.venta);
   document.addEventListener("keydown", onEscape);
 });
 

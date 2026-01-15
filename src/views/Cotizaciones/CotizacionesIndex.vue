@@ -58,8 +58,10 @@ import { onMounted, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import Cotizacion from "@js/apis/Cotizacion";
 import { useUserStore } from "@js/s";
-import useMisFechas from "../../composables/useMisFechas";
+import useMisFechas from "@js/composables/useMisFechas";
 import TableRow from "./TableRow.vue";
+import { useProcessRequest } from "@js/composables/useProcessRequest";
+import { useNotification } from "@js/composables/useNotification";
 const s = useUserStore();
 const { handleOpException } = s;
 
@@ -67,6 +69,8 @@ const cargando = ref(false);
 const misventas = ref([]);
 const router = useRouter();
 const route = useRoute();
+const { processRequest } = useProcessRequest();
+const { notify } = useNotification();
 
 const tHeaders = ref([
   'Id',
@@ -105,33 +109,25 @@ watch(() => route.query, () => {
 })
 
 function getMisVentas() {
-  cargando.value = true;
-  Cotizacion.getMisVentas(page.value, dfecha.value, hfecha.value)
-    .then((response) => {
-      cargando.value = false;
-      misventas.value = response.data;
-    })
-    .catch((error) => {
-      cargando.value = false;
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    const response = await Cotizacion.getMisVentas(page.value, dfecha.value, hfecha.value);
+    misventas.value = response.data;
+  }, cargando, {
+    onError: () => {
+      notify.error("Ha ocurrido un error");
+    }
+  });
 }
 function cancelarVenta(venta) {
-  if (cargando.value) {
-    return
-  }
-  cargando.value = true;
-  Cotizacion.cancelarVenta(venta)
-    .then(() => {
-      getMisVentas();
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    }).finally(() => {
-      cargando.value = false
-    });
+  processRequest(async () => {
+    await Cotizacion.cancelarVenta(venta);
+    cargando.value = false;
+    await getMisVentas();
+  }, cargando, {
+    onError: () => {
+      notify.error("Ha ocurrido un error");
+    }
+  });
 }
 
 function imprimirVenta(ticketActual) {

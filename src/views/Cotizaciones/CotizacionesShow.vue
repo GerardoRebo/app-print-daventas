@@ -1,65 +1,67 @@
 <template>
-  <v-card class="mb-2" v-if="mdAndUp">
-    <v-card-title>Ticket venta folio # {{ ticketActual?.consecutivo }}</v-card-title>
-    <v-card-text>
-      <router-link :to="{ name: 'CotizacionesIndex' }">
-        <span class="text-decoration-underline text-caption">
-          Regresar al historial de cotizaciones
-        </span>
-      </router-link>
-      <v-row dense class="mt-2">
-        <v-btn size="small" @click="imprimirVenta" class="mx-2" prepend-icon="mdi-printer-pos">Imprimir</v-btn>
-        <v-btn size="small" v-if="
-          !ticketActual.cancelada &&
-          !devuelto &&
-          !ticketActual.facturado_en &&
-          !ticketActual.latest_pre_factura?.facturado_en &&
-          !ticketActual.ventaticket_id 
-        " @click="cancelarVenta" class="mx-2" prepend-icon="mdi-cancel">Cancelar</v-btn>
-        <v-btn size="small" v-if="
-          !ticketActual.cancelada &&
-          !devuelto &&
-          !ticketActual.facturado_en &&
-          !ticketActual.clienteId &&
-          !ticketActual.latest_pre_factura?.facturado_en &&
-          !ticketActual.ventaticket_id
-        " @click="abrirCliente" class="mx-2" prepend-icon="mdi-account-multiple">Clientes</v-btn>
-        <v-btn size="small" v-if="
-          !ticketActual.cancelada &&
-          !devuelto &&
-          !ticketActual.facturado_en &&
-          !ticketActual.latest_pre_factura?.facturado_en &&
-          !ticketActual.ventaticket_id
-        " @click="finzalizeCotization" class="mx-2" color="primary" variant="elevated"
-          prepend-icon="mdi-check-circle" :loading="cargando">Generar venta</v-btn>
-        <div v-else-if="ticketActual.ventaticket_id" class="mx-2">
-          <router-link :to="{ name: 'VentasShow', params:{ventaId: ticketActual.ventaticket_id} }">
-            <p>Ticket Venta: {{ ticketActual?.ventaticket?.consecutivo }}</p>
-          </router-link>
-        </div>
-        
-        <div class="mx-2">
-          <p>Almacén: {{ ticketActual?.almacen?.name }}</p>
-          <p>Cliente: {{ ticketActual?.cliente?.name }}</p>
-        </div>
-        <div>
-          <p>Subtotal: ${{ ticketActual.subtotal }}</p>
-          <p>Descuento: ${{ ticketActual.descuento }}</p>
-          <p>Impuesto Retenido: ${{ ticketActual.impuesto_retenido }}</p>
-          <p>Impuesto Trasladado: ${{ ticketActual.impuesto_traslado }}</p>
-          <p>Total: ${{ ticketActual.total }}</p>
-        </div>
-        <p class="mx-4 text-error" v-if="ticketActual.total_devuelto > 0">
-          Total Devuelto: ${{ ticketActual.total_devuelto }}
-        </p>
-        <p class="mx-4">
-          Creado en:
-          {{ moment(ticketActual.created_at).format("DD-MM-YYYY h:mma") }}
-        </p>
-        <p v-if="ticketActual.cancelada" class="mx-4 text-error">cancelada</p>
-      </v-row>
-    </v-card-text>
-  </v-card>
+  <v-container fluid class="py-0 mt-2">
+    <v-card class="mb-2" v-if="mdAndUp">
+      <v-card-title>Cotización folio # {{ ticketActual?.consecutivo }}</v-card-title>
+      <v-card-text>
+        <router-link :to="{ name: 'CotizacionesIndex' }">
+          <span class="text-decoration-underline text-caption">
+            Regresar al historial de cotizaciones
+          </span>
+        </router-link>
+        <v-row dense class="mt-2">
+          <v-btn size="small" @click="imprimirVenta" class="mx-2" prepend-icon="mdi-printer-pos">Reimprimir</v-btn>
+          <v-btn size="small" v-if="
+            !ticketActual.cancelado &&
+            !devuelto &&
+            !ticketActual.facturado_en &&
+            !ticketActual.latest_pre_factura?.facturado_en &&
+            !ticketActual.ventaticket_id
+          " @click="cancelarVenta" class="mx-2" prepend-icon="mdi-cancel">Cancelar</v-btn>
+          <v-btn size="small" v-if="
+            !ticketActual.cancelado &&
+            !devuelto &&
+            !ticketActual.facturado_en &&
+            !ticketActual.clienteId &&
+            !ticketActual.latest_pre_factura?.facturado_en &&
+            !ticketActual.ventaticket_id
+          " @click="abrirCliente" class="mx-2" prepend-icon="mdi-account-multiple">Clientes</v-btn>
+          <v-btn size="small" v-if="
+            !ticketActual.cancelado &&
+            !devuelto &&
+            !ticketActual.facturado_en &&
+            !ticketActual.latest_pre_factura?.facturado_en &&
+            !ticketActual.ventaticket_id
+          " @click="finzalizeCotization" class="mx-2" color="primary" variant="elevated"
+            prepend-icon="mdi-check-circle">Generar venta</v-btn>
+          <div v-else-if="ticketActual.ventaticket_id" class="mx-2">
+            <router-link :to="{ name: 'VentasShow', params: { ventaId: ticketActual.ventaticket_id } }">
+              <p>Ticket Venta: {{ ticketActual?.ventaticket?.consecutivo }}</p>
+            </router-link>
+          </div>
+
+          <div class="mx-2">
+            <p>Almacén: {{ ticketActual?.almacen?.name }}</p>
+            <p>Cliente: {{ ticketActual?.cliente?.name }}</p>
+          </div>
+          <div>
+            <p>Subtotal: ${{ ticketActual.subtotal }}</p>
+            <p>Descuento: ${{ ticketActual.descuento }}</p>
+            <p>Impuesto Retenido: ${{ ticketActual.impuesto_retenido }}</p>
+            <p>Impuesto Trasladado: ${{ ticketActual.impuesto_traslado }}</p>
+            <p>Total: ${{ ticketActual.total }}</p>
+          </div>
+          <p class="mx-4 text-error" v-if="ticketActual.total_devuelto > 0">
+            Total Devuelto: ${{ ticketActual.total_devuelto }}
+          </p>
+          <p class="mx-4">
+            Creado en:
+            {{ moment(ticketActual.created_at).format("DD-MM-YYYY h:mma") }}
+          </p>
+          <p v-if="ticketActual.cancelado" class="mx-4 text-error">Cancelada</p>
+        </v-row>
+      </v-card-text>
+    </v-card>
+  </v-container>
   <!-- Mobile -->
   <v-card class="mb-2" v-if="smAndDown">
     <v-card-title>Venta # {{ ticketActual?.id }}</v-card-title>
@@ -90,25 +92,25 @@
         <v-row dense class="m2-4">
           <v-btn size="small" @click="imprimirVenta" class="my-1" block>Reimprimir</v-btn>
           <v-btn size="small" v-if="
-            !ticketActual.cancelada &&
+            !ticketActual.cancelado &&
             !devuelto &&
             !ticketActual.facturado_en &
             !ticketActual.latest_pre_factura?.facturado_en
           " @click="cancelarVenta" class="my-1" block>Cancelar</v-btn>
           <v-btn size="small" v-if="
-            !ticketActual.cancelada &&
+            !ticketActual.cancelado &&
             !devuelto &&
             !ticketActual.facturado_en &&
             !ticketActual.clienteId &
             !ticketActual.latest_pre_factura?.facturado_en
           " @click="abrirCliente" class="my-1" block>Clientes</v-btn>
           <v-btn size="small" v-if="
-            !ticketActual.cancelada &&
+            !ticketActual.cancelado &&
             !devuelto &&
             !ticketActual.facturado_en &&
             !ticketActual.latest_pre_factura?.facturado_en
-          " @click="finzalizeCotization" class="my-1" color="primary" variant="elevated" block :loading="cargando">Generar venta</v-btn>
-          
+          " @click="finzalizeCotization" class="my-1" color="primary" variant="elevated" block>Generar venta</v-btn>
+
           <div>
             <p>Almacén: {{ ticketActual.miAlmacenName }}</p>
             <p>Cliente: {{ ticketActual.clienteName }}</p>
@@ -124,7 +126,7 @@
               Pagado en:
               {{ moment(ticketActual.pagado_en).format("DD-MM-YYYY h:mma") }}
             </p>
-            <p v-if="ticketActual.cancelada" class="text-error">Cancelada</p>
+            <p v-if="ticketActual.cancelado" class="text-error">Cancelada</p>
           </div>
         </v-row>
       </v-container>
@@ -203,6 +205,8 @@ const { handleOpException } = s;
 import Cliente from "../../apis/Cliente";
 import { useUserStore } from "../../s";
 import { useDisplay } from "vuetify";
+import { useProcessRequest } from "@js/composables/useProcessRequest";
+import { useNotification } from "@js/composables/useNotification";
 const { xs, mdAndUp, mdAndDown, smAndDown } = useDisplay();
 const route = useRoute();
 const keycliente = ref("");
@@ -212,6 +216,8 @@ const cargando = ref(false);
 const openCliente = ref(false);
 const drawer = ref(false);
 const saldo = ref(null);
+const { processRequest } = useProcessRequest();
+const { notify } = useNotification();
 const clienteHeaders = ref([
   { title: "Id", key: "id", align: "start", sortable: false },
   { title: "Nombre", key: "name", align: "start", sortable: false },
@@ -281,47 +287,38 @@ async function finzalizeCotization() {
   if (cargando.value) return;
   cargando.value = true;
   try {
-    const {data} = await Cotizacion.finalize(cotizacionId.value)
+    const { data } = await Cotizacion.finalize(cotizacionId.value)
     getSpecificVT(cotizacionId.value);
-    
+
   } catch (error) {
-    
-  }finally{
-    cargando.value= false
+
+  } finally {
+    cargando.value = false
   }
-  
+
 }
 
 function getAllClientes() {
-  if (cargando.value) return;
-  cargando.value = true;
-  Cliente.getAllClientes(keycliente.value)
-    .then((response) => {
-      clients.value = response.data;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error");
-    })
-    .finally(() => {
-      cargando.value = false;
-    });
+  processRequest(async () => {
+    const response = await Cliente.getAllClientes(keycliente.value);
+    clients.value = response.data;
+  }, cargando, {
+    onError: () => {
+      notify.error("Ha ocurrido un error");
+    }
+  });
 }
 function setCliente(cliente) {
-  if (cargando.value) return;
-  cargando.value = true;
-  Cotizacion.setCliente(cliente, ticketActual.value.id)
-    .then(() => {
-      getSpecificVT(cotizacionId.value);
-      openCliente.value = false;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error");
-    })
-    .finally(() => {
-      cargando.value = false;
-    });
+  processRequest(async () => {
+    await Cliente.setCliente(cliente, ticketActual.value.id);
+    cargando.value = false;
+    await getSpecificVT(cotizacionId.value);
+    openCliente.value = false;
+  }, cargando, {
+    onError: () => {
+      notify.error("Ha ocurrido un error");
+    }
+  });
 }
 function onEscape(e) {
   if (e.key === "F4") {
@@ -357,14 +354,15 @@ function imprimirVenta() {
   );
 }
 function cancelarVenta() {
-  Cotizacion.cancelarVenta(ticketActual.value.id)
-    .then(() => {
-      getSpecificVT(ticketActual.value.id);
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error");
-    });
+  processRequest(async () => {
+    await Cotizacion.cancelarVenta(ticketActual.value.id);
+    cargando.value = false;
+    await getSpecificVT(ticketActual.value.id);
+  }, ref(false), {
+    onError: () => {
+      notify.error("Ha ocurrido un error");
+    }
+  });
 }
 
 onMounted(() => {
