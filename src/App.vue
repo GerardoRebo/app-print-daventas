@@ -1,13 +1,32 @@
 <template>
   <router-view></router-view>
-    <v-snackbar-queue v-model="messages.queue" timeout="2500" closable close-text="cerrar"></v-snackbar-queue>
+  <v-snackbar 
+    v-for="(toast, index) in toasterStore.toasts" 
+    :key="toast.id"
+    v-model="toast.active" 
+    :timeout="toast.timeout" 
+    :color="toast.status" 
+    :variant="toast.variant"
+    location="bottom center"
+    :style="{ 
+      transform: `translateY(-${index * 100}px)`,
+      zIndex: 1000 + index
+    }"
+  >
+    {{ toast.text }}
+    <template v-slot:actions>
+      <v-btn variant="text" @click="toast.active = false">
+        Cerrar
+      </v-btn>
+    </template>
+  </v-snackbar>
 </template>
 <script setup>
 import { onMounted } from 'vue';
 import Offline from './sqlite/Offline'
 import PuntoVenta from './apis/PuntoVenta'
-import { useMessagesStore } from "@js/s/messages";
-const messages = useMessagesStore();
+import { useToasterStore } from "./s/toaster";
+const toasterStore = useToasterStore();
 
 const syncLocalVentas = async () => {
   if (!navigator.onLine) {
