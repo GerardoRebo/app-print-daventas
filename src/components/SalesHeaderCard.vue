@@ -83,6 +83,14 @@
             <v-text-field label="Cantidad" id="cantidad" autocomplete="off" placeholder="Cantidad"
               @keydown.stop.enter="$emit('enviarArticulo')" v-model="productForm.cantidad" hide-details type="number" />
           </v-col>
+          <v-col cols="1" v-if="productForm.usa_medidas">
+            <v-text-field label="Ancho" autocomplete="off" placeholder="Ancho" @keydown.stop.enter="$emit('enviarArticulo')"
+              v-model="productForm.ancho" hide-details type="number" />
+          </v-col>
+          <v-col cols="1" v-if="productForm.usa_medidas">
+            <v-text-field label="Alto" autocomplete="off" placeholder="Alto" @keydown.stop.enter="$emit('enviarArticulo')"
+              v-model="productForm.alto" hide-details type="number" />
+          </v-col>
           <v-col :cols="priceOptions?.length > 1 ? 2 : 1">
             <v-text-field label="Precio" id="precio" type="number" autocomplete="off"
               :append-icon="priceOptions?.length > 1 ? 'mdi-dots-vertical-circle-outline' : ''"

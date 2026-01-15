@@ -76,6 +76,30 @@
             hide-details 
           />
         </v-col>
+        <v-col cols="4" v-if="productForm.usa_medidas">
+          <v-text-field 
+            label="Ancho" 
+            autocomplete="off" 
+            placeholder="Ancho" 
+            @keydown.stop.enter="$emit('enviarArticulo')"
+            v-model="productForm.ancho" 
+            density="compact" 
+            variant="outlined" 
+            hide-details 
+          />
+        </v-col>
+        <v-col cols="4" v-if="productForm.usa_medidas">
+          <v-text-field 
+            label="Alto" 
+            autocomplete="off" 
+            placeholder="Alto" 
+            @keydown.stop.enter="$emit('enviarArticulo')"
+            v-model="productForm.alto" 
+            density="compact" 
+            variant="outlined" 
+            hide-details 
+          />
+        </v-col>
         <v-col :cols="priceOptions?.length > 1 ? 8 : 4">
           <v-text-field 
             label="Precio" 

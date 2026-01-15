@@ -42,7 +42,9 @@ export function useArticlesManagement({
     id: null,
     name: '',
     pventa: null,
-    cantidad: null
+    cantidad: null,
+    ancho: null,
+    alto: null
   });
   const edicion = ref(false);
   const openEdit = ref(false);
@@ -73,14 +75,23 @@ export function useArticlesManagement({
     articulo_form.name = articulo.product_name ?? articulo.product?.name;
     articulo_form.pventa = precioValue;
     articulo_form.cantidad = articulo.cantidad;
+    articulo_form.ancho = articulo.ancho;
+    articulo_form.alto = articulo.alto;
     edicion.value = true;
   }
 
   /**
    * Inicializa el formulario de edición y abre el modal
    */
-  function abrirEdicion(id, name, pventa, cantidad) {
-    
+  function abrirEdicion(id, name, pventa, cantidad, ancho, alto) {
+    articuloActualId.value = id;
+    articulo_form.id = id;
+    articulo_form.name = name;
+    articulo_form.pventa = pventa;
+    articulo_form.cantidad = cantidad;
+    articulo_form.ancho = ancho;
+    articulo_form.alto = alto;
+    edicion.value = true;
   }
 
   /**

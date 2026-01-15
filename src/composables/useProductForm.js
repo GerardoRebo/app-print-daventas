@@ -19,13 +19,16 @@ export function useProductForm(ticketActual, almacen, { onOpenConversion } = {})
     name: '',
     codigo: '',
     cantidad: '',
+    ancho: '',
+    alto: '',
     pventa: '',
     pcosto: '',
     porcentaje_ganancia: '',
     pventa_base: '',
     precio_mayoreo: '',
     precio_medio_mayoreo: '',
-    existencia: ''
+    existencia: '',
+    usa_medidas: false
   })
 
   const priceOptions = ref([])
@@ -41,9 +44,12 @@ export function useProductForm(ticketActual, almacen, { onOpenConversion } = {})
    */
   function rellenaProductForm(response) {
     productActualId.value = response.data.id
+    product_form.usa_medidas = response.data.usa_medidas
     product_form.name = response.data.name
     product_form.codigo = response.data.codigo
     product_form.cantidad = 1
+    product_form.ancho = 1
+    product_form.alto = 1
     product_form.pventa = response.data.precio
     product_form.pcosto = response.data.pcosto
     product_form.porcentaje_ganancia = response.data.porcentaje_ganancia
@@ -193,9 +199,12 @@ export function useProductForm(ticketActual, almacen, { onOpenConversion } = {})
     product_form.name = ''
     product_form.codigo = ''
     product_form.cantidad = ''
+    product_form.ancho = ''
+    product_form.alto = ''
     product_form.pventa = ''
     product_form.precio_mayoreo = ''
     product_form.existencia = ''
+    product_form.usa_medidas = false
     priceOptions.value = []
   }
 

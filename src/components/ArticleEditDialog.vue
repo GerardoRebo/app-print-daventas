@@ -24,6 +24,26 @@
           type="number"
           ref="cantidadRef"
         />
+        <v-text-field
+          label="Ancho"
+          id="ancho"
+          autocomplete="off"
+          placeholder="Ancho"
+          density="compact"
+          v-model.number="localArticulo.ancho"
+          @keydown.stop.enter="$emit('confirm', localArticulo)"
+          type="number"
+        />
+        <v-text-field
+          label="Alto"
+          id="alto"
+          autocomplete="off"
+          placeholder="Alto"
+          density="compact"
+          v-model.number="localArticulo.alto"
+          @keydown.stop.enter="$emit('confirm', localArticulo)"
+          type="number"
+        />
       </v-card-text>
       <v-card-actions>
         <v-btn
@@ -78,6 +98,8 @@ const emit = defineEmits([
 const localArticulo = ref({
   pventa: props.articulo.pventa,
   cantidad: props.articulo.cantidad,
+  ancho: props.articulo.ancho,
+  alto: props.articulo.alto,
 });
 
 const cantidadRef = ref(null);
@@ -90,6 +112,8 @@ watch(
     localArticulo.value = {
       pventa: newVal.pventa,
       cantidad: newVal.cantidad,
+      ancho: newVal.ancho,
+      alto: newVal.alto,
     };
   },
   { deep: true }
