@@ -92,10 +92,12 @@ export default {
     },
     register(productActualId, movimiento, product_form) {
         return Api().post("/movimientos/register", {
-            productActualId,
-            movimiento,
-            precio: product_form.pcosto,
-            cantidad: product_form.cantidad,
+            params: {
+                productActualId,
+                movimiento,
+                precio: product_form.pcosto,
+                cantidad: product_form.cantidad,
+            }
         })
     },
     destroyArticulo(articulo, movimiento) {
