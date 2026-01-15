@@ -12,9 +12,7 @@
         <v-btn size="small" @click="imprimirVenta" class="mx-2" prepend-icon="mdi-printer-pos">Reimprimir</v-btn>
         <v-btn size="small" v-if="
           !ticketActual.esta_cancelado &&
-          !devuelto &&
-          !ticketActual.facturado_en &
-          !ticketActual.latest_pre_factura?.facturado_en
+          !devuelto
         " @click="cancelarVenta" class="mx-2" prepend-icon="mdi-cancel">Cancelar</v-btn>
         <v-btn size="small" v-if="
           !ticketActual.esta_cancelado &&
@@ -31,7 +29,7 @@
         " @click="isFacturaInfoOpen = true" class="mx-2" color="primary" variant="elevated"
           prepend-icon="mdi-check">Facturar</v-btn>
         <template v-else-if="!ticketActual.esta_cancelado && ticketActual?.facturado_en">
-          <v-menu>
+          <v-menu class="">
             <template v-slot:activator="{ props }">
               <v-btn variant="tonal" v-bind="props" append-icon="mdi-menu-down" size="small">
                 Factura
@@ -67,6 +65,14 @@
                 <v-list-item-title>
                   Descarga XML</v-list-item-title>
               </v-list-item>
+              <v-list-item @click="regenerarPdf()">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-sync"></v-icon>
+                </template>
+                <v-list-item-title>
+                  Regenerar PDF</v-list-item-title>
+              </v-list-item>
+
             </v-list>
           </v-menu>
           <div v-if="!ticketActual.cfdi_cancellation_status">
@@ -75,11 +81,20 @@
               Cancelar Factura
             </v-btn>
           </div>
+          <div v-else-if="ticketActual.cfdi_cancellation_status == 'PENDING'">
+            <p class="mx-2 text-warning">
+              Cancelación de factura en proceso...
+            </p>
+          </div>
+          <div v-else-if="ticketActual.cfdi_cancellation_status == 'CANCELED'">
+            <p class="mx-2 text-success">
+              Factura cancelada correctamente.
+            </p>
+          </div>
           <v-btn @click="verificarEstadoCancelacion" size="small" class="ml-2" prepend-icon="mdi-progress-check"
             :loading="cargando">
             Verificar estado de cancelación
           </v-btn>
-
           <!-- <v-btn size="small" @click="descargarXml" class="mx-2" prepend-icon="mdi-xml">Descargar Xml</v-btn>
           <v-btn size="small" @click="descargarPdf" class="mx-2" prepend-icon="mdi-file-pdf-box">Descargar Pdf</v-btn> -->
           <p v-if="ticketActual.facturado_en" class="mx-2">
@@ -102,10 +117,10 @@
               name: 'FacturasGlobalesShow',
               params: {
                 facturaId:
-                  ticketActual?.latest_pre_factura?.pre_factura_global_id ?? 1,
+                  ticketActual.latest_pre_factura.pre_factura_global_id,
               },
             }">
-              {{ ticketActual?.latest_pre_factura?.pre_factura_global_id }}
+              {{ ticketActual.latest_pre_factura.pre_factura_global_id }}
             </router-link>
           </p>
         </template>
@@ -163,9 +178,7 @@
           <v-btn size="small" @click="imprimirVenta" class="my-1" block>Reimprimir</v-btn>
           <v-btn size="small" v-if="
             !ticketActual.esta_cancelado &&
-            !devuelto &&
-            !ticketActual.facturado_en &
-            !ticketActual.latest_pre_factura?.facturado_en
+            !devuelto
           " @click="cancelarVenta" class="my-1" block>Cancelar</v-btn>
           <v-btn size="small" v-if="
             !ticketActual.esta_cancelado &&
@@ -183,7 +196,7 @@
           <template v-else-if="!ticketActual.esta_cancelado">
             <v-menu transition="scale-transition" size="small">
               <template v-slot:activator="{ props }">
-                <v-btn variant="tonal" v-bind="props" append-icon="mdi-menu-down" size="small" block>
+                <v-btn variant="tonal" v-bind="props" append-icon="mdi-menu-down" size="small" block class="my-1">
                   Factura
                 </v-btn>
               </template>
@@ -217,6 +230,13 @@
                   <v-list-item-title>
                     Descarga XML</v-list-item-title>
                 </v-list-item>
+                <v-list-item @click="regenerarPdf()">
+                  <template v-slot:prepend>
+                    <v-icon icon="mdi-sync"></v-icon>
+                  </template>
+                  <v-list-item-title>
+                    Regenerar PDF</v-list-item-title>
+                </v-list-item>
               </v-list>
             </v-menu>
             <p v-if="ticketActual.facturado_en" class="my-1">
@@ -237,7 +257,7 @@
                 name: 'FacturasGlobalesShow',
                 params: {
                   facturaId:
-                    ticketActual?.latest_pre_factura?.pre_factura_global_id ??1,
+                    ticketActual?.latest_pre_factura?.pre_factura_global_id ?? 1,
                 },
               }">
                 {{ ticketActual.latest_pre_factura.pre_factura_global_id }}
@@ -248,13 +268,13 @@
             <p>Timbres Disponibles: {{ saldo ?? 0 }}</p>
             <p>Almacén: {{ ticketActual?.almacen?.name }}</p>
             <p>Cliente: {{ ticketActual?.cliente?.name }}</p>
-            <p>Subtotal: ${{ ticketActual.subtotal }}</p>
-            <p>Descuento: ${{ ticketActual.descuento }}</p>
-            <p>Impuesto Retenido: ${{ ticketActual.impuesto_retenido }}</p>
-            <p>Impuesto Trasladado: ${{ ticketActual.impuesto_traslado }}</p>
-            <p>Total: ${{ ticketActual.total }}</p>
+            <p>Subtotal: ${{ formatNumber(ticketActual.subtotal) }}</p>
+            <p>Descuento: ${{ formatNumber(ticketActual.descuento) }}</p>
+            <p>Impuesto Retenido: ${{ formatNumber(ticketActual.impuesto_retenido) }}</p>
+            <p>Impuesto Trasladado: ${{ formatNumber(ticketActual.impuesto_traslado) }}</p>
+            <p>Total: ${{ formatNumber(ticketActual.total) }}</p>
             <p class="text-error" v-if="ticketActual.total_devuelto > 0">
-              Total Devuelto: ${{ ticketActual.total_devuelto }}
+              Total Devuelto: ${{ formatNumber(ticketActual.total_devuelto) }}
             </p>
             <p>
               Pagado en:
@@ -269,7 +289,7 @@
   <v-progress-linear color="primary" indeterminate v-if="cargando" class="mb-4"></v-progress-linear>
   <v-container fluid>
     <template v-if="loadingInitial">
-      <v-skeleton-loader type="card, list-item@5" />
+      <v-skeleton-loader type="table" />
     </template>
     <template v-else>
       <v-data-table :headers="tHeaders" :items="articulos" dense>
@@ -286,6 +306,7 @@
         <template v-slot:item.codigo="{ item }">
           <span>{{ item.product.codigo }}</span>
         </template>
+
         <template v-slot:item.precio_usado="{ item }">
           <span>${{ formatNumber(item.precio_usado) }}</span>
         </template>
@@ -294,6 +315,15 @@
         </template>
         <template v-slot:item.fue_devuelto="{ item }">
           <span>{{ item.fue_devuelto ? "Si" : "No" }}</span>
+        </template>
+        <template v-slot:item.importe_descuento="{ item }">
+          <span>{{ formatNumber(item.importe_descuento) }}</span>
+        </template>
+        <template v-slot:item.impuesto_traslado="{ item }">
+          <span>{{ formatNumber(item.impuesto_traslado) }}</span>
+        </template>
+        <template v-slot:item.impuesto_retenido="{ item }">
+          <span>{{ formatNumber(item.impuesto_retenido) }}</span>
         </template>
       </v-data-table>
     </template>
@@ -321,7 +351,7 @@
       <v-card-text class="pt-4">
 
         <!-- BUSCADOR -->
-        <v-text-field v-model="keycliente" prepend-inner-icon="mdi-magnify" label="Buscar cliente"
+        <v-text-field id="keycliente" v-model="keycliente" prepend-inner-icon="mdi-magnify" label="Buscar cliente"
           placeholder="Ingresa nombre, teléfono o email" variant="outlined" density="compact" class="mb-4"
           hide-details></v-text-field>
 
@@ -346,6 +376,18 @@
             <span>${{ formatNumber(item.limite_credito) }}</span>
           </template>
 
+          <!-- Estado CFDI -->
+          <template #item.es_apto_para_cfdi="{ item }">
+            <v-chip v-if="item.es_apto_para_cfdi" color="success" size="small">
+              <v-icon start icon="mdi-check-circle"></v-icon>
+              Apto
+            </v-chip>
+            <v-chip v-else color="warning" size="small">
+              <v-icon start icon="mdi-alert-circle"></v-icon>
+              Incompleto
+            </v-chip>
+          </template>
+
           <!-- Acciones -->
           <template #item.actions="{ item }">
             <v-btn color="primary" size="small" prepend-icon="mdi-check" tabindex="-1" @click="setCliente(item.id)">
@@ -357,6 +399,7 @@
       </v-card-text>
     </v-card>
   </v-dialog>
+
   <v-dialog v-model="isFacturaInfoOpen" max-width="800">
     <v-card>
       <v-card-title>Información de CFDI</v-card-title>
@@ -495,6 +538,7 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
   <v-dialog v-model="isEmailOpen" max-width="600">
     <v-card>
       <v-card-title class="text-h6">
@@ -556,6 +600,8 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+
 </template>
 <script setup>
 import {
@@ -574,10 +620,14 @@ import Organizacion from "@js/apis/Organizacion";
 import PuntoVenta from "../../apis/PuntoVenta";
 import { vMaska } from "maska/vue"
 import { useCurrency } from '@js/composables/useCurrency';
+import { useProcessRequest } from "@js/composables/useProcessRequest";
+import { useNotification } from "@js/composables/useNotification";
+
 const { formatNumber } = useCurrency('es-MX', 'MXN');
 
 const s = useUserStore();
-const { handleOpException } = s;
+const { processRequest } = useProcessRequest();
+const { notify } = useNotification();
 import Cliente from "../../apis/Cliente";
 import { useUserStore } from "../../s";
 import { useDisplay } from "vuetify";
@@ -593,12 +643,12 @@ const cancelacionData = ref({
 const isEmailOpen = ref(false)
 const isFacturaInfoOpen = ref(false);
 const isFormasDePagoOpen = ref(false);
-const loadingInitial = ref(true)
 const isCancelarFacturaOpen = ref(false);
 const cargando = ref(false);
 const errors = ref([]);
-const openCliente = ref(false);
 const erroresRelacionadas = ref([]);
+const openCliente = ref(false);
+const loadingInitial = ref(true);
 const drawer = ref(false);
 const cdfiUsos = ref([
   { value: "G01", title: "G01-Adquisición de mercancías." },
@@ -688,6 +738,7 @@ const clienteHeaders = ref([
     sortable: false,
   },
   { title: "Email", key: "email", align: "start", sortable: false },
+  { title: "Estado CFDI", key: "es_apto_para_cfdi", align: "start", sortable: false },
   { title: "Acciones", key: "actions", align: "start", sortable: false },
 ]);
 const tHeaders = ref([
@@ -747,7 +798,6 @@ watch(isFacturaInfoOpen, () => {
     ticketActual.value.uso_cfdi = "G01";
   }
 });
-
 watch(() => ticketActual.value.es_publico_en_general, (newVal) => {
   if (newVal) {
     ticketActual.value.uso_cfdi = 'S01';
@@ -755,6 +805,7 @@ watch(() => ticketActual.value.es_publico_en_general, (newVal) => {
     ticketActual.value.nombre_receptor = 'PUBLICO EN GENERAL';
   }
 });
+
 const devuelto = computed(() =>
   articulos.value.some((articulo) => articulo.fue_devuelto == 1)
 );
@@ -766,122 +817,88 @@ function abrirCliente() {
   getAllClientes();
 }
 function descargarPdf() {
-  if (cargando.value) return;
-  cargando.value = true;
-  PuntoVenta.descargarPdf(ventaId.value)
-    .then((response) => {
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "factura";
-      link.click();
-      URL.revokeObjectURL(link.href);
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error");
-    })
-    .finally(() => {
-      cargando.value = false;
-    });
+  processRequest(async () => {
+    const response = await PuntoVenta.descargarPdf(ventaId.value);
+    const blob = new Blob([response.data], { type: "application/pdf" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "factura";
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }, cargando, {
+    onError: (error) => notify.error("Ha ocurrido un error")
+  });
 }
 function descargarXml() {
-  if (cargando.value) return;
-  cargando.value = true;
-  PuntoVenta.descargarXml(ventaId.value)
-    .then((response) => {
-      const blob = new Blob([response.data], { type: "application/xml" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "factura";
-      link.click();
-      URL.revokeObjectURL(link.href);
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error");
-    })
-    .finally(() => {
-      cargando.value = false;
-    });
+  processRequest(async () => {
+    const response = await PuntoVenta.descargarXml(ventaId.value);
+    const blob = new Blob([response.data], { type: "application/xml" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "factura";
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }, cargando, {
+    onError: (error) => notify.error("Ha ocurrido un error")
+  });
+}
+function regenerarPdf() {
+  processRequest(async () => {
+    const response = await PuntoVenta.regenerarPdf(ventaId.value);
+    notify.success("PDF regenerado correctamente");
+  }, cargando, {
+    onError: (error) => notify.error("Ha ocurrido un error")
+  });
 }
 function onWatchPdf() {
-  if (cargando.value) return;
-  cargando.value = true;
-  PuntoVenta.descargarPdf(ventaId.value)
-    .then((response) => {
-      const file = new Blob([response.data], { type: response.headers['content-type'] });
-      const fileURL = URL.createObjectURL(file);
-      window.open(fileURL);
-    })
-    .catch((error) => {
-      alert("Ha ocurrido un error")
-      handleOpException(error);
-    }).finally(() => {
-      cargando.value = false;
-    });
-
+  processRequest(async () => {
+    const response = await PuntoVenta.descargarPdf(ventaId.value);
+    const file = new Blob([response.data], { type: response.headers['content-type'] });
+    const fileURL = URL.createObjectURL(file);
+    window.open(fileURL);
+  }, cargando, {
+    onError: (error) => notify.error("Ha ocurrido un error")
+  });
 }
 function getAllClientes() {
-  if (cargando.value) return;
-  cargando.value = true;
-  Cliente.getAllClientes(keycliente.value)
-    .then((response) => {
-      clients.value = response.data;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error");
-    })
-    .finally(() => {
-      cargando.value = false;
-    });
+  processRequest(async () => {
+    const response = await Cliente.getAllClientes(keycliente.value);
+    clients.value = response.data;
+  }, cargando, {
+    onError: (error) => notify.error("Ha ocurrido un error")
+  });
 }
 function setCliente(cliente) {
-  if (cargando.value) return;
-  cargando.value = true;
-  Cliente.setCliente(cliente, ticketActual.value.id)
-    .then((response) => {
-      if (response.data?.success && response.data?.retentionRules?.length) {
-        if (
-          confirm(
-            "Se aplicaran las siguientes reglas de retencion: " +
-            response.data.retentionRules
-          ) == true
-        ) {
-          cargando.value = false;
-          acceptRetentionRules();
-        } else {
-          getSpecificVT(ticketActual.value.id);
-
-        }
+  processRequest(async () => {
+    const response = await Cliente.setCliente(cliente, ticketActual.value.id);
+    if (response.data?.success && response.data?.retentionRules?.length) {
+      if (
+        confirm(
+          "Se aplicaran las siguientes reglas de retencion: " +
+          response.data.retentionRules
+        ) == true
+      ) {
+        acceptRetentionRules();
+      } else {
+        getSpecificVT(ticketActual.value.id);
       }
-      openCliente.value = false;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error");
-    })
-    .finally(() => {
-      cargando.value = false;
-    });
+    }
+    openCliente.value = false;
+  }, cargando, {
+    onError: (error) => notify.error("Ha ocurrido un error")
+  });
 }
 function acceptRetentionRules() {
-  if (cargando.value) return;
-  cargando.value = true;
-  PuntoVenta.acceptRetentionRules(ticketActual.value.id)
-    .then((response) => {
-      getSpecificVT(ticketActual.value.id);
-      openCliente.value = false;
-    })
-    .catch((error) => {
+  processRequest(async () => {
+    const response = await PuntoVenta.acceptRetentionRules(ticketActual.value.id);
+    getSpecificVT(ticketActual.value.id);
+    openCliente.value = false;
+  }, cargando, {
+    onError: (error) => {
       console.log(error);
-      handleOpException(error);
-      alert("Ha ocurrido un error");
-    })
-    .finally(() => {
-      cargando.value = false;
-    });
+      notify.error("Ha ocurrido un error");
+    }
+  });
 }
 function onEscape(e) {
   if (e.key === "F4") {
@@ -910,7 +927,8 @@ async function sendEmail() {
     cargando.value = true;
     const { data } = await PuntoVenta.sendEmail(ticketActual.value.id, emailData.value)
     isEmailOpen.value = false;
-    alert(data.message);
+
+    alert(data.message)
 
   } catch (error) {
     handleOpException(error);
@@ -924,26 +942,30 @@ async function verificarEstadoCancelacion() {
   try {
     cargando.value = true;
     const { data } = await PuntoVenta.verificarEstadoCancelacion(ticketActual.value.id)
-    console.log(data);
     if (data.output) {
       alert(data.output)
     }
+    console.log(data);
   } catch (error) {
     console.log(error);
   } finally {
     cargando.value = false;
   }
 }
+
 async function getSpecificVT(ventaticket) {
   try {
     const { data } = await PuntoVenta.getSpecificVT(ventaticket);
     ticketActual.value = data[0];
     articulos.value = data[1];
+
     emailData.value.fromName = ticketActual.value.organization?.name ?? ticketActual.value.almacen?.name;
     emailData.value.fromEmail = ticketActual.value.organization?.email ?? ticketActual.value.almacen?.email;
     emailData.value.toEmail = ticketActual.value.cliente?.email;
     emailData.value.toName = ticketActual.value.cliente?.name;
     const { data: newData } = await Organizacion.getFoliosSaldo();
+    console.log(newData, 'newd');
+
     saldo.value = newData?.saldo;
   } catch (error) {
     console.log(error);
@@ -973,19 +995,12 @@ function cancelarVenta() {
   if (!confirm('Estas seguro de cancelar esta venta?')) {
     return;
   }
-  if (cargando.value) return;
-  cargando.value = true;
-    
-  PuntoVenta.cancelarVenta(ticketActual.value.id)
-    .then(() => {
-      cargando.value = false; 
-      getSpecificVT(ticketActual.value.id);
-    })
-    .catch((error) => {
-      cargando.value = false; 
-      handleOpException(error);
-      alert("Ha ocurrido un error");
-    });
+  processRequest(async () => {
+    const response = await PuntoVenta.cancelarVenta(ticketActual.value.id);
+    getSpecificVT(ticketActual.value.id);
+  }, cargando, {
+    onError: (error) => notify.error("Ha ocurrido un error")
+  });
 }
 const validarFacturasRelacionadas = () => {
   if (!Array.isArray(ticketActual.value.facturasRelacionadas)) return true;
@@ -1004,44 +1019,38 @@ const fieldErrorCount = computed(() => {
 })
 function facturar() {
   if (!validarFacturasRelacionadas()) {
-    activeTab.value = 'avanzado'; // Optionally switch to the tab with errors
+    activeTab.value = 'avanzado';
     return;
   }
-  if (cargando.value) return;
-  cargando.value = true;
   if (!saldo.value) {
-    alert(
+    notify.warning(
       "No tienes suficientes timbres fiscales, contacta con la administración para solicitar timbres fiscales"
     );
     isFacturaInfoOpen.value = false;
-    cargando.value = false;
     return;
   }
-  PuntoVenta.facturar(ticketActual.value.id, {
-    forma_pago: ticketActual.value.forma_pago,
-    metodo_pago: ticketActual.value.metodo_pago,
-    uso_cfdi: ticketActual.value.uso_cfdi,
-    serie: ticketActual.value.serie,
-    clave_privada_local: ticketActual.value.clave_privada_local,
-    publico_en_general: ticketActual.value.es_publico_en_general ?? false,
-    nombre_receptor: ticketActual.value.nombre_receptor,
-    facturas_relacionadas: ticketActual.value.facturasRelacionadas,
-  })
-    .then((response) => {
-      isFacturaInfoOpen.value = false;
-      getSpecificVT(ventaId.value);
-    })
-    .catch((error) => {
-      if (error.response.status === 422) {
-        errors.value = error.response.data.errors;
-        return
-      }
-      handleOpException(error);
-      alert("Ha ocurrido un error");
-    })
-    .finally(() => {
-      cargando.value = false;
+  processRequest(async () => {
+    const response = await PuntoVenta.facturar(ticketActual.value.id, {
+      forma_pago: ticketActual.value.forma_pago,
+      metodo_pago: ticketActual.value.metodo_pago,
+      uso_cfdi: ticketActual.value.uso_cfdi,
+      serie: ticketActual.value.serie,
+      clave_privada_local: ticketActual.value.clave_privada_local,
+      publico_en_general: ticketActual.value.es_publico_en_general ?? false,
+      nombre_receptor: ticketActual.value.nombre_receptor,
+      facturas_relacionadas: ticketActual.value.facturasRelacionadas,
     });
+    isFacturaInfoOpen.value = false;
+    getSpecificVT(ventaId.value);
+  }, cargando, {
+    onError: (error) => {
+      if (error.response?.status === 422) {
+        errors.value = error.response.data.errors;
+        return;
+      }
+      notify.error("Ha ocurrido un error");
+    }
+  });
 }
 onMounted(() => {
   ventaId.value = route.params.ventaId;
@@ -1072,6 +1081,8 @@ const motivosCancelacion = [
   { title: "04 - Operación nominativa relacionada en una factura global", value: "04" },
 ]
 
+
+// funciones
 function agregarRelacion() {
   if (!Array.isArray(ticketActual.value.facturasRelacionadas)) {
     ticketActual.value.facturasRelacionadas = [{ tipo: null, folio: "" }]

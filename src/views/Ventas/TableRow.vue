@@ -18,7 +18,7 @@ const { xs, mdAndUp, mdAndDown, smAndDown } = useDisplay()
         <td>{{ venta.turno_id }}</td>
         <td>{{ venta.nombre }}</td>
         <td>{{ venta?.cliente?.name }}</td>
-        <td>{{ venta?.almacen?.name }}</td>
+        <td><strong>{{ venta?.almacen?.name }} </strong></td>
         <td>${{ formatNumber(venta.total) }}</td>
         <td>
             {{ venta.total_devuelto > 0 ? "Sí" : "No" }}
