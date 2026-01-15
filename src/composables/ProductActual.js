@@ -1,5 +1,5 @@
 import { ref } from "vue";
-import { useProcessRequest } from "./ProcessRequest";
+import { useProcessRequest } from "@js/composables/useProcessRequest";
 import Product from "@js/apis/Product";
 
 const { processRequest } = useProcessRequest();
