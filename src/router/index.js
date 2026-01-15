@@ -75,10 +75,9 @@ const CorteImprimir = () => import('../views/CorteImprimir.vue')
 // const Offline = () => import('../views/Offline.vue')
 const MovimientoImprimir = () => import('../views/MovimientoImprimir.vue')
 const DevolucionImprimir = () => import('../views/DevolucionImprimir.vue')
-const MercadopagoSuccess = () => import('../views/admin/Mercadopago/MercadopagoSuccess.vue')
-const MercadopagoFailed = () => import('../views/admin/Mercadopago/MercadoPagoFailed.vue')
-
-const MercadopagoPending = () => import('../views/admin/Mercadopago/MercadopagoPending.vue')
+// const MercadopagoSuccess = () => import('../views/admin/Mercadopago/MercadopagoSuccess.vue')
+// const MercadopagoFailed = () => import('../views/admin/Mercadopago/MercadoPagoFailed.vue')
+// const MercadopagoPending = () => import('../views/admin/Mercadopago/MercadopagoPending.vue')
 
 import User from "../apis/User";
 import { useUserStore } from "../s";
@@ -215,9 +214,9 @@ const routes = [
   // { path: '/ventatickets/imprimirOffline/:id', name: 'ventaImprimirOffline', component: VentaOfflineImprimir },
   { path: '/devoluciones/imprimir/:id', component: DevolucionImprimir },
   { path: '/movimientos/imprimir/:id', component: MovimientoImprimir },
-  { path: '/mercadopago_success', component: MercadopagoSuccess },
-  { path: '/mercadopago_failed', component: MercadopagoFailed },
-  { path: '/mercadopago_pending', component: MercadopagoPending },
+  // { path: '/mercadopago_success', component: MercadopagoSuccess },
+  // { path: '/mercadopago_failed', component: MercadopagoFailed },
+  // { path: '/mercadopago_pending', component: MercadopagoPending },
 ]
 const router = createRouter({
   history: createWebHistory(), routes
