@@ -4,6 +4,8 @@ import { useUserStore } from "../s";
 import { useRoute, useRouter } from "vue-router";
 import User from "../apis/User";
 import { useDisplay } from "vuetify";
+import { useProcessRequest } from "@js/composables/useProcessRequest";
+import { useNotification } from "@js/composables/useNotification";
 
 const { mobile } = useDisplay();
 const s = useUserStore();
@@ -12,6 +14,8 @@ const route = useRoute();
 const countNotf = ref(0);
 const notifications = ref([]);
 const intervalId = ref(null);
+const { processRequest } = useProcessRequest();
+const { notify } = useNotification();
 
 const drawer = ref(true);
 const rail = ref(true);
@@ -117,17 +121,28 @@ const initials = computed(() =>
 );
 const nombre = computed(() => (s.authuser?.name ? s.authuser.name : "Inicio"));
 const email = computed(() => s.authuser?.email);
+const activeOrganizationName = computed(() => {
+  const orgId = s.authuser?.active_organization_id;
+  const orgs = s.organizations;
+  return orgs?.find(org => org.id === orgId)?.name || '';
+});
 function getCountNotf() {
   if (s.isLoggedIn) {
-    User.getCountNotf().then((response) => {
+    processRequest(async () => {
+      const response = await User.getCountNotf();
       countNotf.value = response.data;
+    }, ref(false), {
+      onError: () => {}
     });
   }
 }
 function getNotifications() {
-  User.getNotifications().then((response) => {
+  processRequest(async () => {
+    const response = await User.getNotifications();
     notifications.value = response.data;
     countNotf.value = 0;
+  }, ref(false), {
+    onError: () => {}
   });
 }
 function onEscape(e) {
@@ -151,6 +166,7 @@ function logout() {
     localStorage.removeItem("myAlmacens");
     localStorage.removeItem("roles");
     localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("organizations");
     s.isLoggedIn = false;
     s.authuser = {};
     s.myAlmacens = [];
@@ -162,7 +178,8 @@ function logout() {
     router.push({ name: "Login" });
     return;
   }
-  User.logout().then(() => {
+  processRequest(async () => {
+    await User.logout();
     localStorage.removeItem("token");
     s.isLoggedIn = false;
     s.authuser = {};
@@ -172,6 +189,8 @@ function logout() {
     s.departamentos = [];
     s.productsData = ref({});
     router.push({ name: "Login" });
+  }, ref(false), {
+    onError: () => {}
   });
 }
 const isChildRouteActive = computed(() => {
@@ -179,6 +198,12 @@ const isChildRouteActive = computed(() => {
     link.children?.some(child => route.name === child.href || route.path.includes(child.href))
   )
 })
+const isLinkActive = (link) => {
+  if (link.children) {
+    return link.children.some(child => route.name === child.href)
+  }
+  return route.name === link.href
+}
 watch(route, () => {
   if (mobile.value) {
     rail.value = false
@@ -191,14 +216,14 @@ watch(route, () => {
   }
 })
 onMounted(() => {
+  s.initializeFromStorage();
   getCountNotf();
   intervalId.value = setInterval(getCountNotf, 600000);
   document.addEventListener("keydown", onEscape);
 });
-onMounted(() => {
-  getCountNotf();
-  intervalId.value = setInterval(getCountNotf, 600000);
-  document.addEventListener("keydown", onEscape);
+onUnmounted(() => {
+  document.removeEventListener("keydown", onEscape);
+  clearInterval(intervalId.value);
 });
 
 
