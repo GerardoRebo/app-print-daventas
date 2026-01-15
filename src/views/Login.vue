@@ -61,50 +61,49 @@ import User from "../apis/User";
 import { reactive, ref } from "@vue/reactivity";
 import { useRouter } from "vue-router";
 import { useUserStore } from "../s";
+import { useProcessRequest } from "@js/composables/useProcessRequest";
+import { useNotification } from "@js/composables/useNotification";
+import { useAuthHandler } from "@js/composables/useAuthHandler";
+
 const store = useUserStore();
-const { handleOpException } = store;
 const router = useRouter();
+const { handleAuthSuccess } = useAuthHandler();
+const { processRequest } = useProcessRequest();
+const { notify } = useNotification();
+
 const cargando = ref(false);
 const show1 = ref(false);
+
 const form = reactive({
   email: "",
   password: "",
   device_name: "browser",
 });
+
 const errors = ref([]);
+
 function login() {
-  // if (!navigator.onLine) {
-  //   alert('No estas conectado a internet')
-  //   return;
-  // }
-  if (cargando.value) return;
-  cargando.value = true
-  User.login(form)
-    .then((response) => {
-      localStorage.setItem("token", response.data);
-      store.isLoggedIn = true;
-      localStorage.setItem("isLoggedIn", JSON.stringify(true));
-      store.setUserRoles()
-      router.push({ name: "Home" });
-    })
-    .catch((error) => {
-      if (error?.response?.status === 422) {
-        errors.value = error.response.data.errors;
-        return;
-      }
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    }).finally(() => {
-      cargando.value = false
-    });
+  if (!navigator.onLine) {
+    notify.error('No estás conectado a internet');
+    return;
+  }
+
+  processRequest(async () => {
+    const response = await User.login(form);
+    handleAuthSuccess(response.data);
+  }, cargando, {
+    errorsRef: errors,
+    onSuccess: () => notify.success("¡Sesión iniciada correctamente!")
+  });
 }
+
 const loginWithGoogle = async () => {
   try {
     const { data } = await User.registerWithGoogle();
-    // console.log('Google Registration Data:', data);
     window.location.href = data.url;
   } catch (error) {
     console.error('Google Login Error:', error);
+    notify.error('Error al iniciar sesión con Google');
   }
 };
 </script>
