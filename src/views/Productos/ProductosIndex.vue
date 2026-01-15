@@ -14,8 +14,9 @@
     </v-btn>
   </v-toolbar>
   <!-- Header Desktop -->
-  <v-card v-if="mdAndUp">
-    <v-container fluid>
+  <v-container fluid class="py-0 mt-2">
+    <v-card v-if="mdAndUp">
+      <v-container fluid>
       <v-row class="mb-2">
         <v-btn @click="abrirProducto" small class="ma-2" prepend-icon="mdi-plus" color="primary" variant="outlined">
           Crear Producto
@@ -32,8 +33,9 @@
         <v-checkbox v-model="bajostock" label="Bajo stock" hide-details></v-checkbox>
         <v-checkbox v-model="prioritario" label="Prioritarios" hide-details></v-checkbox>
       </v-row>
-    </v-container>
-  </v-card>
+      </v-container>
+    </v-card>
+  </v-container>
 
   <!-- Mobile Navigation Drawer -->
   <v-navigation-drawer v-model="drawer" :location="$vuetify.display.mobile ? 'bottom' : undefined" temporary
@@ -58,8 +60,8 @@
   <v-container fluid>
     <v-text-field v-model="keyword" label="Buscar Producto" prepend-inner-icon="mdi-magnify" variant="solo-filled" flat
       hide-details single-line ref="keywordRef" color="accent" clearable></v-text-field>
-    <v-progress-linear color="gray" v-if="!cargando" model-value="100"></v-progress-linear>
-    <v-progress-linear color="primary" indeterminate v-if="cargando" model-value="100"></v-progress-linear>
+    <v-progress-linear color="primary" v-if="!cargando" model-value="100"></v-progress-linear>
+    <v-progress-linear color="primary" indeterminate v-if="cargando || cargandoConcurrent" model-value="100"></v-progress-linear>
     <v-table density="compact" fixed-header height="50vh" hover>
       <thead>
         <tr>
@@ -80,11 +82,14 @@
   <!-- Crear Producto -->
   <v-dialog v-model="isVisible" max-width="800">
     <v-card>
-      <v-card-title>Crea Producto Aquí</v-card-title>
+      <v-card-title class="d-flex justify-space-between align-center">
+        <span>Crear Producto</span>
+        <span class="text-caption text-medium-emphasis">* Campo requerido</span>
+      </v-card-title>
       <v-card-text>
-        <v-text-field label="Código" id="cod" autocomplete="off" placeholder="" density="compact"
+        <v-text-field label="Código *" required id="cod" autocomplete="off" placeholder="" density="compact"
           :error-messages="errors.codigo ? errors.codigo[0] : null" v-model="product_form.codigo" />
-        <v-text-field label="Nombre" id="name" autocomplete="off" placeholder="" density="compact"
+        <v-text-field label="Nombre *" required id="name" autocomplete="off" placeholder="" density="compact"
           :error-messages="errors.name ? errors.name[0] : null" v-model="product_form.name" />
         <v-textarea label="Descripción" id="descripcion" autocomplete="off" placeholder="" density="compact"
           variant="outlined" :error-messages="errors.descripcion ? errors.descripcion[0] : null"
@@ -133,12 +138,12 @@
       </v-card-text>
       <v-card-actions>
         <v-btn @click="closeModal" :loading="cargando">Cancelar</v-btn>
-        <v-btn @click="enviarProduct" :loading="cargando">Confirmar</v-btn>
+        <v-btn @click="enviarProduct" :loading="cargando" color="primary" variant="outlined">Confirmar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
   <!-- Existencias-->
-  <v-dialog v-model="openExistencias">
+  <v-dialog v-model="openExistencias" max-width="1200">
     <v-card>
       <v-card-title>Existencias</v-card-title>
       <v-card-text>
@@ -170,8 +175,7 @@
             </v-row>
           </v-col>
           <v-col cols="12" sm="10">
-            <v-data-table :headers="existenciasHeaders" :items="existencias" items-per-page="5" show-select
-              select-strategy="single">
+            <v-data-table :headers="existenciasHeaders" :items="existencias" items-per-page="5">
               <template v-slot:item.data-table-select="{
                 internalItem,
                 isSelected,
@@ -201,32 +205,116 @@
     </v-card>
   </v-dialog>
   <!-- Ajuste Inventarios -->
-  <v-dialog v-model="openAjuste" max-width="800">
+  <v-dialog v-model="openAjuste" max-width="650">
     <v-card>
-      <v-card-title>Ajuste Precio/Inventario: {{ inventario_form.name }}</v-card-title>
-      <v-card-text>
-        <p><span>Almacen: </span>{{ almacenAjusteInventario }}</p>
-        <p>
-          <span>Cantidad actual: </span>{{ inventario_form.cantidadActual }}
-        </p>
-        <v-text-field label="Ajustar cantidad a" id="cantidadId" autocomplete="off" placeholder="" density="compact"
-          @keydown.enter="ajusteInventarioGeneral" v-model="inventario_form.cantidad" />
-        <v-text-field label="Precio Costo" id="pcosto" autocomplete="off" placeholder="" density="compact"
-          v-model="inventario_form.pcosto" @keydown.enter="ajusteInventarioGeneral" />
-        <v-text-field :label="inventario_form.precio_sugerido
-          ? 'Precio Venta (Sugerido: $' +
-          (formatNumber(inventario_form.precio_sugerido)) +
-          ')'
-          : 'Precio Venta'
-          " id="pcosto" autocomplete="off" placeholder="" density="compact" v-model="inventario_form.pventa"
-          @keydown.enter="ajusteInventarioGeneral" />
-        <!-- <v-text-field label="Precio Mayoreo" id="precio_mayoreo" autocomplete="off" placeholder="" density="compact"
-          v-model="inventario_form.precio_mayoreo" @keydown.enter="ajusteInventarioGeneral" /> -->
+      <v-card-title class="pb-1">
+        <div>
+          <div class="text-subtitle2 font-weight-bold">Ajusta inventario - precio</div>
+          <div class="text-caption text-medium-emphasis" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            {{ inventario_form.name }}
+          </div>
+        </div>
+      </v-card-title>
+      
+      <v-divider class="my-2"></v-divider>
+      
+      <v-card-text class="pt-4 pb-0">
+        <!-- Sección Inventario -->
+        <template v-if="!inventario_form.is_service">
+          <div class="mb-4">
+            <div class="text-caption text-primary font-weight-bold mb-2">INVENTARIO</div>
+            <p class="text-caption text-medium-emphasis mb-2">Cantidad actual: <span class="font-weight-bold text-h6 text-primary">{{ inventario_form.cantidadActual }}</span></p>
+            <v-text-field 
+              label="Nueva Cantidad" 
+              id="cantidadId" 
+              autocomplete="off" 
+              density="compact"
+              variant="outlined"
+              @keydown.enter="ajusteInventarioGeneral" 
+              v-model="inventario_form.cantidad"
+            />
+          </div>
+          <v-divider class="my-4"></v-divider>
+        </template>
+
+        <!-- Sección Costos -->
+        <template v-if="!inventario_form.is_service">
+          <div class="mb-4">
+            <div class="text-caption text-primary font-weight-bold mb-2">COSTO</div>
+            <v-text-field 
+              label="Precio Costo" 
+              id="pcosto" 
+              autocomplete="off"
+              density="compact"
+              variant="outlined"
+              v-model="inventario_form.pcosto"
+              @keydown.enter="ajusteInventarioGeneral"
+            />
+          </div>
+          <v-divider class="my-4"></v-divider>
+        </template>
+
+        <!-- Sección Precios -->
+        <div>
+          <div class="text-caption text-success font-weight-bold mb-2">PRECIOS</div>
+          
+          <div class="mb-3">
+            <v-text-field 
+              :label="inventario_form.precio_sugerido
+                ? 'Precio Venta (Sugerido: $' + formatNumber(inventario_form.precio_sugerido) + ')'
+                : 'Precio Venta'
+              " 
+              id="pventa"
+              autocomplete="off"
+              density="compact"
+              variant="outlined"
+              color="success"
+              v-model="inventario_form.pventa"
+              @keydown.enter="ajusteInventarioGeneral"
+            />
+          </div>
+
+          <!-- Precios Mayoreo -->
+          <div class="pa-3 bg-blue-grey-lighten-5 rounded">
+            <div class="text-caption font-weight-bold text-primary mb-2">Mayoreo (opcional)</div>
+            <v-row dense>
+              <v-col cols="12" sm="6">
+                <v-text-field 
+                  label="Medio Mayoreo" 
+                  id="precio_medio_mayoreo" 
+                  autocomplete="off"
+                  density="compact"
+                  variant="outlined"
+                  v-model="inventario_form.precio_medio_mayoreo"
+                  @keydown.enter="ajusteInventarioGeneral"
+                />
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field 
+                  label="Full Mayoreo" 
+                  id="precio_mayoreo" 
+                  autocomplete="off"
+                  density="compact"
+                  variant="outlined"
+                  v-model="inventario_form.precio_mayoreo"
+                  @keydown.enter="ajusteInventarioGeneral"
+                />
+              </v-col>
+            </v-row>
+          </div>
+        </div>
       </v-card-text>
-      <v-card-actions>
-        <v-btn @click="openAjuste = false" :loading="cargando">Cancelar</v-btn>
-        <v-btn @click="ajusteInventarioGeneral" :loading="cargando" variant="outlined">Guardar General</v-btn>
-        <v-btn @click="ajusteInventario" :loading="cargando" variant="outlined" color="accent">Guardar</v-btn>
+
+      <v-divider class="my-2"></v-divider>
+      <v-card-actions class="pa-3">
+        <v-btn @click="openAjuste = false" :loading="cargando" size="small">Cancelar</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn @click="ajusteInventarioGeneral" :loading="cargando" variant="outlined" size="small">
+          Guardar General
+        </v-btn>
+        <v-btn @click="ajusteInventario" :loading="cargando" variant="outlined" color="primary" size="small">
+          Guardar
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -301,14 +389,17 @@ const consumibleItems = [
 const inventario_form = reactive({
   name: "",
   cantidadActual: null,
+  is_service: null,
   cantidad: null,
   pcosto: null,
   pventa: null,
   precio_mayoreo: null,
+  precio_medio_mayoreo: null,
   precio_sugerido: null,
 });
 const drawer = ref(true);
 const cargando = ref(false);
+const cargandoConcurrent = ref(false);
 const keyword = ref("");
 const keywordRef = ref(null);
 const bajostock = ref(false);
@@ -324,8 +415,7 @@ const tHeaders = ref([
   "Costo",
   "Precio",
   "Existencia",
-  "Min",
-  "Max",
+  "Min-Max",
   "Kit",
   "Impuestos",
   "Acciones",
@@ -428,6 +518,7 @@ watch(
       return;
     }
     const task = () => {
+      cargando.value = false;
       search();
     };
     debounce(task, 550);
@@ -507,9 +598,9 @@ function enviarProduct() {
       isVisible.value = false;
       limpiarCampos();
       setTimeout(() => {
+        cargando.value = false;
         ajusteProduct(response.data.id);
       }, 300);
-      // search();
       keyword.value = response.data?.name;
       if (aVenderFeature.value) {
         isBannerOpen.value = true;
@@ -554,7 +645,7 @@ function limpiarCampos() {
   product_form.precio_sugerido = "";
   product_form.porcentaje_ganancia = "";
   product_form.pcosto = "";
-  product_form.es_kit = false;
+  product_form.es_kit = true;
   product_form.tventa = "U";
   product_form.prioridad = "0";
 }
@@ -640,12 +731,22 @@ function ajusteProduct(productId) {
     .then((response) => {
       productActualId.value = response.data.id;
       inventario_form.name = response.data.name;
+      inventario_form.is_service = response.data.is_service;
       inventario_form.cantidadActual = response.data.cantidad_actual;
       inventario_form.cantidad = response.data.cantidad_actual;
       inventario_form.pcosto = response.data.pcosto;
       inventario_form.pventa = response.data.precio;
       inventario_form.precio_sugerido = response.data.precio_sugerido;
-      inventario_form.precio_mayoreo = response.data.precio_mayoreo;
+      if (response.data.precio_mayoreo == null) {
+        inventario_form.precio_mayoreo = inventario_form.pventa;
+      } else {
+        inventario_form.precio_mayoreo = response.data.precio_mayoreo;
+      }
+      if (response.data.precio_medio_mayoreo == null) {
+        inventario_form.precio_medio_mayoreo = inventario_form.pventa;
+      } else {
+        inventario_form.precio_medio_mayoreo = response.data.precio_medio_mayoreo;
+      }
       nextTick(() => document.getElementById("cantidadId").select());
     })
     .catch((error) => {
@@ -654,6 +755,12 @@ function ajusteProduct(productId) {
     });
 }
 function ajusteInventario() {
+  if (+inventario_form.pventa < +inventario_form.precio_mayoreo ||
+    +inventario_form.pventa < +inventario_form.precio_medio_mayoreo
+  ) {
+    alert('Error, los precios mayoreo no pueden ser mas altos que el precio base');
+    return;
+  }
   if (cargando.value) return;
   cargando.value = true;
   Product.ajustar(productActualId.value, almacenActualId.value, inventario_form)
@@ -669,6 +776,12 @@ function ajusteInventario() {
     });
 }
 function ajusteInventarioGeneral() {
+  if (+inventario_form.pventa < +inventario_form.precio_mayoreo ||
+    +inventario_form.pventa < +inventario_form.precio_medio_mayoreo
+  ) {
+    alert('Error, los precios mayoreo no pueden ser mas altos que el precio base');
+    return;
+  }
   if (cargando.value) return;
   cargando.value = true;
   Product.ajustarGeneral(
@@ -682,7 +795,6 @@ function ajusteInventarioGeneral() {
       openAjuste.value = false;
     })
     .catch((error) => {
-      //:todo
       cargando.value = false;
       alert("Ha ocurrido un error");
     });
