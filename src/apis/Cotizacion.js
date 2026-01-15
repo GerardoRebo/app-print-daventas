@@ -82,12 +82,12 @@ export default {
     },
     register(productActualId, ticketActual, product_form) {
         return Api().post(`/${baseRoute}/register`, {
-            params: {
-                productActualId: productActualId,
-                ticketActual: ticketActual,
-                precio: product_form.pventa,
-                cantidad: product_form.cantidad,
-            }
+            productActualId: productActualId,
+            ticketActual: ticketActual,
+            precio: product_form.pventa,
+            cantidad: product_form.cantidad,
+            ancho: product_form.ancho,
+            alto: product_form.alto,
         })
 
     },
