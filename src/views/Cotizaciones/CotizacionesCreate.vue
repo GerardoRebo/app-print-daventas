@@ -240,6 +240,17 @@ const {
     precioField: 'precio' // Campo de precio en la API de Cotizaciones
   }
 });
+const emptyValuesWrapper = () => {
+  emptyValues();
+  // closeAllModals();
+  drawer.value = false;
+  isVisible.value = false;
+  isOpenImagenes.value = false;
+  openEdit.value = false;
+  openPendiente.value = false;
+  openConversion.value = false;
+  focusCodigoField();
+};
 
 // ============================================================================
 // TABLE HEADERS - Encabezados para la Tabla de Artículos
@@ -340,17 +351,6 @@ function handleProductSelected(productId) {
 // ============================================================================
 // HELPER FUNCTIONS - Funciones de Ayuda
 // ============================================================================
-const emptyValuesWrapper = () => {
-  emptyValues();
-  closeAllModals();
-  drawer.value = false;
-  isVisible.value = false;
-  isOpenImagenes.value = false;
-  openEdit.value = false;
-  openPendiente.value = false;
-  openConversion.value = false;
-  focusCodigoField();
-};
 
 function getAllPendientes() {
   if (cargando.value) return;
