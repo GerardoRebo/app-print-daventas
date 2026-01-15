@@ -4,6 +4,16 @@ export default {
     register(form) {
         return Api().post("/register", form);
     },
+    googleCallback(code) {
+        return Api().get(`/auth/google/callback?code=${code}`);
+    },
+    registerWithGoogle() {
+        return Api().get(`/auth/google`);
+    },
+
+    updateLead(form) {
+        return Api().post("/updateLead", form);
+    },
 
     login(form) {
         return Api().post("/login", form);
@@ -19,6 +29,10 @@ export default {
     },
     reenviarLink() {
         return Api().post("/email/verification-notification");
+
+    },
+    getMyEmail() {
+        return Api().get("/email/getMyEmail");
 
     },
     verify(
@@ -97,5 +111,8 @@ export default {
     },
     updateFeature(post) {
         return Api().post("/user/updateFeature", post);
+    },
+    getDistribuidorInfo(){
+        return Api().get("/user/distribuidor_info");
     },
 }

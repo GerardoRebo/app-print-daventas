@@ -13,6 +13,9 @@ export default {
                 }
             });
     },
+    getMyOrganization() {
+        return Api().get("/organizacions/myOrganization")
+    },
     getConfigurations(organizacionActualId = null) {
 
         return Api().get("/organizacions/configurations")
@@ -56,6 +59,16 @@ export default {
     },
     loadFacturacionData() {
         return Api().get("/organizacions/facturacionData/");
+    },
+    buyPacket(paquete_id) {
+        return Api().post("/organizacions/buypacket/", {
+            paquete_id
+        });
+    },
+    paySubscription(plan_price_id) {
+        return Api().post("/organizacions/pay_subscription/", {
+            plan_price_id
+        });
     },
     downloadFile(file) {
         return Api().get("excelfile/excelfile/downloadExported/" + file);
@@ -119,6 +132,18 @@ export default {
         return Api().post("/organizacions/desvincularUser", {
             userId
         });
+    },
+    toggleUser(userId){
+        return Api().post("/organizacions/toggleUser", {
+            userId
+        });
+
+    },
+    toggleAlmacen(almacenId){
+        return Api().post("/organizacions/toggleAlmacen", {
+            almacenId
+        });
+
     },
     getTabulares() {
 

@@ -7,11 +7,7 @@ export default {
         return Api().get(`/${baseRoute}`);
     },
     getSpecificVT(cotizacion) {
-
         return Api().get(`/${baseRoute}/${cotizacion}`);
-    },
-    finalize(cotizacion) {
-        return Api().post(`/${baseRoute}/${cotizacion}/finalize`)
     },
     getMisVentas(page, dfecha, hfecha) {
 
@@ -38,8 +34,8 @@ export default {
     },
     setCliente(cliente, cotizacion) {
         return Api().post(`/${baseRoute}/setcliente`, {
-            cliente,
-            cotizacion
+                cliente,
+                cotizacion
         })
 
     },
@@ -50,11 +46,14 @@ export default {
             credito
         })
     },
+    finalize(cotizacion) {
+        return Api().post(`/${baseRoute}/${cotizacion}/finalize`)
+    },
     archivar(cotizacion) {
-        return Api().post(`/${baseRoute}/archivar/` + cotizacion)
+        return Api().post(`/${baseRoute}/archivar/`+cotizacion)
     },
     enviarCopia(cotizacion) {
-        return Api().post(`/${baseRoute}/enviarCopia` + cotizacion, {
+        return Api().post(`/${baseRoute}/enviarCopia`+cotizacion, {
             telefono
         })
     },
@@ -83,12 +82,12 @@ export default {
     },
     register(productActualId, ticketActual, product_form) {
         return Api().post(`/${baseRoute}/register`, {
-            productActualId: productActualId,
-            ticketActual: ticketActual,
-            precio: product_form.pventa,
-            cantidad: product_form.cantidad,
-            ancho: product_form.ancho,
-            alto: product_form.alto,
+            params: {
+                productActualId: productActualId,
+                ticketActual: ticketActual,
+                precio: product_form.pventa,
+                cantidad: product_form.cantidad,
+            }
         })
 
     },
@@ -146,5 +145,10 @@ export default {
     },
     syncLocalVentas(post) {
         return Api().post(`/${baseRoute}/syncLocalVentas/`, { tickets: post })
+    },
+    acceptRetentionRules(cotizacion) {
+        return Api().post(`/${baseRoute}/acceptRetentionRules`, {
+            cotizacion
+        })
     },
 }

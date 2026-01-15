@@ -92,12 +92,10 @@ export default {
     },
     register(productActualId, movimiento, product_form) {
         return Api().post("/movimientos/register", {
-            params: {
-                productActualId,
-                movimiento,
-                precio: product_form.pcosto,
-                cantidad: product_form.cantidad,
-            }
+            productActualId,
+            movimiento,
+            precio: product_form.pcosto,
+            cantidad: product_form.cantidad,
         })
     },
     destroyArticulo(articulo, movimiento) {
@@ -148,17 +146,21 @@ export default {
         })
 
     },
-    cambiaPrecio(precio, producto, almacen) {
+    cambiaPrecio(precio, precio_medio_mayoreo, precio_mayoreo, producto, almacen) {
         return Api().post("/movimientos/cambiaprecio", {
             precio,
+            precio_medio_mayoreo,
+            precio_mayoreo,
             producto,
             almacen
         })
 
     },
-    cambiaPrecioGeneral(precio, producto, almacen) {
+    cambiaPrecioGeneral(precio, precio_medio_mayoreo, precio_mayoreo, producto, almacen) {
         return Api().post("/movimientos/cambiaPrecioGeneral", {
             precio,
+            precio_medio_mayoreo,
+            precio_mayoreo,
             producto,
             almacen
         })
