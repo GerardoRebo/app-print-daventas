@@ -37,7 +37,6 @@ const links = computed(() => {
   if (isAdmin.value) {
     return [
       { icon: "mdi-network-pos", title: "Punto de Venta", href: "PuntoVenta" },
-      { icon: "mdi-factory", title: "Producción", href: "Produccion" },
       {
         icon: "mdi-file-presentation-box",
         title: "Cotizaciones",
@@ -65,7 +64,7 @@ const links = computed(() => {
           { icon: "", title: "Ventas", href: "VentasIndex" },
           { icon: "", title: "Devoluciones", href: "DevolucionesIndex" },
           { icon: "", title: "Movimientos", href: "MovimientosIndex" },
-          { icon: "", title: "Cotizaciones.", href: "CotizacionesIndex" },
+          { icon: "", title: "Cotizaciones", href: "CotizacionesIndex" },
         ],
       },
       {
@@ -97,7 +96,7 @@ const links = computed(() => {
         children: [
           { icon: "", title: "Ventas", href: "VentasIndex" },
           { icon: "", title: "Movimientos", href: "MovimientosIndex" },
-          { icon: "", title: "Cotizaciones.", href: "CotizacionesIndex" },
+          { icon: "", title: "Cotizaciones", href: "CotizacionesIndex" },
         ],
       },
       {
@@ -106,7 +105,6 @@ const links = computed(() => {
         href: "CreditosIndex",
       },
       { icon: "mdi-cash-check", title: "Cortes", href: "Cortes" },
-      // { icon: "mdi-account-cash", title: "Refiere y Gana", href: "distribuidores" },
     ];
   } else {
     return [];
@@ -214,7 +212,7 @@ watch(route, () => {
   } else {
     rail.value = true
   }
-})
+}, { immediate: false })
 onMounted(() => {
   s.initializeFromStorage();
   getCountNotf();
@@ -227,18 +225,11 @@ onUnmounted(() => {
 });
 
 
-if (permanentDrawer.value) {
-  drawer.value = true
-}
-if (mobile.value) {
-  rail.value = false
-}
-
-
 
 </script>
 <template>
   <v-app>
+
     <v-navigation-drawer v-model="drawer" :location="$vuetify.display.mobile ? 'bottom' : undefined"
       @click="rail = false" :permanent="permanentDrawer" :rail="rail" v-if="isLoggedIn">
       <v-list>
@@ -253,39 +244,67 @@ if (mobile.value) {
       <v-divider></v-divider>
       <v-list nav color="primary">
         <!-- Loop through the main links array -->
-        <div v-for="(link, index) in links" :key="link.title + index" :prepend-icon="link.icon" :value="link.title">
-          <!-- Handle nested children with v-list-group -->
-          <v-list-group v-if="link.children" @click="rail = false">
-            <template v-slot:activator="{ props }" v-if="rail">
-              <v-tooltip location="right">
-                <template #activator="{ props }">
-                  <v-list-item v-bind="props" :title="link.title" :prepend-icon="link.icon"
-                    @click="rail = false"></v-list-item>
-                </template>
-                <span>{{ link.title }}</span>
-              </v-tooltip>
+        <template v-for="(link, index) in links" :key="index">
+          <!-- When rail mode, show only icons with tooltips -->
+          <v-tooltip v-if="rail && link.children" location="right">
+            <template #activator="{ props }">
+              <v-list-item 
+                v-bind="props"
+                :prepend-icon="link.icon"
+                :title="link.title"
+                :active="isLinkActive(link)"
+                @click.stop.prevent="rail = false"
+              ></v-list-item>
             </template>
-            <template v-else v-slot:activator="{ props }">
-              <v-list-item v-bind="props" :title="link.title" :prepend-icon="link.icon"
-                @click="rail = false"></v-list-item>
+            <span>{{ link.title }}</span>
+          </v-tooltip>
+
+          <!-- When expanded, show list group for children -->
+          <v-list-group v-else-if="!rail && link.children" :value="link.title">
+            <template v-slot:activator="{ props }">
+              <v-list-item 
+                v-bind="props" 
+                :prepend-icon="link.icon"
+                :title="link.title"
+                :active="isLinkActive(link)"
+              ></v-list-item>
             </template>
-            <!-- Loop through the children of the current link -->
-            <v-list-item v-for="(child, childIndex) in link.children" v-if="link.children" :key="childIndex"
-              :prepend-icon="child.icon" :title="child.title" :to="{ name: child.href }" 
-              @click="rail = false"></v-list-item>
+            <!-- Children items -->
+            <v-list-item 
+              v-for="(child, childIndex) in link.children" 
+              :key="childIndex"
+              :prepend-icon="child.icon" 
+              :title="child.title" 
+              :to="{ name: child.href }"
+              :active="route.name === child.href"
+              @click="rail = false"
+            ></v-list-item>
           </v-list-group>
-          <div v-else>
-            <v-tooltip location="right" v-if="rail">
-              <template #activator="{ props }">
-                <v-list-item v-bind="props" :prepend-icon="link.icon" :title="link.title" :to="{ name: link.href }"
-                  @click="rail = false"></v-list-item>
-              </template>
-              <span>{{ link.title }}</span>
-            </v-tooltip>
-            <v-list-item :prepend-icon="link.icon" :title="link.title" :to="{ name: link.href }" @click="rail = false"
-              v-else></v-list-item>
-          </div>
-        </div>
+
+          <!-- Single items without children -->
+          <v-tooltip v-else-if="rail && !link.children" location="right">
+            <template #activator="{ props }">
+              <v-list-item 
+                v-bind="props" 
+                :prepend-icon="link.icon" 
+                :title="link.title" 
+                :to="{ name: link.href }"
+                :active="isLinkActive(link)"
+                @click="rail = false"
+              ></v-list-item>
+            </template>
+            <span>{{ link.title }}</span>
+          </v-tooltip>
+
+          <v-list-item 
+            v-else
+            :prepend-icon="link.icon" 
+            :title="link.title" 
+            :to="{ name: link.href }"
+            :active="isLinkActive(link)"
+            @click="rail = false"
+          ></v-list-item>
+        </template>
       </v-list>
     </v-navigation-drawer>
     <v-app-bar color="secondary">
@@ -295,11 +314,12 @@ if (mobile.value) {
             v-if="isLoggedIn"></v-app-bar-nav-icon>
         </v-container>
       </template>
-      <!-- <v-img src="https://cdn.vuetifyjs.com/images/cards/docks.jpg" height="128px" class="mr-3" max-width="50"
-          contain></v-img> -->
       <v-app-bar-title v-if="isLoggedIn">
-        <router-link :to="{ name: 'Home' }" class="text-decoration-none text-white">
-          Daventas
+        <router-link :to="{ name: 'Home' }" class="text-decoration-none text-white d-flex align-center">
+          <span>Daventas</span>
+          <span v-if="activeOrganizationName" class="text-caption ml-2 text-grey-lighten-1">
+            / {{ activeOrganizationName }}
+          </span>
         </router-link>
       </v-app-bar-title>
       <v-app-bar-title v-else>
@@ -307,9 +327,6 @@ if (mobile.value) {
           Daventas
         </router-link>
       </v-app-bar-title>
-      <!-- <v-avatar>
-        <v-img src="https://cdn.vuetifyjs.com/images/cards/docks.jpg" height="128px" contain></v-img>
-      </v-avatar> -->
       <!-- Avatar with Dropdown Menu -->
       <template v-slot:append>
         <v-container>
@@ -324,9 +341,9 @@ if (mobile.value) {
             <v-card>
               <v-card-text>
                 <v-list>
-                  <v-list-item v-for="(notification, index) in notifications">{{
+                  <v-list-item v-for="(notification, index) in notifications" :key="index">{{
                     notification.data.data
-                    }}</v-list-item>
+                  }}</v-list-item>
                 </v-list>
               </v-card-text>
             </v-card>
