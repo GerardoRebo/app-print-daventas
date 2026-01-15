@@ -60,7 +60,7 @@ const FacturasGlobalesIndex = () => import('../views/admin/FacturasGlobales/Fact
 const FacturasGlobalesCreate = () => import('../views/admin/FacturasGlobales/FacturasGlobalesCreate.vue')
 const FacturasGlobalesShow = () => import('../views/admin/FacturasGlobales/FacturasGlobalesShow.vue')
 const MisDatos = () => import('../views/admin/MisDatos.vue')
-const MiSuscripcion = () => import('../views/admin/Suscripcion/MiSuscripcion.vue')
+// const MiSuscripcion = () => import('../views/admin/Suscripcion/MiSuscripcion.vue')
 const MiOrganizacion = () => import('../views/admin/MiOrganizacion.vue')
 const MisOrganizaciones = () => import('../views/admin/MisOrganizaciones.vue')
 const MisSolicitudes = () => import('../views/admin/MisSolicitudes.vue')
@@ -202,7 +202,7 @@ const adminRoutes = [
   { path: 'mitabular', name: 'MiTabular', component: MiTabular, meta: { hasOrganization: true, requiresAuth: true, requireAdministrationRole: true } },
   { path: 'gastos', name: 'GastosIndex', component: GastosIndex, meta: { hasOrganization: true, requiresAuth: true, requireAdministrationRole: true } },
   { path: 'MisDatos', name: 'MisDatos', component: MisDatos, meta: { hasOrganization: true, requiresAuth: true, requireAdministrationRole: true } },
-  { path: 'suscription-plan', name: 'suscription-plan', component: MiSuscripcion, meta: { hasOrganization: true, requiresAuth: true, requireAdministrationRole: true } },
+  // { path: 'suscription-plan', name: 'suscription-plan', component: MiSuscripcion, meta: { hasOrganization: true, requiresAuth: true, requireAdministrationRole: true } },
 ]
 const routes = [
   { path: '/', redirect: '/front/puntoventa' },
