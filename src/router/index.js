@@ -4,7 +4,7 @@ const Login = () => import('../views/Login.vue')
 const ForgotPassword = () => import('../views/ForgotPassword.vue')
 const ResetPassword = () => import('../views/ResetPassword.vue')
 const Register = () => import('../views/Register.vue')
-const GoogleRegister = () => import('../views/GoogleRegister.vue')
+// const GoogleRegister = () => import('../views/GoogleRegister.vue')
 const VerifyEmail = () => import('../views/VerifyEmail.vue')
 // const VerificationHandler = () => import('../views/VerificationHandler.vue')
 const ProductosIndex = () => import('../views/Productos/ProductosIndex.vue')
@@ -27,7 +27,7 @@ const CotizacionesShow = () => import('../views/Cotizaciones/CotizacionesShow.vu
 const Proveedores = () => import('../views/Proveedores.vue')
 const Almacens = () => import('../views/Almacens.vue')
 const Conceptos = () => import('../views/Conceptos.vue')
-const Distribuidor = () => import('../views/Distribuidor.vue')
+// const Distribuidor = () => import('../views/Distribuidor.vue')
 const Departamentos = () => import('../views/Departamentos.vue')
 const UserSettings = () => import('../views/settings/UserSettings.vue')
 const VentasIndex = () => import('../views/Ventas/VentasIndex.vue')
@@ -89,7 +89,7 @@ const frontRoutes = [
   { path: '/forgot-password', name: 'ForgotPassword', component: ForgotPassword, meta: { hasOrganization: false, requiresAuth: false } },
   { path: '/reset-password', name: 'ResetPassword', component: ResetPassword, meta: { hasOrganization: false, requiresAuth: false } },
   { path: 'register', name: 'Register', component: Register, meta: { hasOrganization: false, requiresAuth: false } },
-  { path: '/auth/google/callback', name: 'Google', component: GoogleRegister, meta: { hasOrganization: false, requiresAuth: false } },
+  // { path: '/auth/google/callback', name: 'Google', component: GoogleRegister, meta: { hasOrganization: false, requiresAuth: false } },
   { path: 'verifyemail', name: 'VerifyEmail', component: VerifyEmail, meta: { hasOrganization: false, requiresAuth: false } },
   {
     path: 'productos', children: [
@@ -155,7 +155,7 @@ const frontRoutes = [
   { path: 'historialCosto/:almacenId/:productId', name: 'HistorialCosto', component: HistorialCosto, meta: { hasOrganization: true, requiresAuth: true } },
   { path: 'cortes', name: 'Cortes', component: Cortes, meta: { hasOrganization: true, requiresAuth: true } },
   { path: 'conceptos', name: 'Conceptos', component: Conceptos, meta: { hasOrganization: true, requiresAuth: true } },
-  { path: 'distribuidores', name: 'distribuidores', component: Distribuidor, meta: { hasOrganization: true, requiresAuth: true } },
+  // { path: 'distribuidores', name: 'distribuidores', component: Distribuidor, meta: { hasOrganization: true, requiresAuth: true } },
   { path: 'notauthorized', name: 'NotAuthorized', component: NotAuthorized, meta: { hasOrganization: false, requiresAuth: false } },
   // { path: 'misventasOffline', name: 'MisVentasOffline', component: MisVentasOffline, meta: { hasOrganization: true, requiresAuth: true } },
   // { path: 'offline', name: 'Offline', component: Offline, meta: { hasOrganization: true, requiresAuth: true } },
