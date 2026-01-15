@@ -37,6 +37,7 @@ const links = computed(() => {
   if (isAdmin.value) {
     return [
       { icon: "mdi-network-pos", title: "Punto de Venta", href: "PuntoVenta" },
+      { icon: "mdi-factory", title: "Producción", href: "Produccion" },
       {
         icon: "mdi-file-presentation-box",
         title: "Cotizaciones",

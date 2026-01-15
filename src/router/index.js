@@ -21,6 +21,7 @@ const ProductosShowImagenes = () => import('../views/Productos/ProductosShow/Ima
 const Clientes = () => import('../views/Clientes.vue')
 const CreditosIndex = () => import('../views/Creditos/CreditosIndex.vue')
 const VentasCreate = () => import('../views/Ventas/VentasCreate.vue')
+const Produccion = () => import("../views/Produccion/Produccion.vue");
 const CotizacionesCreate = () => import('../views/Cotizaciones/CotizacionesCreate.vue')
 const CotizacionesIndex = () => import('../views/Cotizaciones/CotizacionesIndex.vue')
 const CotizacionesShow = () => import('../views/Cotizaciones/CotizacionesShow.vue')
@@ -111,6 +112,12 @@ const frontRoutes = [
     ]
   },
   { path: 'puntoventa', name: 'PuntoVenta', component: VentasCreate, meta: { hasOrganization: true, requiresAuth: true } },
+  {
+    path: "produccion",
+    name: "Produccion",
+    component: Produccion,
+    meta: { hasOrganization: true, requiresAuth: true },
+  },
   { path: 'proveedores', name: 'Proveedores', component: Proveedores, meta: { hasOrganization: true, requiresAuth: true } },
   { path: 'almacens', name: 'Almacens', component: Almacens, meta: { hasOrganization: true, requiresAuth: true } },
   { path: 'departamentos', name: 'Departamentos', component: Departamentos, meta: { hasOrganization: true, requiresAuth: true } },
