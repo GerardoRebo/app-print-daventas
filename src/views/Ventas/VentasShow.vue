@@ -75,7 +75,7 @@
 
             </v-list>
           </v-menu>
-          <div v-if="!ticketActual.cfdi_cancellation_status">
+          <div v-if="!(ticketActual.cfdi_cancellation_status == 'Cancelado')">
             <v-btn @click="isCancelarFacturaOpen = true" size="small" class="ml-2" prepend-icon="mdi-cancel"
               :loading="cargando">
               Cancelar Factura
@@ -125,6 +125,7 @@
           </p>
         </template>
         <div class="mx-2">
+          <p v-if="ticketActual.cfdi_cancellation_status">Estado CFDI: {{ ticketActual.cfdi_cancellation_status ?? '' }}</p>
           <p>Timbres Disponibles: {{ saldo ?? 0 }}</p>
           <p>Almacén: {{ ticketActual?.almacen?.name }}</p>
           <p>Cliente: {{ ticketActual?.cliente?.name }}</p>
