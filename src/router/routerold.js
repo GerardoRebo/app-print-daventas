@@ -30,7 +30,7 @@ const ProductosShowImagenes = () =>
   import("../views/Productos/ProductosShow/Imagenes.vue");
 const Clientes = () => import("../views/Clientes.vue");
 const CreditosIndex = () => import("../views/Creditos/CreditosIndex.vue");
-const PuntoVenta = () => import("../views/Ventas/VentasCreate.vue");
+const PuntoVenta = () => import("../views/PuntoVenta.vue");
 const Produccion = () => import("../views/Produccion/Produccion.vue");
 const Cotizaciones = () => import("../views/Cotizaciones/Cotizaciones.vue");
 const CotizacionesShow = () => import('../views/Cotizaciones/CotizacionesShow.vue')
