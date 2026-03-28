@@ -763,6 +763,7 @@ function updateFechaEntrega() {
   const fechaFormateada = formatDateTimeLocal(fechaEntrega.value)
   processRequest(async () => {
     await PuntoVenta.updateFechaEntrega(ticketActual.id, fechaFormateada)
+    cargando.value = false
     await getSpecificVT(ticketActual.id)
     isFechaEntregaOpen.value = false
     focusCodigoField()

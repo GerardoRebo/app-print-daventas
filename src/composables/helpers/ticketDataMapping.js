@@ -27,6 +27,7 @@ export async function rellenaTicket(
   ticketActual.nombre = response.nombre;
   ticketActual.consecutivo = response.consecutivo;
   ticketActual.clienteId = response.cliente_id;
+  ticketActual.fecha_entrega = response.fecha_entrega;
   ticketActual.apartar_productos = Boolean(response.apartar_productos);
   
   if (ticketActual.miAlmacenId) {

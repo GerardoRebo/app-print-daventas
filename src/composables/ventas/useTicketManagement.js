@@ -27,6 +27,7 @@ export function useTicketManagement() {
     miAlmacenId: null,
     miAlmacenName: "",
     consecutivo: null,
+    fecha_entrega: null,
     cliente: "",
     price_type: "",
     ganancia: null,
