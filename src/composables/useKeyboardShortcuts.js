@@ -96,6 +96,7 @@ export function useVentasKeyboardShortcuts({
   openCobrar = () => {},
   setPendiente = () => {},
   abrirPendiente = () => {},
+  openFechaEntrega = () => {},
   abrirModalBuscaProductsNombre = () => {},
   abrirExistencias = () => {},
   emptyValues = () => {},
@@ -110,6 +111,7 @@ export function useVentasKeyboardShortcuts({
     'Escape': emptyHandler,
     'F2': openCobrar,
     'F3': setPendiente,
+    'F5': openFechaEntrega,
     'F6': abrirPendiente,
     'F7': () => {
       router?.push({ name: routerName })

@@ -22,7 +22,7 @@
     @enviarArticulo="enviarArticulo" @abrirModalBuscaProductsNombre="abrirModalBuscaProductsNombre"
     @borrarTicket="borrarTicketWrapper" @actionButtonClick="abrirCobrarModal" @setNombreTicket="setNombreTicketWrapper"
     @abrirExistencias="abrirExistencias" @update:codigo="codigo = $event" @searchProduct="searchProduct"
-    @showPrices="showPrices" @openFechaEntrega="isFechaEntregaOpen = true"
+    @showPrices="showPrices" @openFechaEntrega="openFechaEntrega"
     @update:desglosarImpuesto="desglosarImpuesto = $event" @update:apartarProductos="handleToggleApartarProductos" />
   <!-- Mobile Sales Card -->
   <MobileSalesCard v-if="mdAndDown" ref="salesHeaderCardRef" :codigo="codigo" :product-form="product_form"
@@ -37,7 +37,7 @@
     @abrirCobrarModal="abrirCobrarModal" @borrarTicket="borrarTicketWrapper" @setPendiente="setPendienteWrapper"
     @abrirPendiente="abrirPendiente" @abrirCliente="abrirCliente" @goOffline="goOffline"
     @copyLinkToClipBoard="copyLinkToClipBoard" @openLastTicket="openLastTicket" @printLastTicket="printLastTicket"
-    @openFechaEntrega="isFechaEntregaOpen = true"
+    @openFechaEntrega="openFechaEntrega"
     @showShortcuts="isShortcutsOpen = true" @asignarAlmacen="asignarAlmacenWrapper"
     @setNombreTicket="setNombreTicketWrapper" />
 
@@ -741,6 +741,13 @@ function abrirPendiente() {
   getAllPendientes();
 }
 
+function openFechaEntrega() {
+  fechaEntrega.value = ticketActual.fecha_entrega
+    ? new Date(ticketActual.fecha_entrega)
+    : new Date();
+  isFechaEntregaOpen.value = true;
+}
+
 function formatDateTimeLocal(date) {
   const d = new Date(date)
   d.setSeconds(0, 0)
@@ -963,6 +970,7 @@ useVentasKeyboardShortcuts({
   openCobrar: abrirCobrarModal,
   setPendiente: setPendiente,
   abrirPendiente: abrirPendiente,
+  openFechaEntrega: openFechaEntrega,
   abrirModalBuscaProductsNombre: abrirModalBuscaProductsNombre,
   abrirExistencias: abrirExistencias,
   emptyValuesWrapper: emptyValuesWrapper,
