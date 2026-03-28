@@ -83,6 +83,14 @@
                   </v-menu>
                 </v-list-item-title>
               </v-list-item>
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-calendar-range"></v-icon>
+                </template>
+                <v-list-item-title @click="$emit('openFechaEntrega')">
+                  Fecha entrega
+                </v-list-item-title>
+              </v-list-item>
               <!-- <v-list-item>
                 <template v-slot:prepend>
                   <v-icon icon="mdi-keyboard"></v-icon>
@@ -109,6 +117,9 @@
           </v-col>
           <v-col cols="6" v-if="ticketActual.miAlmacenName">
             <p>Almacen: {{ ticketActual.miAlmacenName }}</p>
+          </v-col>
+          <v-col cols="6" v-if="ticketActual.fecha_entrega">
+            <p>Entrega: {{ formatDeliveryDate(ticketActual.fecha_entrega) }}</p>
           </v-col>
           <v-col cols="6" v-if="ticketActual.nombre">
             <p>Nombre Ticket: {{ ticketActual.nombre }}</p>
@@ -199,8 +210,16 @@ defineEmits([
   'copyLinkToClipBoard',
   'openLastTicket',
   'printLastTicket',
+  'openFechaEntrega',
   'showShortcuts',
   'asignarAlmacen',
   'setNombreTicket'
 ]);
+
+const formatDeliveryDate = (value) => {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleDateString('es-MX')
+}
 </script>

@@ -43,6 +43,9 @@
               </v-list-item>
             </v-list>
           </v-menu>
+          <v-btn class="mx-2" prepend-icon="mdi-calendar-range" @click="$emit('openFechaEntrega')" size="small">
+            Fecha entrega
+          </v-btn>
           <v-btn size="small" class="mx-2" append-icon="mdi-keyboard" variant="tonal"
             @click="$emit('showShortcuts')">Atajos</v-btn>
 
@@ -58,6 +61,9 @@
             </p>
             <p v-if="ticketActual.miAlmacenName" class="mx-2">
               <strong>Almacen:</strong> {{ ticketActual.miAlmacenName }}
+            </p>
+            <p v-if="ticketActual.fecha_entrega" class="mx-2">
+              <strong>Entrega:</strong> {{ formatDeliveryDate(ticketActual.fecha_entrega) }}
             </p>
             <p v-if="ticketActual.nombre" class="mx-2">
               <strong>Nombre Ticket:</strong> {{ ticketActual.nombre }}
@@ -285,6 +291,7 @@ const emit = defineEmits([
   'copyLinkToClipBoard',
   'openLastTicket',
   'printLastTicket',
+  'openFechaEntrega',
   'showShortcuts',
   'asignarAlmacen',
   'goPrimerArticulo',
@@ -344,6 +351,13 @@ const handlePrecioEnter = (event) => {
   } else {
     emit('enviarArticulo')
   }
+}
+
+const formatDeliveryDate = (value) => {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleDateString('es-MX')
 }
 
 // Expose focus method for keyboard shortcuts and clear method

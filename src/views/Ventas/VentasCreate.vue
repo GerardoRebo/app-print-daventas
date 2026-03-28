@@ -22,7 +22,8 @@
     @enviarArticulo="enviarArticulo" @abrirModalBuscaProductsNombre="abrirModalBuscaProductsNombre"
     @borrarTicket="borrarTicketWrapper" @actionButtonClick="abrirCobrarModal" @setNombreTicket="setNombreTicketWrapper"
     @abrirExistencias="abrirExistencias" @update:codigo="codigo = $event" @searchProduct="searchProduct"
-    @showPrices="showPrices" @update:desglosarImpuesto="desglosarImpuesto = $event" @update:apartarProductos="handleToggleApartarProductos" />
+    @showPrices="showPrices" @openFechaEntrega="isFechaEntregaOpen = true"
+    @update:desglosarImpuesto="desglosarImpuesto = $event" @update:apartarProductos="handleToggleApartarProductos" />
   <!-- Mobile Sales Card -->
   <MobileSalesCard v-if="mdAndDown" ref="salesHeaderCardRef" :codigo="codigo" :product-form="product_form"
     :almacen="almacen" :price-options="priceOptions" @update:codigo="codigo = $event"
@@ -36,6 +37,7 @@
     @abrirCobrarModal="abrirCobrarModal" @borrarTicket="borrarTicketWrapper" @setPendiente="setPendienteWrapper"
     @abrirPendiente="abrirPendiente" @abrirCliente="abrirCliente" @goOffline="goOffline"
     @copyLinkToClipBoard="copyLinkToClipBoard" @openLastTicket="openLastTicket" @printLastTicket="printLastTicket"
+    @openFechaEntrega="isFechaEntregaOpen = true"
     @showShortcuts="isShortcutsOpen = true" @asignarAlmacen="asignarAlmacenWrapper"
     @setNombreTicket="setNombreTicketWrapper" />
 
@@ -262,6 +264,23 @@
   </v-dialog>
   <!-- Imagenes Dialog -->
   <ImagesDialog :model-value="isOpenImagenes" :images="imagenes" @update:model-value="isOpenImagenes = $event" />
+
+  <!-- Fecha entrega -->
+  <v-dialog v-model="isFechaEntregaOpen" max-width="500">
+    <v-card>
+      <v-card-title>Fecha de entrega</v-card-title>
+      <v-card-text>
+        <v-row justify="center" dense>
+          <v-date-picker v-model="fechaEntrega" color="primary" header-color="primary" />
+        </v-row>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn @click="isFechaEntregaOpen = false">Cancelar</v-btn>
+        <v-btn color="primary" variant="outlined" @click="updateFechaEntrega">Actualizar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
   <!-- Precios Dialog -->
   <PricesDialog :model-value="isShowPricesOpen" :price-options="priceOptions" :headers="pricesHeaders"
     @update:model-value="isShowPricesOpen = $event" @price-selected="handlePriceSelected" />
@@ -421,6 +440,8 @@ const imagenes = ref([]);
 const isInfoAgregarExistenciaOpen = ref(false);
 const openCobrar = ref(false);
 const openPendiente = ref(false);
+const isFechaEntregaOpen = ref(false);
+const fechaEntrega = ref(null);
 const pagocon = ref(0);
 const showTelefonoField = ref(false);
 const pricesDialogOpenedFrom = ref(null); // Track where prices dialog was opened from ('conversion' or 'product')
@@ -718,6 +739,30 @@ function abrirCliente() {
 function abrirPendiente() {
   openPendiente.value = true;
   getAllPendientes();
+}
+
+function formatDateTimeLocal(date) {
+  const d = new Date(date)
+  d.setSeconds(0, 0)
+  return d.toISOString().slice(0, 19).replace('T', ' ')
+}
+
+function updateFechaEntrega() {
+  if (!fechaEntrega.value) {
+    notify.warning('Selecciona una fecha de entrega')
+    return
+  }
+
+  const fechaFormateada = formatDateTimeLocal(fechaEntrega.value)
+  processRequest(async () => {
+    await PuntoVenta.updateFechaEntrega(ticketActual.id, fechaFormateada)
+    await getSpecificVT(ticketActual.id)
+    isFechaEntregaOpen.value = false
+    focusCodigoField()
+  }, cargando, {
+    onSuccess: () => notify.success('Fecha de entrega actualizada'),
+    onError: (error) => notify.error(error)
+  })
 }
 async function guardarVenta(imprimir) {
   if (amountExceedsTotal.value) {
