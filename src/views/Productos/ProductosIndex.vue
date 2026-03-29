@@ -126,18 +126,24 @@
               <p>Historial</p>
               <v-btn size="small" class="ma-2" :to="{
                 name: 'Historial',
-                params: { productId: productActualId || 0 },
-                query: { almacenId: almacenActualId }
+                params: {
+                  almacenId: almacenActualId,
+                  productId: productActualId || 0,
+                },
               }">Inventario</v-btn>
               <v-btn size="small" class="ma-2" :to="{
                 name: 'HistorialCosto',
-                params: { productId: productActualId || 0 },
-                query: { almacenId: almacenActualId }
+                params: {
+                  almacenId: almacenActualId,
+                  productId: productActualId || 0,
+                },
               }">Costo</v-btn>
               <v-btn size="small" class="ma-2" :to="{
                 name: 'HistorialPrecio',
-                params: { productId: productActualId || 0 },
-                query: { almacenId: almacenActualId }
+                params: {
+                  almacenId: almacenActualId,
+                  productId: productActualId || 0,
+                },
               }">Precio</v-btn>
             </v-row>
           </v-col>
