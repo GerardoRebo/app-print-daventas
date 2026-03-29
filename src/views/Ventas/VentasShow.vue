@@ -708,6 +708,7 @@ function vistaPrevia() {
     const response = await PuntoVenta.facturaVistaPrevia(ticketActual.value.id, payload);
     const file = new Blob([response.data], { type: response.headers["content-type"] });
     const fileURL = URL.createObjectURL(file);
+    console.log(fileURL, 'bloc');
     window.open(fileURL);
   }, cargando, {
     onSuccess: () => notify.success("Vista previa generada correctamente"),
@@ -739,6 +740,8 @@ function vistaPreviaXml() {
     }
     const response = await PuntoVenta.facturaVistaPreviaXml(ticketActual.value.id, payload);
     const blob = new Blob([response.data], { type: "application/xml" });
+    console.log(blob, 'bloc');
+    
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = `${fileName.value}.xml`;
