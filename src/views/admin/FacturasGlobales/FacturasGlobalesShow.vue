@@ -1,4 +1,5 @@
 <template>
+  
   <v-card class="mb-2" v-if="mdAndUp">
     <v-card-title>Factura global ID:{{ factura.id }}</v-card-title>
     <v-card-text>
@@ -27,22 +28,22 @@
         </div>
         <div class="flex flex-col">
           <p>
-            Subtotal: ${{ factura.subtotal }}
+            Subtotal: ${{ formatNumber(factura.subtotal) }}
           </p>
           <p>
-            Descuento: ${{ factura.descuento }}
+            Descuento: ${{ formatNumber(factura.descuento) }}
           </p>
           <p>
-            Impuesto Trasladado: ${{ factura.impuesto_traslado }}
+            Impuesto Trasladado: ${{ formatNumber(factura.impuesto_traslado) }}
           </p>
           <p class="font-weight-bold">
-            Total: ${{ factura.total }}
+            Total: ${{ formatNumber(factura.total) }}
           </p>
         </div>
         <v-btn :loading="cargando" class="mx-4" @click="deleteFacturaGlobal" v-if="!factura.facturado_en"
           prepend-icon="mdi-trash-can">Borrar</v-btn>
         <v-btn :loading="cargando" class="mx-4" @click="isFacturaInfoOpen = true" v-if="!factura.facturado_en"
-          prepend-icon="mdi-certificate" color="accent" variant="elevated">Timbrar</v-btn>
+          prepend-icon="mdi-certificate" color="primary" variant="elevated">Timbrar</v-btn>
         <template v-else>
           <v-menu>
             <template v-slot:activator="{ props }">
@@ -57,6 +58,13 @@
                 </template>
                 <v-list-item-title>
                   Ver PDF</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="isEmailOpen = true">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-email"></v-icon>
+                </template>
+                <v-list-item-title>
+                  Enviar por correo </v-list-item-title>
               </v-list-item>
               <v-list-item @click="descargarPdf()">
                 <template v-slot:prepend>
@@ -73,13 +81,20 @@
                 <v-list-item-title>
                   Descarga XML</v-list-item-title>
               </v-list-item>
+              <v-list-item @click="regenerarPdf()">
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-refresh"></v-icon>
+                </template>
+                <v-list-item-title>
+                  Regenerar PDF</v-list-item-title>
+              </v-list-item>
             </v-list>
           </v-menu>
           <p class="mx-2">Facturado en: {{ moment(factura.facturado_en).format('DD-MM-YYYY h:mma') }}</p>
         </template>
       </v-row>
     </v-card-text>
-    <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
+    <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
   </v-card>
   <v-card class="mb-2" v-if="smAndDown">
     <v-card-title>Factura global</v-card-title>
@@ -103,7 +118,7 @@
         </v-col>
       </v-row>
     </v-card-text>
-    <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
+    <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
   </v-card>
   <!-- Mobile Navigation Drawer -->
   <v-navigation-drawer v-model="drawer" :location="$vuetify.display.mobile ? 'bottom' : undefined" temporary
@@ -112,7 +127,7 @@
       <v-container>
         <v-row dense>
           <v-btn :loading="cargando" block class="my-1" @click="isFacturaInfoOpen = true" v-if="!factura.facturado_en"
-            prepend-icon="mdi-certificate" color="accent" variant="elevated">Timbrar</v-btn>
+            prepend-icon="mdi-certificate" color="primary" variant="elevated">Timbrar</v-btn>
           <v-btn :loading="cargando" block class="my-1" @click="deleteFacturaGlobal" v-if="!factura.facturado_en"
             prepend-icon="mdi-trash-can">Borrar</v-btn>
           <template v-else>
@@ -162,22 +177,23 @@
             <p>
               Hasta:{{ factura.hasta }}
             </p>
+
             <p>
               Periodicidad: {{ periodicidadName }}
             </p>
           </div>
           <div class="flex flex-col">
             <p>
-              Subtotal: ${{ subtotalComputed }}
+              Subtotal: ${{ formatNumber(factura.subtotal) }}
             </p>
             <p>
-              Descuento: ${{ descuentoComputed }}
+              Descuento: ${{ formatNumber(factura.descuento) }}
             </p>
             <p>
-              Impuesto Trasladado: ${{ impuestoComputed }}
+              Impuesto Trasladado: ${{ formatNumber(factura.impuesto_traslado) }}
             </p>
             <p>
-              Total: ${{ totalComputed }}
+              Total: ${{ formatNumber(factura.total) }}
             </p>
           </div>
 
@@ -189,23 +205,24 @@
   <v-container fluid>
     <v-data-table :headers="headers" :items="factura?.articulos" dense>
       <template v-slot:item.consecutivo="{ item }">
-        <router-link :to="{ name: 'VentasShow', params: { ventaId: item.ventaticket?.id } }"
-          :class="[checkMaxVentaticket(item.ventaticket?.id) ? 'warning' : '']">
+        <router-link :to="{ name: 'VentasShow', params: { ventaId: item.facturable?.id ?? item.ventaticket?.id ?? 1 } }"
+          :class="[checkMaxVentaticket(item.facturable?.id ?? item.ventaticket?.id) ? 'warning' : '']">
           <span>{{
-            item.ventaticket?.consecutivo }}</span>
+            item.facturable?.consecutivo ?? item.ventaticket?.consecutivo }}</span>
         </router-link>
       </template>
       <template v-slot:item.subtotal="{ item }">
-        <span>${{ item.ventaticket?.subtotal }}</span>
+        <!-- {{ item }} -->
+        <span>${{ formatNumber(item.facturable?.subtotal ?? item.ventaticket?.subtotal) }}</span>
       </template>
       <template v-slot:item.descuento="{ item }">
-        <span>${{ item.ventaticket?.descuento }}</span>
+        <span>${{ formatNumber(item.facturable?.descuento ?? item.ventaticket?.descuento) }}</span>
       </template>
       <template v-slot:item.impuesto_traslado="{ item }">
-        <span>${{ item.ventaticket?.impuesto_traslado }}</span>
+        <span>${{ formatNumber(item.facturable?.impuesto_traslado ?? item.ventaticket?.impuesto_traslado) }}</span>
       </template>
       <template v-slot:item.total="{ item }">
-        <span class="font-weight-bold">${{ item.ventaticket?.total }}</span>
+        <span class="font-weight-bold">${{ formatNumber(item.facturable?.total ?? item.ventaticket?.total) }}</span>
       </template>
     </v-data-table>
   </v-container>
@@ -213,20 +230,156 @@
     <v-card>
       <v-card-title>Información de CFDI</v-card-title>
       <v-card-text>
-        <v-text-field label="Periodicidad" v-model="periodicidadName" readonly></v-text-field>
-        <v-text-field label="Serie (opcional)" v-model="facturaInfo.serie"></v-text-field>
-        <v-select :items="pagoFormas" label="Forma de pago" v-model="facturaInfo.forma_pago"></v-select>
-        <v-select label="Año" :items="years" v-model="facturaInfo.year"></v-select>
-        <v-select label="Mes" :items="meses" v-model="facturaInfo.mes"></v-select>
-        <v-text-field label="Clave privada local" v-model="facturaInfo.clave_privada_local"></v-text-field>
+        <!-- Navegación de Tabs -->
+        <v-tabs v-model="activeTab" grow>
+          <v-tab value="basico">Básico</v-tab>
+          <v-tab value="avanzado">Opciones Avanzadas</v-tab>
+        </v-tabs>
+
+        <!-- Contenido de Tabs -->
+        <v-window v-model="activeTab">
+          <!-- TAB BÁSICO -->
+          <v-window-item value="basico">
+            <v-card-text>
+              <TimbresOrganizationSelector
+                :model-value="selectedTimbresOrganization"
+                :is-contador="s.isContador"
+                :contador-organizations="s.contadorOrganizations"
+                :active-organization-name="s.activeOrganization?.name"
+                :saldo="saldo"
+                :saldos="saldos"
+                @update:model-value="selectedTimbresOrganization = $event"
+              />
+              <v-select label="Periodicidad" :items="periodicidades" v-model="facturaInfo.c_periodicidad"></v-select>
+              <v-text-field label="Serie (opcional)" v-model="facturaInfo.serie"></v-text-field>
+              <v-select :items="pagoFormas" label="Forma de pago" v-model="facturaInfo.forma_pago"></v-select>
+              <v-select label="Año" :items="years" v-model="facturaInfo.year"></v-select>
+              <v-select label="Mes" :items="meses" v-model="facturaInfo.mes"></v-select>
+              <v-text-field label="Clave privada local" v-model="facturaInfo.clave_privada_local"></v-text-field>
+            </v-card-text>
+          </v-window-item>
+
+          <!-- TAB AVANZADO -->
+          <v-window-item value="avanzado">
+            <v-card-text>
+              <!-- Fecha Personalizada -->
+              <v-checkbox
+                label="Usar fecha personalizada para la factura"
+                v-model="facturaInfo.usarFechaPersonalizada"
+              />
+              <v-date-input
+                v-if="facturaInfo.usarFechaPersonalizada"
+                v-model="facturaInfo.fechaFactura"
+                label="Fecha de la factura"
+                class="mt-2 mb-4"
+                :max="new Date().toISOString().split('T')[0]"
+              />
+
+              <div class="d-flex justify-space-between align-center mb-3">
+                <span class="text-subtitle-1 font-weight-medium">Facturas Relacionadas</span>
+                <v-btn
+                  color="primary"
+                  variant="outlined"
+                  size="small"
+                  prepend-icon="mdi-plus"
+                  @click="agregarRelacion"
+                >
+                  Relación
+                </v-btn>
+              </div>
+
+              <!-- Lista editable de relaciones -->
+              <v-container fluid>
+                <v-row
+                  v-for="(relacion, index) in facturaInfo.facturasRelacionadas"
+                  :key="index"
+                  class="align-center mb-2"
+                >
+                  <v-col cols="5">
+                    <v-select
+                      :items="tiposRelacionCatalogo"
+                      label="Tipo de Relación"
+                      :error-messages="relacion.tipo ? '' : 'Campo requerido'"
+                      :model-value="relacion.tipo"
+                      @update:model-value="actualizarRelacionTipo({ index, value: $event })"
+                    />
+                  </v-col>
+                  <v-col cols="6">
+                    <v-text-field
+                      label="Folio Fiscal"
+                      :model-value="relacion.folio"
+                      @update:model-value="actualizarRelacionFolio({ index, value: $event })"
+                      v-maska="'********-****-****-****-************'"
+                      :error-messages="relacion.folio ? '' : 'Campo requerido'"
+                      placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+                    />
+                  </v-col>
+                  <v-col cols="1" class="d-flex justify-end">
+                    <v-btn
+                      icon="mdi-delete"
+                      color="error"
+                      variant="text"
+                      size="small"
+                      @click="eliminarRelacion(index)"
+                    />
+                  </v-col>
+                </v-row>
+              </v-container>
+
+              <!-- Observaciones -->
+              <v-divider class="my-4" />
+              <v-textarea 
+                label="Observaciones (opcional)" 
+                v-model="facturaInfo.observaciones"
+                placeholder="Agrega observaciones que aparecerán en la factura"
+                rows="4"
+                counter
+                maxlength="2000"
+              ></v-textarea>
+            </v-card-text>
+          </v-window-item>
+        </v-window>
       </v-card-text>
       <v-card-actions>
         <v-btn @click="isFacturaInfoOpen = false" :loading="cargando">Cancelar</v-btn>
-        <v-btn @click.stop="timbrarFacturaGlobal" variant="outlined" color="accent" prepend-icon="mdi-certificate"
-          :loading="cargando">Timbrar</v-btn>
+        <v-btn
+          @click.stop="vistaPreviaXml"
+          variant="tonal"
+          color="secondary"
+          prepend-icon="mdi-xml"
+          :loading="cargando"
+        >
+          Vista Previa XML
+        </v-btn>
+        <v-btn
+          @click.stop="vistaPrevia"
+          variant="tonal"
+          color="primary"
+          prepend-icon="mdi-open-in-new"
+          :loading="cargando"
+        >
+          Vista Previa
+        </v-btn>
+        <v-btn
+          @click.stop="timbrarFacturaGlobal"
+          variant="elevated"
+          color="primary"
+          prepend-icon="mdi-certificate"
+          :loading="cargando"
+        >
+          Timbrar
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <EmailFacturaModal
+    v-model="isEmailOpen"
+    :email-data="emailData"
+    :loading="cargando"
+    :errors="errors"
+    @send="sendEmail"
+  />
 </template>
 <style scoped></style>
 <script setup>
@@ -235,22 +388,35 @@ import { watch } from "@vue/runtime-core";
 import { computed, onMounted } from "vue";
 import moment from 'moment-timezone';
 import Organizacion from "../../../apis/Organizacion";
-import { useMessagesStore } from "../../../s/messages";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@js/s";
 import { useDisplay } from "vuetify";
+import { useProcessRequest } from "@js/composables/useProcessRequest";
+import { useNotification } from "@js/composables/useNotification";
+import TimbresOrganizationSelector from '@js/components/Facturacion/TimbresOrganizationSelector.vue';
+import EmailFacturaModal from '@js/components/Facturacion/EmailFacturaModal.vue';
+import { useCurrency } from '@js/composables/useCurrency';
+import { meses as mesesCatalogo, pagoFormas as pagoFormasCatalogo, tiposRelacion, periodicidades as periodicidadesCatalogo } from '@js/utils/cfdiCatalogs';
+import { vMaska } from "maska/vue";
+
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 const { xs, mdAndUp, mdAndDown, smAndDown } = useDisplay()
 const s = useUserStore();
 const { handleOpException } = s;
-const messages = useMessagesStore();
+const { processRequest } = useProcessRequest();
+const { notify } = useNotification();
 const route = useRoute();
 const router = useRouter();
 const facturaId = ref(route.params.facturaId);
+const selectedTimbresOrganization = ref(null);
 
+const isEmailOpen = ref(false)
+const errors = ref([]);
 const cargando = ref(false);
 const drawer = ref(false);
 const factura = ref({});
 const saldo = ref(null);
+const saldos = ref({});
 const maxVentaticket = ref(null);
 
 const headers = ref([
@@ -270,46 +436,15 @@ const facturaInfo = reactive({
   year: null,
   mes: "01",
   forma_pago: "01",
+  usarFechaPersonalizada: false,
+  fechaFactura: null,
+  facturasRelacionadas: [],
+  observaciones: '',
 })
 const years = ref([]);
-const meses = ref([
-  { value: "01", title: "Enero" },
-  { value: "02", title: "Febrero" },
-  { value: "03", title: "Marzo" },
-  { value: "04", title: "Abril" },
-  { value: "05", title: "Mayo" },
-  { value: "06", title: "Junio" },
-  { value: "07", title: "Julio" },
-  { value: "08", title: "Agosto" },
-  { value: "09", title: "Septiembre" },
-  { value: "10", title: "Octubre" },
-  { value: "11", title: "Noviembre" },
-  { value: "12", title: "Diciembre" },
-]);
-const pagoFormas = [
-  { "value": "01", "title": "Efectivo" },
-  { "value": "02", "title": "Cheque nominativo" },
-  { "value": "03", "title": "Transferencia electrónica de fondos" },
-  { "value": "04", "title": "Tarjeta de crédito" },
-  { "value": "05", "title": "Monedero electrónico" },
-  { "value": "06", "title": "Dinero electrónico" },
-  { "value": "08", "title": "Vales de despensa" },
-  { "value": "12", "title": "Dación en pago" },
-  { "value": "13", "title": "Pago por subrogación" },
-  { "value": "14", "title": "Pago por consignación" },
-  { "value": "15", "title": "Condonación" },
-  { "value": "17", "title": "Compensación" },
-  { "value": "23", "title": "Novación" },
-  { "value": "24", "title": "Confusión" },
-  { "value": "25", "title": "Remisión de deuda" },
-  { "value": "26", "title": "Prescripción o caducidad" },
-  { "value": "27", "title": "A satisfacción del acreedor" },
-  { "value": "28", "title": "Tarjeta de débito" },
-  { "value": "29", "title": "Tarjeta de servicios" },
-  { "value": "30", "title": "Aplicación de anticipos" },
-  { "value": "31", "title": "Intermediario pagos" },
-  { "value": "99", "title": "Por definir" }
-];
+const meses = ref(mesesCatalogo);
+const pagoFormas = ref(pagoFormasCatalogo);
+const periodicidades = ref(periodicidadesCatalogo);
 const periodicidadName = computed(() => {
   const periodicidad = factura.value.c_periodicidad;
   if (periodicidad == '01') {
@@ -329,6 +464,15 @@ const periodicidadName = computed(() => {
   }
   return "Configura periodicidad"
 })
+const emailData = ref({
+  fromEmail: '',
+  fromName: '',
+  toName: '',
+  toEmail: '',
+});
+const fileName = computed(() => {
+  return `${factura.value.cliente?.rfc ?? 'General'}-${factura.value.consecutivo}-${moment(factura.value.pagado_en).format('YYYYMMDD')}`;
+});
 const totalComputed = computed(() => {
   const suma = +subtotalComputed.value + +impuestoComputed.value - +descuentoComputed.value;
   return roundToNearestFiveCents(suma).toFixed(2)
@@ -367,8 +511,10 @@ const subtotalComputed = computed(() => {
   return suma.toFixed(2)
 });
 const isFacturaInfoOpen = ref(false);
+const activeTab = ref("basico");
+const tiposRelacionCatalogo = ref(tiposRelacion);
 const currentYear = new Date().getFullYear();
-const month = new Date().getMonth().toString();
+const month = (new Date().getMonth() + 1).toString();
 facturaInfo.mes = month > 9 ? month : "0" + month
 facturaInfo.year = currentYear;
 years.value = Array.from({ length: 5 }, (_, index) => (currentYear - 1 + index).toString()).map((item) => {
@@ -379,6 +525,22 @@ years.value = Array.from({ length: 5 }, (_, index) => (currentYear - 1 + index).
 });
 const checkMaxVentaticket = (ventaticket) => {
   return ventaticket == maxVentaticket.value
+}
+async function sendEmail(localEmailData) {
+  try {
+    cargando.value = true;
+    const { data } = await Organizacion.sendFacturaEmail(facturaId.value, localEmailData)
+    isEmailOpen.value = false;
+
+    notify.success(data.message);
+
+  } catch (error) {
+    // handleOpException(error);
+    errors.value = error.response?.data?.errors || [];
+    console.log(error);
+  } finally {
+    cargando.value = false;
+  }
 }
 const timbrarFacturaGlobal = async () => {
   if (!saldo.value) {
@@ -391,7 +553,19 @@ const timbrarFacturaGlobal = async () => {
   if (cargando.value) return;
   cargando.value = true;
   try {
-    const { data } = await Organizacion.timbrarFacturaGlobal(facturaId.value, facturaInfo);
+    // Preparar datos y formatear fecha si existe
+    const datosEnvio = {
+      ...facturaInfo,
+      timbres_organization_id: selectedTimbresOrganization.value,
+    };
+    
+    // Formatear fechaFactura a Y-m-d si existe
+    if (datosEnvio.fechaFactura) {
+      const fecha = new Date(datosEnvio.fechaFactura);
+      datosEnvio.fechaFactura = fecha.toISOString().split('T')[0];
+    }
+    
+    const { data } = await Organizacion.timbrarFacturaGlobal(facturaId.value, datosEnvio);
     if (data.success) {
       isFacturaInfoOpen.value = false;
     }
@@ -400,12 +574,27 @@ const timbrarFacturaGlobal = async () => {
     if (error?.response?.status === 422) {
       console.log(error.response.data.errors);
       for (const [key, value] of Object.entries(error.response.data.errors)) {
-        messages.add({ text: value, title: "error" })
+        notify.warning(value)
       }
     }
   } finally {
     cargando.value = false
   }
+}
+const agregarRelacion = () => {
+  if (!facturaInfo.facturasRelacionadas) {
+    facturaInfo.facturasRelacionadas = [];
+  }
+  facturaInfo.facturasRelacionadas.push({ tipo: '', folio: '' });
+}
+const eliminarRelacion = (index) => {
+  facturaInfo.facturasRelacionadas.splice(index, 1);
+}
+const actualizarRelacionTipo = ({ index, value }) => {
+  facturaInfo.facturasRelacionadas[index].tipo = value;
+}
+const actualizarRelacionFolio = ({ index, value }) => {
+  facturaInfo.facturasRelacionadas[index].folio = value;
 }
 const deleteFacturaGlobal = async () => {
   const res = confirm('Estas seguro?');
@@ -421,7 +610,7 @@ const deleteFacturaGlobal = async () => {
     if (error?.response?.status === 422) {
       console.log(error.response.data.errors);
       for (const [key, value] of Object.entries(error.response.data.errors)) {
-        messages.add({ text: value, title: "error" })
+        notify.warning(value)
       }
     }
   } finally {
@@ -439,51 +628,136 @@ const getConfigurations = async () => {
   }
 }
 function descargarPdf() {
-  if (cargando.value) return;
-  cargando.value = true;
-  Organizacion.descargarPdf(facturaId.value)
-    .then((response) => {
-      const blob = new Blob([response.data], { type: 'application/pdf' })
-      const link = document.createElement('a')
-      link.href = URL.createObjectURL(blob)
-      link.download = "factura"
-      link.click()
-      URL.revokeObjectURL(link.href)
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    }).finally(() => {
-      cargando.value = false;
-    });
+  processRequest(async () => {
+    const response = await Organizacion.descargarPdf(facturaId.value);
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName.value + ".pdf";
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }, cargando, {
+    onError: () => {
+      notify.error("Ha ocurrido un error");
+    }
+  });
 }
 function descargarXml() {
-  if (cargando.value) return;
-  cargando.value = true;
-  Organizacion.descargarXml(facturaId.value)
-    .then((response) => {
-      const blob = new Blob([response.data], { type: 'application/xml' })
-      const link = document.createElement('a')
-      link.href = URL.createObjectURL(blob)
-      link.download = "factura"
-      link.click()
-      URL.revokeObjectURL(link.href)
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    }).finally(() => {
-      cargando.value = false;
-    });
+  processRequest(async () => {
+    const response = await Organizacion.descargarXml(facturaId.value);
+    const blob = new Blob([response.data], { type: 'application/xml' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName.value + ".xml";
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }, cargando, {
+    onError: () => {
+      notify.error("Ha ocurrido un error");
+    }
+  });
+}
+
+function regenerarPdf() {
+  processRequest(async () => {
+    const response = await Organizacion.regenerarPdf(facturaId.value);
+    notify.success("PDF regenerado correctamente");
+  }, cargando, {
+    onError: () => {
+      notify.error("Ha ocurrido un error");
+    }
+  });
+}
+
+function onWatchPdf() {
+  processRequest(async () => {
+    const response = await Organizacion.descargarPdf(facturaId.value);
+    const file = new Blob([response.data], { type: response.headers['content-type'] });
+    const fileURL = URL.createObjectURL(file);
+    window.open(fileURL);
+  }, cargando, {
+    onError: () => {
+      notify.error("Ha ocurrido un error");
+    }
+  });
+}
+
+function vistaPrevia() {
+  processRequest(async () => {
+    const payload = {
+      forma_pago: facturaInfo.forma_pago,
+      serie: facturaInfo.serie,
+      clave_privada_local: facturaInfo.clave_privada_local,
+      year: facturaInfo.year,
+      mes: facturaInfo.mes,
+      facturasRelacionadas: facturaInfo.facturasRelacionadas,
+      timbres_organization_id: selectedTimbresOrganization.value,
+      usarFechaPersonalizada: facturaInfo.usarFechaPersonalizada ?? false,
+    };
+    
+    // Formatear fechaFactura a Y-m-d si existe
+    if (payload.usarFechaPersonalizada && facturaInfo.fechaFactura) {
+      const fecha = new Date(facturaInfo.fechaFactura);
+      payload.fechaFactura = fecha.toISOString().split('T')[0];
+    }
+    
+    const response = await Organizacion.facturaVistaPreviaGlobal(facturaId.value, payload);
+    const file = new Blob([response.data], { type: response.headers['content-type'] });
+    const fileURL = URL.createObjectURL(file);
+    window.open(fileURL);
+    notify.success("Vista previa generada correctamente");
+  }, cargando, {
+    onError: () => {
+      notify.error("Ha ocurrido un error al generar la vista previa");
+    }
+  });
+}
+
+function vistaPreviaXml() {
+  processRequest(async () => {
+    const payload = {
+      forma_pago: facturaInfo.forma_pago,
+      serie: facturaInfo.serie,
+      clave_privada_local: facturaInfo.clave_privada_local,
+      year: facturaInfo.year,
+      mes: facturaInfo.mes,
+      facturasRelacionadas: facturaInfo.facturasRelacionadas,
+      timbres_organization_id: selectedTimbresOrganization.value,
+      usarFechaPersonalizada: facturaInfo.usarFechaPersonalizada ?? false,
+    };
+    
+    // Formatear fechaFactura a Y-m-d si existe
+    if (payload.usarFechaPersonalizada && facturaInfo.fechaFactura) {
+      const fecha = new Date(facturaInfo.fechaFactura);
+      payload.fechaFactura = fecha.toISOString().split('T')[0];
+    }
+    
+    const response = await Organizacion.facturaVistaPreviaXmlGlobal(facturaId.value, payload);
+    const fileName = `factura_global_preview_${new Date().getTime()}`;
+    const blob = new Blob([response.data], { type: "application/xml" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${fileName}.xml`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    notify.success("Vista previa XML generada correctamente");
+  }, cargando, {
+    onError: () => {
+      notify.error("Ha ocurrido un error al generar la vista previa XML");
+    }
+  });
 }
 
 const loadInitialData = async () => {
   try {
     const { data } = await Organizacion.facturasGlobalesShow(facturaId.value)
+    emailData.value.fromName = data.factura.organization?.name ?? data.factura.almacen?.name;
+    emailData.value.fromEmail = data.factura.organization?.email ?? data.factura.almacen?.email;
     const { data: newData } = await Organizacion.getFoliosSaldo();
     maxVentaticket.value = data.maxVentaticket
     factura.value = data.factura
     saldo.value = newData?.saldo
+    saldos.value = newData?.saldos
 
     getConfigurations()
 

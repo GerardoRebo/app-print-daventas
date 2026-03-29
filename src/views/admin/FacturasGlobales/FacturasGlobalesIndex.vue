@@ -3,16 +3,41 @@
     <v-card-title>Facturas globales</v-card-title>
     <v-card-text>
       <v-row dense class="mt-4">
-        <v-date-input label="Desde" v-model="dfecha" hide-details max-width="300"></v-date-input>
-        <v-date-input label="Hasta" v-model="hfecha" hide-details max-width="300"></v-date-input>
-        <RouterLink :to="{ name: 'FacturasGlobalesCreate' }">
-          <v-btn :loading="cargando" class="mx-4" prepend-icon="mdi-plus">Crear factura global</v-btn>
-        </RouterLink>
+        <!-- Fecha inicio -->
+        <v-col cols="12" md="3">
+          <v-menu v-model="menuInicio" :close-on-content-click="false" transition="scale-transition" offset-y
+            color="primary">
+            <template #activator="{ props }">
+              <v-text-field color="primary" v-bind="props" v-model="formattedDFecha" @update:model-value="updateDFecha"
+                label="Fecha inicio" prepend-inner-icon="mdi-calendar" readonly clearable />
+            </template>
+            <v-date-picker v-model="dfecha" @update:model-value="menuInicio = false" color="primary" />
+          </v-menu>
+        </v-col>
+
+        <!-- Fecha fin -->
+        <v-col cols="12" md="3">
+          <v-menu v-model="menuFin" :close-on-content-click="false" transition="scale-transition" offset-y
+            color="primary">
+            <template #activator="{ props }">
+              <v-text-field v-bind="props" v-model="formattedHFecha" @update:model-value="updateHFecha"
+                label="Fecha fin" prepend-inner-icon="mdi-calendar" readonly clearable color="primary" />
+            </template>
+            <v-date-picker v-model="hfecha" @update:model-value="menuFin = false" color="primary" />
+          </v-menu>
+        </v-col>
+
+        <!-- Botón crear -->
+        <v-col cols="12" md="6" class="d-flex align-top">
+          <RouterLink :to="{ name: 'FacturasGlobalesCreate' }">
+            <v-btn :loading="cargando" prepend-icon="mdi-plus" color="primary" variant="elevated">Crear factura global</v-btn>
+          </RouterLink>
+        </v-col>
       </v-row>
     </v-card-text>
   </v-card>
   <v-container fluid>
-    <v-table density="compact" color="primary_d700">
+    <v-table density="compact" color="secondary">
       <thead>
         <tr>
           <th class="text-left" v-for="header in tHeaders" :key="header">
@@ -26,27 +51,37 @@
             {{ factura.id }}
           </td>
           <td>
-            ${{ factura.subtotal }}
+            ${{ formatNumber(factura.subtotal) }}
           </td>
           <td>
-            ${{ factura.descuento }}
+            ${{ formatNumber(factura.descuento) }}
           </td>
           <td>
-            ${{ factura.impuesto_traslado }}
+            ${{ formatNumber(factura.impuesto_traslado) }}
           </td>
           <td>
-            ${{ factura.total }}
+            <strong> ${{ formatNumber(factura.total) }}</strong>
           </td>
           <td>
             {{ moment(factura.created_at).format('DD-MM-YYYY h:mm a') }}
           </td>
           <td>
-            <span v-if="factura.facturado_en">
-              {{ moment(factura.facturado_en).format('DD-MM-YYYY h:mm a') }}
-            </span>
-            <span v-else>
-              Pendiente...
-            </span>
+            <v-chip 
+            v-if="factura.facturado_en"
+            color="success"
+            text-color="white"
+            size="small"
+          >
+            {{ moment(factura.facturado_en).format('DD-MM-YYYY') }}
+          </v-chip>
+          <v-chip 
+            v-else
+            color="warning"
+            text-color="black"
+            size="small"
+          >
+            Pendiente
+          </v-chip>
           </td>
           <td>
             <router-link :to="{ name: 'FacturasGlobalesShow', params: { facturaId: factura.id } }">
@@ -70,12 +105,16 @@ import { ref, reactive } from "@vue/reactivity";
 import { watch } from "@vue/runtime-core";
 import { computed, onMounted } from "vue";
 import Organizacion from "../../../apis/Organizacion";
-import useMisFechas from '../../../composables/useMisFechas';
+import useMisFechas from "@js/composables/useMisFechas";
 import { useRoute, useRouter } from 'vue-router';
+import { useCurrency } from '@js/composables/useCurrency';
 
+const menuInicio = ref(false);
+const menuFin = ref(false);
 const cargando = ref(false);
 const facturas = ref([]);
-const { dfecha, hfecha } = useMisFechas();
+const { dfecha, hfecha, formattedDFecha, formattedHFecha, updateDFecha, updateHFecha } = useMisFechas();
+const { formatNumber } = useCurrency('es-MX', 'MXN');
 const router = useRouter();
 const route = useRoute();
 const page = ref(1);
@@ -87,7 +126,7 @@ const onPagination = (page) => {
     .push({ name: route.name, query: { ...route.query, page } })
     .catch(() => {
     }).finally(() => {
-      getMisVentas()
+      getFacturasGlobales()
     });
 };
 watch([dfecha, hfecha], () => {
@@ -109,6 +148,7 @@ const getFacturasGlobales = async () => {
     const { data } = await Organizacion.getFacturasGlobales({
       desde: dfecha.value,
       hasta: hfecha.value,
+      page: page.value,
     })
     facturas.value = data.facturas
   } catch (error) {

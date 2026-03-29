@@ -24,6 +24,12 @@ export default {
     timbrarFacturaGlobal(facturaId, postData) {
         return Api().post("/organizacions/timbrarFacturaGlobal/" + facturaId, postData);
     },
+    facturaVistaPreviaGlobal(facturaId, postData) {
+        return ApiBlob().post("/organizacions/facturaVistaPreviaGlobal/" + facturaId, postData);
+    },
+    facturaVistaPreviaXmlGlobal(facturaId, postData) {
+        return ApiBlob().post("/organizacions/facturaVistaPreviaXmlGlobal/" + facturaId, postData);
+    },
     deleteFacturaGlobal(facturaId) {
         return Api().delete("/organizacions/facturas_globales/" + facturaId);
     },
@@ -45,6 +51,7 @@ export default {
             params: {
                 desde: postData.desde,
                 hasta: postData.hasta,
+                page: postData.page,
             }
         });
     },
@@ -187,7 +194,13 @@ export default {
     descargarPdf(ticket) {
         return ApiBlob().get("/organizacions/descargarPdf/" + ticket)
     },
+    regenerarPdf(ticket) {
+        return Api().get("/organizacions/regenerarPdf/" + ticket)
+    },
     exportFacturasCSV(params) {
         return ApiBlob().get("/organizacions/facturas/export/csv", { params })
+    },
+    sendFacturaEmail(facturaId, emailData) {
+        return Api().post(`/organizacions/sendEmail/${facturaId}`, emailData);
     }
 }

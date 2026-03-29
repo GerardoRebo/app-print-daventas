@@ -11,15 +11,46 @@
         #Tickets: {{ facturaInfo.ticketIds.length }}
       </p>
       <p>
-        Periodicidad: {{ periodicidadName }}
+        Periodicidad: 
+       <span v-if="periodicidadName != 'Configura periodicidad'">
+          {{ periodicidadName }} 
+       </span> 
+       <router-link v-else :to="{ name: 'Facturacion' }" class="text-decoration-underline">
+          Configura periodicidad
+       </router-link>
       </p>
       <v-row dense class="mt-4">
-        <v-date-input label="Desde" v-model="dfecha" hide-details max-width="300"></v-date-input>
-        <v-date-input label="Hasta" v-model="hfecha" hide-details max-width="300"></v-date-input>
-        <v-btn :loading="cargando" class="mx-4" @click="preProcesar" color="accent" variant="elevated">Procesar</v-btn>
+        <!-- Fecha inicio -->
+        <v-col cols="12" md="3">
+          <v-menu v-model="menuInicio" :close-on-content-click="false" transition="scale-transition" offset-y
+            color="primary">
+            <template #activator="{ props }">
+              <v-text-field color="primary" v-bind="props" v-model="formattedDFecha" @update:model-value="updateDFecha"
+                label="Fecha inicio" prepend-inner-icon="mdi-calendar" readonly clearable />
+            </template>
+            <v-date-picker v-model="dfecha" @update:model-value="menuInicio = false" color="primary" />
+          </v-menu>
+        </v-col>
+
+        <!-- Fecha fin -->
+        <v-col cols="12" md="3">
+          <v-menu v-model="menuFin" :close-on-content-click="false" transition="scale-transition" offset-y
+            color="primary">
+            <template #activator="{ props }">
+              <v-text-field v-bind="props" v-model="formattedHFecha" @update:model-value="updateHFecha"
+                label="Fecha fin" prepend-inner-icon="mdi-calendar" readonly clearable color="primary" />
+            </template>
+            <v-date-picker v-model="hfecha" @update:model-value="menuFin = false" color="primary" />
+          </v-menu>
+        </v-col>
+
+        <!-- Botón procesar -->
+        <v-col cols="12" md="6" class="d-flex align-top">
+          <v-btn :loading="cargando" @click="preProcesar" color="primary" variant="elevated">Procesar</v-btn>
+        </v-col>
       </v-row>
     </v-card-text>
-    <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
+    <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
   </v-card>
   <v-container>
     <v-virtual-scroll :items="ventatickets" max-height="500">
@@ -28,11 +59,9 @@
           :title="`Fecha: ${moment(item.pagado_en).format('DD-MM-YYYY h:mm a')}`">
           <template v-slot:prepend>
             <router-link :to="{ name: 'VentasShow', params: { ventaId: item.id } }" class="secondary">
-              <v-icon color="primary_d700">mdi-open-in-new</v-icon>
+              <v-icon color="secondary">mdi-open-in-new</v-icon>
             </router-link>
             <v-checkbox v-model="facturaInfo.ticketIds" :value="item.id" hide-details></v-checkbox>
-          </template>
-          <template v-slot:append>
           </template>
         </v-list-item>
       </template>
@@ -46,15 +75,16 @@ import { ref, reactive } from "@vue/reactivity";
 import { watch } from "@vue/runtime-core";
 import { computed, onMounted } from "vue";
 import Organizacion from "../../../apis/Organizacion";
-import { useMessagesStore } from "../../../s/messages";
 import { useRoute, useRouter } from "vue-router";
-import useMisFechas from "../../../composables/useMisFechas";
+import useMisFechas from "@js/composables/useMisFechas";
 import { useUserStore } from "@js/s";
+import { useNotification } from "@js/composables/useNotification";
 const s = useUserStore();
 const { handleOpException } = s;
+const { notify } = useNotification();
 
-const messages = useMessagesStore();
-
+const menuInicio = ref(false);
+const menuFin = ref(false);
 const cargando = ref(false);
 const ventatickets = ref([]);
 const all = ref(true);
@@ -83,7 +113,7 @@ const periodicidadName = computed(() => {
   }
   return "Configura periodicidad"
 })
-const { dfecha, hfecha } = useMisFechas();
+const { dfecha, hfecha, formattedDFecha, formattedHFecha, updateDFecha, updateHFecha } = useMisFechas();
 const router = useRouter();
 const route = useRoute();
 
@@ -106,13 +136,8 @@ const getVentatickets = async () => {
       return item.id
     })
   } catch (error) {
-    if (error?.response?.status === 422) {
-      console.log(error.response.data.errors);
-      for (const [key, value] of Object.entries(error.response.data.errors)) {
-        messages.add({ text: value, color: "error" })
-      }
-      return;
-    }
+    console.log(error);
+    handleOpException(error);
 
   } finally {
     cargando.value = false
@@ -135,7 +160,7 @@ const preProcesar = async () => {
     if (error?.response?.status === 422) {
       console.log(error.response.data.errors);
       for (const [key, value] of Object.entries(error.response.data.errors)) {
-        messages.add({ text: value, title: "error" })
+        notify.warning(value)
       }
     }
     handleOpException(error);
