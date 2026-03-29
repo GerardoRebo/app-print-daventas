@@ -15,6 +15,7 @@
   </v-container>
 
   <v-container fluid>
+    <v-progress-linear indeterminate v-if="cargando"></v-progress-linear>
     <template v-if="loadingInitial">
       <v-skeleton-loader type="table" />
     </template>
@@ -98,9 +99,12 @@ import CortesSumary from "@js/components/CortesSumary.vue";
 import Chart from 'chart.js/auto'
 import { useUserStore } from "../s";
 import { useCurrency } from '@js/composables/useCurrency';
+import { useProcessRequest } from "@js/composables/useProcessRequest";
+import { useNotification } from "@js/composables/useNotification";
 const { formatNumber } = useCurrency('es-MX', 'MXN');
 const s = useUserStore();
-const { handleOpException } = s;
+const { processRequest } = useProcessRequest();
+const { notify } = useNotification();
 const turno_actual = ref(null);
 const isVisible = ref(null);
 const isVMovCaja = ref(null);
@@ -162,84 +166,55 @@ function limpiarCampos() {
   commentsCaja.value = null;
 }
 function habilitarCaja() {
-  if (cargando.value) return;
-  cargando.value = true;
-  Cortes.habilitarCaja()
-    .then(() => {
-      Cortes.realizarMovimiento(
-        "entrada",
-        efInicial.value,
-        null,
-        "Ingreso Inicial",
-        "Ingreso Inicial"
-      )
-        .then((response) => {
-          turno_actual.value = response.data
-          // asignar(response.data);
-          cargando.value = false;
-          openInicial.value = false;
-        })
-        .catch((error) => {
-          //:todo
-          alert("Ha ocurrido un error")
-          cargando.value = false;
-        });
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    const response1 = await Cortes.habilitarCaja();
+    const response2 = await Cortes.realizarMovimiento(
+      "entrada",
+      efInicial.value,
+      null,
+      "Ingreso Inicial",
+      "Ingreso Inicial"
+    );
+    turno_actual.value = response2.data;
+    openInicial.value = false;
+  }, cargando, {
+    onSuccess: () => {
+    },
+  });
 }
 function realizarCorte() {
-  errors.value = []
-  if (cargando.value) return;
-  cargando.value = true;
-  Cortes.realizarCorte(efectivoCierre.value, comments.value, diferencia.value)
-    .then((response) => {
-      cargando.value = false;
-      if (response.data == "TicketsAbiertos") return alert("Tickets Abiertos");
-      turno_actual.value = response.data;
-
-      // asignar(response);
-      isVisible.value = false;
-    })
-    .catch((error) => {
-
-      if (error.response.status === 422) {
-        errors.value = error.response.data.errors;
-        return
-      }
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    }).finally(() => {
-      cargando.value = false;
-    });
+  errors.value = [];
+  processRequest(async () => {
+    const response = await Cortes.realizarCorte(efectivoCierre.value, comments.value, diferencia.value);
+    if (response.data == "TicketsAbiertos") {
+      notify.warning("Tickets Abiertos");
+      return;
+    }
+    turno_actual.value = response.data;
+    isVisible.value = false;
+  }, cargando, {
+    onSuccess: () => {
+      notify.success("Corte realizado con éxito");
+    }
+  });
 }
 function realizarMovimiento() {
-  if (cargando.value) return;
-  cargando.value = true;
   if (tipo.value == 'entrada') {
     es_gasto.value = null;
   }
-  Cortes.realizarMovimiento(
-    tipo.value,
-    cantidad.value,
-    es_gasto.value,
-    commentsCaja.value,
-    concepto.value.toString()
-  )
-    .then((response) => {
-      limpiarCampos();
-      turno_actual.value = response.data
-      // asignar(response.data);
-      openCaja.value = false;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    }).finally(() => {
-      cargando.value = false;
-    });
+  processRequest(async () => {
+    const response = await Cortes.realizarMovimiento(
+      tipo.value,
+      cantidad.value,
+      es_gasto.value,
+      commentsCaja.value,
+      concepto.value.toString()
+    );
+    limpiarCampos();
+    turno_actual.value = response.data;
+    openCaja.value = false;
+  }, cargando, {
+  });
 }
 async function getTurnoActual() {
   try {
@@ -260,18 +235,16 @@ async function getTurnoActual() {
 }
 
 function getConceptos() {
-  Cortes.getConceptos(tipo.value)
-    .then((response) => {
-      conceptos.value = response.data;
-
-      if (response.data[0]) {
-        concepto.value = response.data[0].id;
-      }
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    const response = await Cortes.getConceptos(tipo.value);
+    conceptos.value = response.data;
+    if (response.data[0]) {
+      concepto.value = response.data[0].id;
+    }
+  }, cargando, {
+    errorsRef: errors,
+    onError: (error) => notify.error("Ha ocurrido un error")
+  });
 }
 function abrirCaja() {
   cantidad.value = 0;
