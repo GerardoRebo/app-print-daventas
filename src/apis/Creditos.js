@@ -1,4 +1,5 @@
 import Api from "./Api";
+import ApiBlob from "./ApiBlob";
 
 export default {
 
@@ -29,6 +30,16 @@ export default {
             }
         })
     },
+    getAbonosHistorial(cliente, params = {}) {
+        return Api().get(`/creditos/${cliente}/getAbonosHistorial`, {
+            params
+        })
+    },
+    getAbonosHistorialGeneral(params = {}) {
+        return Api().get(`/creditos/allAbonosHistorial`, {
+            params
+        })
+    },
     getSaldo(deuda) {
         return Api().get(`/creditos/getsaldo`, {
             params: {
@@ -39,14 +50,20 @@ export default {
     realizarAbono(deuda, postData) {
         return Api().post(`/creditos/realizarabono/${deuda}`, postData);
     },
-    facturarAbono(abono) {
-        return Api().post(`/creditos/facturarabono/${abono}`);
+    realizarAbonoGlobal(payload) {
+        return Api().post(`/creditos/realizarabonoGlobal`, payload);
     },
-     downloadPdf(abono) {
+    facturarAbono(abono, payload) {
+        return Api().post(`/creditos/facturarabono/${abono}`, payload);
+    },
+    cancelarAbono(abono, payload) {
+        return Api().post(`/creditos/cancelarabono/${abono}`, payload);
+    },
+    downloadPdf(abono) {
         return ApiBlob().get("/creditos/downloadPdf/" + abono);
-      },
+    },
     downloadXml(abono) {
         return ApiBlob().get("/creditos/downloadXml/" + abono);
-      },
+    },
 
 }
