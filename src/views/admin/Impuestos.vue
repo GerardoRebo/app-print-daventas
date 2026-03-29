@@ -21,10 +21,7 @@
       </template>
       <template v-slot:item.actions="{ item }">
         <v-btn @click="openEditImpuestos(item.id)" size="small" prepend-icon="mdi-pencil" class="mx-4">Editar</v-btn>
-        <!-- <v-btn @click="navigate(item.id)" size="small" prepend-icon="mdi-checkbox-multiple-marked"
-          class="mx-4">Asignación
-          masiva</v-btn> -->
-        <!-- <v-btn @click="destroyImpuesto(item.id)" size="small" prepend-icon="mdi-trash-can">Eliminar</v-btn> -->
+        <v-btn @click="destroyImpuesto(item.id)" size="small" prepend-icon="mdi-delete" class="mx-4" :disabled="true">Eliminar</v-btn>
       </template>
     </v-data-table>
   </v-container>
@@ -44,7 +41,8 @@
           { value: 'Tasa', title: 'Tasa' },
           { value: 'Cuota', title: 'Cuota' },
           { value: 'Exento', title: 'Exento' },
-        ]" label="Tipo Factor" v-model="impuesto_form.tipo_factor" :error-messages="errors.tipo_factor ? errors.tipo_factor[0] : null" />
+        ]" label="Tipo Factor" v-model="impuesto_form.tipo_factor"
+          :error-messages="errors.tipo_factor ? errors.tipo_factor[0] : null" />
         <v-select :items="[
           { value: '1', title: 'Si' },
           { value: '0', title: 'No' },
@@ -64,8 +62,12 @@ import { reactive, ref } from "@vue/reactivity";
 import { nextTick, watch } from "@vue/runtime-core";
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useNotification } from "@js/composables/useNotification";
+import { useProcessRequest } from "@js/composables/useProcessRequest";
 
 const router = useRouter();
+const { notify } = useNotification();
+const { processRequest } = useProcessRequest();
 const impuesto_form = reactive({
   c_impuesto: null,
   tasa_cuota: 0,
@@ -148,72 +150,51 @@ function openCreateImpuesto() {
   isVisible.value = true;
 }
 function editarImpuesto() {
-  Impuesto.update(impuestoActualId.value, impuesto_form)
-    .then(() => {
-      getAllImpuestos();
-      limpiarCampos();
-      isVisible.value = false
-    })
-    .catch((error) => {
-      if (error.response.status === 422) {
-        errors.value = error.response.data.errors;
-        return;
-      }
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    }).finally(() => {
-
-    });
+  processRequest(async () => {
+    await Impuesto.update(impuestoActualId.value, impuesto_form);
+    cargando.value = false;
+    getAllImpuestos();
+    limpiarCampos();
+    isVisible.value = false;
+  }, cargando, {
+  });
 }
 
 function getAllImpuestos() {
-  Impuesto.getAll()
-    .then((response) => {
-      impuestos.value = response.data;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    const response = await Impuesto.getAll();
+    impuestos.value = response.data;
+  }, cargando, {
+  });
 }
 
 function enviarImpuesto() {
-  Impuesto.register(impuesto_form)
-    .then(() => {
-      isVisible.value = false;
-      getAllImpuestos();
-      limpiarCampos();
-    })
-    .catch((error) => {
-      if (error.response.status === 422) {
-        errors.value = error.response.data.errors;
-        return;
-      }
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    }).finally(() => {
-
-    });
+  processRequest(async () => {
+    await Impuesto.register(impuesto_form);
+    cargando.value = false; 
+    isVisible.value = false;
+    await getAllImpuestos();
+    limpiarCampos();
+  }, cargando, {
+  });
 }
 function destroyImpuesto(impuestoId) {
-  Impuesto.delete(impuestoId)
-    .then(() => {
-      getAllImpuestos();
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  if (!confirm('Estas seguro?')) {
+    return;
+  }
+  processRequest(async () => {
+    await Impuesto.delete(impuestoId);
+    cargando.value = false;
+    await getAllImpuestos();
+  }, cargando, {
+  });
 }
 function search(keyword) {
-  Impuesto.search(keyword)
-    .then((response) => {
-      impuestos.value = response.data;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    const response = await Impuesto.search(keyword);
+    impuestos.value = response.data;
+  }, cargando, {
+  });
 }
 function limpiarCampos() {
   impuesto_form.impuesto = '';
@@ -221,6 +202,5 @@ function limpiarCampos() {
 }
 onMounted(() => {
   getAllImpuestos();
-  // nextTick(() => document.getElementById("keyword").select());
 });
 </script>
