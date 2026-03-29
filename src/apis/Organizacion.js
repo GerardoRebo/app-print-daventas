@@ -186,5 +186,8 @@ export default {
     },
     descargarPdf(ticket) {
         return ApiBlob().get("/organizacions/descargarPdf/" + ticket)
+    },
+    exportFacturasCSV(params) {
+        return ApiBlob().get("/organizacions/facturas/export/csv", { params })
     }
 }
