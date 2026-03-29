@@ -57,6 +57,11 @@ export default {
     loadFacturacionData() {
         return Api().get("/organizacions/facturacionData/");
     },
+    buyPacket(paquete_id) {
+        return Api().post("/organizacions/buypacket/", {
+            paquete_id
+        });
+    },
     downloadFile(file) {
         return Api().get("excelfile/excelfile/downloadExported/" + file);
     },
@@ -96,6 +101,19 @@ export default {
     },
     updateClavePrivadaSat(id, value) {
         return Api().put(`/organizacions/updateClavePrivadaSat/${id}`, { value: value });
+    },
+    addFinkokCustomer(id) {
+        return Api().post(`/organizacions/addFinkokCustomer`);
+    },
+    getFinkokContracts() {
+        return Api().post(`/organizacions/getFinkokContracts`);
+    },
+    signFinkokContracts(formData) {
+        return Api().post(`/organizacions/signFinkokContracts`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
     },
     updateClavePrivadaLocal(id, value) {
         return Api().put(`/organizacions/updateClavePrivadaLocal/${id}`, { value: value });
@@ -156,6 +174,12 @@ export default {
     uploadCer(file) {
 
         return Api().post("/organizacions/uploadCer", file);
+    },
+    uploadCSD(formData) {
+        return Api().post("/organizacions/uploadCSD", formData);
+    },
+    clearCSD() {
+        return Api().delete("/organizacions/clearCSD");
     },
     descargarXml(ticket) {
         return Api().get("/organizacions/descargarXml/" + ticket)
