@@ -4,14 +4,15 @@
       <v-card-text>
         <v-card-title>Catálogo clientes</v-card-title>
         <v-row dense class="mt-4">
-          <v-btn prepend-icon="mdi-plus" variant="outlined" color="primary" class="mx-2"
-            @click="openCreateCliente" v-model="keyword">Crear Cliente
+          <v-btn prepend-icon="mdi-plus" variant="outlined" color="primary" class="mx-2" @click="openCreateCliente"
+            v-model="keyword">Crear Cliente
           </v-btn>
         </v-row>
       </v-card-text>
     </v-card>
   </v-container>
   <v-container fluid>
+    <!-- <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear> -->
     <v-card>
       <v-card-text>
         <v-text-field label="Cliente" id="keyword" autocomplete="password" v-model="keyword" hide-details
@@ -19,58 +20,248 @@
         <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
         <v-data-table :headers="tHeaders" :items="clientes">
           <template v-slot:item.regimen_fiscal="{ item }">
-            {{ item.regimen_fiscal }} {{ getRegimen(item.regimen_fiscal) }}
+            {{ getRegimen(item.regimen_fiscal) }}
+          </template>
+          <template v-slot:item.es_apto_para_cfdi="{ item }">
+            <v-chip v-if="item.es_apto_para_cfdi" color="success" size="small">
+              <v-icon start icon="mdi-check-circle"></v-icon>
+              Apto para CFDI
+            </v-chip>
+            <v-chip v-else color="warning" size="small">
+              <v-icon start icon="mdi-alert-circle"></v-icon>
+              Datos incompletos
+            </v-chip>
           </template>
           <template v-slot:item.actions="{ item }">
-            <v-btn icon="mdi-pencil" size="small" color="primary" @click="openEditCliente(item.id)"></v-btn>
-            <v-btn icon="mdi-trash-can" size="small" color="error" @click="destroyCliente(item.id)"></v-btn>
+            <v-btn icon="mdi-pencil" size="x-small" color="primary" @click="openEditCliente(item.id)"></v-btn>
+            <v-btn icon="mdi-trash-can" size="x-small" color="error" @click="destroyCliente(item.id)"></v-btn>
           </template>
         </v-data-table>
       </v-card-text>
     </v-card>
   </v-container>
-  <v-dialog v-model="isVisible" max-width="1000">
-    <v-card>
-      <v-card-title>{{ title }}</v-card-title>
-      <v-card-text>
-        <v-text-field v-model="cliente_form.name" label="Nombre"
-          :error-messages="errors.name ? errors.name[0] : null"></v-text-field>
-        <v-row dense>
-          <v-col cols="12" md="6">
-            <v-text-field v-model="cliente_form.telefono" label="Telefono" density="compact"
-              :error-messages="errors.telefono ? errors.telefono[0] : null"></v-text-field>
-          </v-col>
-          <v-col cols="12" md="6">
-            <v-text-field v-model="cliente_form.email" label="Email" density="compact"
-              :error-messages="errors.email ? errors.email[0] : null"></v-text-field>
-          </v-col>
-        </v-row>
-        <v-row dense>
-          <v-col cols="12" md="6">
-            <v-text-field v-model="cliente_form.domicilio" label="Domicilio" density="compact"
-              :error-messages="errors.domicilio ? errors.domicilio[0] : null"></v-text-field>
-          </v-col>
-          <v-col cols="12" md="6">
-            <v-text-field v-model="cliente_form.codigo_postal" label="Código Postal" density="compact"
-              :error-messages="errors.codigo_postal ? errors.codigo_postal[0] : null"></v-text-field>
-          </v-col>
-        </v-row>
-        <v-text-field v-model="cliente_form.rfc" label="Rfc" density="compact"
-          :error-messages="errors.rfc ? errors.rfc[0] : null"></v-text-field>
-        <v-text-field v-model="cliente_form.razon_social" label="Razon social" density="compact"
-          :error-messages="errors.razon_social ? errors.razon_social[0] : null"></v-text-field>
-        <v-autocomplete :items="fiscalRegimenes" label="Régimen Fiscal" v-model="cliente_form.regimen_fiscal" density="compact" variant="outlined" clearable></v-autocomplete>
-        <v-text-field v-model="cliente_form.limite_credito" label="Límite de crédito" density="compact"
-          :error-messages="errors.limite_credito ? errors.limite_credito[0] : null"></v-text-field>
-        <v-radio-group v-model="cliente_form.price_type" mandatory label="Cliente usa precio">
-          <v-radio label="Normal" value="normal"></v-radio>
-          <v-radio label="Medio Mayoreo" value="medio_mayoreo"></v-radio>
-          <v-radio label="Mayoreo" value="mayoreo"></v-radio>
-        </v-radio-group>
+  <v-dialog v-model="isVisible" max-width="900" persistent>
+    <v-card elevation="3">
+      <!-- Header -->
+      <v-card-title class="bg-primary text-white pa-6 d-flex align-center">
+        <v-icon class="me-3" size="large">{{ modalType === 'create' ? 'mdi-account-plus' : 'mdi-account-edit' }}</v-icon>
+        {{ title }}
+      </v-card-title>
+
+      <!-- Content -->
+      <v-card-text class="pa-6">
+        <!-- DATOS PERSONALES -->
+        <div class="mb-8">
+          <v-row class="mb-4">
+            <v-col cols="12">
+              <div class="d-flex align-center mb-4">
+                <v-icon color="primary" class="me-3">mdi-account-outline</v-icon>
+                <h3 class="text-subtitle1 font-weight-semibold">Datos Personales</h3>
+              </div>
+              <v-divider></v-divider>
+            </v-col>
+          </v-row>
+
+          <!-- Campo Nombre (requerido) -->
+          <v-row class="mt-4">
+            <v-col cols="12">
+              <v-text-field 
+                v-model="cliente_form.name" 
+                label="Nombre *" 
+                required
+                variant="outlined"
+                prepend-inner-icon="mdi-account"
+                :error-messages="errors.name ? errors.name[0] : null">
+              </v-text-field>
+            </v-col>
+          </v-row>
+
+          <!-- Teléfono y Email -->
+          <v-row dense>
+            <v-col cols="12" md="6">
+              <v-text-field 
+                v-model="cliente_form.telefono" 
+                label="Teléfono" 
+                variant="outlined"
+                prepend-inner-icon="mdi-phone"
+                :error-messages="errors.telefono ? errors.telefono[0] : null">
+              </v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field 
+                v-model="cliente_form.email" 
+                label="Email" 
+                variant="outlined"
+                prepend-inner-icon="mdi-email"
+                :error-messages="errors.email ? errors.email[0] : null">
+              </v-text-field>
+            </v-col>
+          </v-row>
+
+          <!-- Domicilio y Límite de Crédito -->
+          <v-row dense>
+            <v-col cols="12" md="8">
+              <v-text-field 
+                v-model="cliente_form.domicilio" 
+                label="Domicilio" 
+                variant="outlined"
+                prepend-inner-icon="mdi-map-marker"
+                :error-messages="errors.domicilio ? errors.domicilio[0] : null">
+              </v-text-field>
+            </v-col>
+            <v-col cols="12" md="4">
+              <v-text-field 
+                v-model="cliente_form.limite_credito" 
+                label="Límite de crédito" 
+                type="number"
+                variant="outlined"
+                prepend-inner-icon="mdi-cash"
+                :error-messages="errors.limite_credito ? errors.limite_credito[0] : null">
+              </v-text-field>
+            </v-col>
+          </v-row>
+
+          <!-- Tipo de Precio -->
+          <v-row dense>
+            <v-col cols="12">
+              <v-select 
+                v-model="cliente_form.price_type" 
+                :items="priceTypes" 
+                label="Tipo de precio" 
+                variant="outlined"
+                prepend-inner-icon="mdi-tag-multiple">
+              </v-select>
+            </v-col>
+          </v-row>
+        </div>
+
+        <!-- DATOS FISCALES -->
+        <div class="mb-6">
+          <v-row class="mb-4">
+            <v-col cols="12">
+              <div class="d-flex align-center justify-space-between">
+                <div class="d-flex align-center">
+                  <v-icon color="primary" class="me-3">mdi-file-document-outline</v-icon>
+                  <h3 class="text-subtitle1 font-weight-semibold">Datos Fiscales</h3>
+                  <span class="text-caption ms-2 text-grey-darken-1">(para timbrado de CFDIs)</span>
+                </div>
+                <v-badge v-if="isClienteAptoCfdi" color="success" offset-x="-10" offset-y="-10" dot>
+                  <span class="text-success text-caption font-weight-semibold">✓ Apto para CFDI</span>
+                </v-badge>
+              </div>
+              <v-divider class="mt-2"></v-divider>
+            </v-col>
+          </v-row>
+
+          <!-- RFC y Razón Social -->
+          <v-row class="mt-4" dense>
+            <v-col cols="12" md="6">
+              <v-text-field 
+                v-model="cliente_form.rfc" 
+                label="RFC" 
+                variant="outlined"
+                prepend-inner-icon="mdi-file-document-outline"
+                :error-messages="errors.rfc ? errors.rfc[0] : null">
+                <template v-slot:append-inner>
+                  <v-tooltip text="Validar RFC en SAT">
+                    <template v-slot:activator="{ props }">
+                      <v-icon 
+                        v-bind="props"
+                        icon="mdi-open-in-new"
+                        class="cursor-pointer text-primary"
+                        size="small"
+                        @click="openSatValidation"
+                        style="cursor: pointer;">
+                      </v-icon>
+                    </template>
+                  </v-tooltip>
+                </template>
+              </v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field 
+                v-model="cliente_form.razon_social" 
+                label="Razón Social" 
+                variant="outlined"
+                prepend-inner-icon="mdi-briefcase"
+                :error-messages="errors.razon_social ? errors.razon_social[0] : null">
+              </v-text-field>
+            </v-col>
+          </v-row>
+
+          <!-- Régimen Fiscal y Código Postal -->
+          <v-row dense>
+            <v-col cols="12" md="8">
+              <v-autocomplete 
+                :items="fiscalRegimenes" 
+                item-title="title" 
+                item-value="value" 
+                label="Régimen Fiscal" 
+                v-model="cliente_form.regimen_fiscal"
+                variant="outlined"
+                prepend-inner-icon="mdi-folder-outline"
+                clearable>
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="12" md="4">
+              <v-text-field 
+                v-model="cliente_form.codigo_postal" 
+                label="Código Postal" 
+                variant="outlined"
+                prepend-inner-icon="mdi-mailbox"
+                :error-messages="errors.codigo_postal ? errors.codigo_postal[0] : null">
+              </v-text-field>
+            </v-col>
+          </v-row>
+
+          <!-- Estado CFDI -->
+          <v-row class="mt-4">
+            <v-col cols="12">
+              <v-alert 
+                v-if="isClienteAptoCfdi" 
+                type="success" 
+                variant="tonal"
+                class="mb-0"
+                closable>
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-check-circle"></v-icon>
+                </template>
+                Este cliente está listo para el timbrado de CFDIs
+              </v-alert>
+              <v-alert 
+                v-else
+                type="info" 
+                variant="tonal"
+                class="mb-0"
+                closable>
+                <template v-slot:prepend>
+                  <v-icon icon="mdi-information"></v-icon>
+                </template>
+                Complete todos los datos fiscales para habilitar el timbrado de CFDIs
+              </v-alert>
+            </v-col>
+          </v-row>
+        </div>
       </v-card-text>
-      <v-card-actions>
-        <v-btn @click="isVisible = false" :loading="cargando">Cancelar</v-btn>
-        <v-btn @click="handleSubmit" :loading="cargando" color="primary" variant="outlined">Confirmar</v-btn>
+
+      <!-- Actions -->
+      <v-divider></v-divider>
+      <v-card-actions class="pa-4 d-flex justify-end gap-2">
+        <v-btn 
+          @click="isVisible = false" 
+          :loading="cargando"
+          variant="tonal">
+          <v-icon start>mdi-close</v-icon>
+          Cancelar
+        </v-btn>
+        <v-btn 
+          @click="handleSubmit" 
+          :loading="cargando" 
+          color="primary" 
+          variant="elevated">
+          <v-icon start>{{ modalType === 'create' ? 'mdi-check' : 'mdi-check-all' }}</v-icon>
+          {{ modalType === 'create' ? 'Crear Cliente' : 'Actualizar Cliente' }}
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -82,10 +273,17 @@ import Cliente from "../apis/Cliente";
 import { reactive, ref } from "@vue/reactivity";
 import { watch } from "@vue/runtime-core";
 import { computed, onMounted, onUnmounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "../s";
+import { useProcessRequest } from "@js/composables/useProcessRequest";
+import { useNotification } from "@js/composables/useNotification";
+import { fiscalRegimenes as catalogoRegimenes } from "@js/utils/cfdiCatalogs";
 
 const s = useUserStore();
-const { handleOpException } = s;
+const route = useRoute();
+const router = useRouter();
+const { processRequest } = useProcessRequest();
+const { notify } = useNotification();
 const cliente_form = reactive({
   name: "",
   telefono: "",
@@ -96,8 +294,13 @@ const cliente_form = reactive({
   razon_social: null,
   regimen_fiscal: 612,
   codigo_postal: null,
-  price_type: '',
+  price_type: 'normal',
 });
+const priceTypes = ref([
+  { value: 'normal', title: 'Normal' },
+  { value: 'medio_mayoreo', title: 'Medio Mayoreo' },
+  { value: 'mayoreo', title: 'Mayoreo' }
+]);
 const tHeaders = ref([
   { title: 'Nombre', key: 'name', align: 'start', sortable: false },
   { title: 'Teléfono', key: 'telefono', align: 'start', sortable: false },
@@ -109,6 +312,7 @@ const tHeaders = ref([
   { title: 'Regimen Fiscal', key: 'regimen_fiscal', align: 'start', sortable: false },
   { title: 'Límite de crédito', key: 'limite_credito', align: 'start', sortable: false },
   { title: 'Tipo de precio', key: 'price_type', align: 'start', sortable: false },
+  { title: 'Información Fiscal', key: 'es_apto_para_cfdi', align: 'start', sortable: false },
   { title: 'Acciones', key: 'actions', align: 'start', sortable: false },
 ]);
 const modalType = ref('create');
@@ -118,27 +322,7 @@ const clientes = ref([]);
 const errors = ref([]);
 const isVisible = ref(false);
 const cargando = ref(false);
-const fiscalRegimenes = ref([
-  { "value": '601', "title": "601 - General de Ley Personas Morales" },
-  { "value": '603', "title": "603 - Personas Morales con Fines no Lucrativos" },
-  { "value": '605', "title": "605 - Sueldos y Salarios e Ingresos Asimilados a Salarios" },
-  { "value": '606', "title": "606 - Arrendamiento" },
-  { "value": '607', "title": "607 - Régimen de Enajenación o Adquisición de Bienes" },
-  { "value": '608', "title": "608 - Demás ingresos" },
-  { "value": '610', "title": "610 - Residentes en el Extranjero sin Establecimiento Permanente en México" },
-  { "value": '611', "title": "611 - Ingresos por Dividendos (socios y accionistas)" },
-  { "value": '612', "title": "612 - Personas Físicas con Actividades Empresariales y Profesionales" },
-  { "value": '614', "title": "614 - Ingresos por intereses" },
-  { "value": '615', "title": "615 - Régimen de los ingresos por obtención de premios" },
-  { "value": '616', "title": "616 - Sin obligaciones fiscales" },
-  { "value": '620', "title": "620 - Sociedades Cooperativas de Producción que optan por diferir sus ingresos" },
-  { "value": '621', "title": "621 - Incorporación Fiscal" },
-  { "value": '622', "title": "622 - Actividades Agrícolas, Ganaderas, Silvícolas y Pesqueras" },
-  { "value": '623', "title": "623 - Opcional para Grupos de Sociedades" },
-  { "value": '624', "title": "624 - Coordinados" },
-  { "value": '625', "title": "625 - Régimen de las Actividades Empresariales con ingresos a través de Plataformas Tecnológicas" },
-  { "value": '626', "title": "626 - Régimen Simplificado de Confianza" }
-]);
+const fiscalRegimenes = ref(catalogoRegimenes);
 
 
 const title = computed(() => {
@@ -148,7 +332,21 @@ const title = computed(() => {
   return "Edita cliente"
 })
 
+const isClienteAptoCfdi = computed(() => {
+  return cliente_form.rfc && 
+         cliente_form.razon_social && 
+         cliente_form.regimen_fiscal != null &&
+         cliente_form.codigo_postal &&
+         cliente_form.domicilio;
+})
+
 watch(keyword, (newValue) => {
+  router.push({
+    query: {
+      ...route.query,
+      keyword: newValue || undefined
+    }
+  });
   search(newValue);
 });
 function handleSubmit() {
@@ -165,13 +363,14 @@ function openEditCliente(clienteId) {
   clienteActualId.value = cl.id;
   cliente_form.name = cl.name;
   cliente_form.telefono = cl.telefono;
-  cliente_form.email = cl.direccion;
+  cliente_form.email = cl.email;
   cliente_form.domicilio = cl.domicilio;
   cliente_form.rfc = cl.rfc;
   cliente_form.regimen_fiscal = cl.regimen_fiscal;
   cliente_form.razon_social = cl.razon_social;
   cliente_form.codigo_postal = cl.codigo_postal;
   cliente_form.price_type = cl.price_type;
+  cliente_form.limite_credito = cl.limite_credito;
 }
 function openCreateCliente() {
   limpiarCampos();
@@ -193,82 +392,63 @@ function limpiarCampos() {
 }
 const getRegimen = (id) => {
   const regimen = fiscalRegimenes.value.find((item) => {
-    return item.value.toString() == id
+    return item.value == id
   })
   return regimen?.title
 }
 
 function editarCliente() {
-  if (cargando.value) return;
-  cargando.value = true;
-  Cliente.update(clienteActualId.value, cliente_form)
-    .then(() => {
-      isVisible.value = false
-      getAllClientes();
-      limpiarCampos();
-    })
-    .catch((error) => {
-      if (error.response.status === 422) {
-        errors.value = error.response.data.errors;
-        return;
-      }
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    }).finally(() => {
-      cargando.value = false;
-    });
+  processRequest(async () => {
+    const response = await Cliente.update(clienteActualId.value, cliente_form);
+    isVisible.value = false;
+    cargando.value = false;
+    await getAllClientes();
+    limpiarCampos();
+  }, cargando, { errorsRef: errors, 
+    onSuccess: () => notify.success("Cliente actualizado"),
+
+   });
 }
 
 function getAllClientes() {
-  Cliente.getAll()
-    .then((response) => {
-      clientes.value = response.data;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    const response = await Cliente.getAll();
+    clientes.value = response.data;
+  }, cargando, { errorsRef: errors, 
+    // onSuccess: () => notify.success("Clientes cargados"),
+   });
 }
 
 function enviarCliente() {
-  if (cargando.value) return;
-  cargando.value = true;
-  Cliente.register(cliente_form)
-    .then(() => {
-      isVisible.value = false;
-      limpiarCampos();
-      getAllClientes();
-    })
-    .catch((error) => {
-      if (error.response.status === 422) {
-        errors.value = error.response.data.errors;
-        return
-      }
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    }).finally(() => {
-      cargando.value = false;
-    });
+  processRequest(async () => {
+    const response = await Cliente.register(cliente_form);
+    isVisible.value = false;
+    limpiarCampos();
+    cargando.value = false;
+    await getAllClientes();
+  }, cargando, { errorsRef: errors, 
+    onSuccess: () => notify.success("Cliente registrado"),
+   });
 }
 function destroyCliente(clienteId) {
-  Cliente.delete(clienteId)
-    .then(() => {
-      getAllClientes();
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    const response = await Cliente.delete(clienteId);
+    cargando.value = false;
+    await getAllClientes();
+  }, cargando, { errorsRef: errors, 
+    onSuccess: () => notify.success("Cliente eliminado"),
+   });
 }
 function search(keyword) {
-  Cliente.search(keyword)
-    .then((response) => {
-      clientes.value = response.data;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    const response = await Cliente.search(keyword);
+    clientes.value = response.data;
+  }, cargando, { errorsRef: errors, 
+    // onSuccess: () => notify.success("Clientes cargados"),
+   });
+}
+function openSatValidation() {
+  window.open('https://agsc.siat.sat.gob.mx/PTSC/ValidaRFC/index.jsf', '_blank');
 }
 function onKeyPressed(e) {
   if (e.key === "Esc" || e.key === "Escape") {
@@ -277,8 +457,12 @@ function onKeyPressed(e) {
   }
 }
 onMounted(() => {
+  if (route.query.keyword) {
+    keyword.value = route.query.keyword;
+  }
   document.addEventListener("keydown", onKeyPressed);
-  getAllClientes();
+  // getAllClientes();
+  search(keyword.value);
 });
 onUnmounted(() => {
   document.removeEventListener("keydown", onKeyPressed);

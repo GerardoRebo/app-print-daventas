@@ -64,6 +64,26 @@ export default {
         
     },
 
+    getFacturacionInfo(almacenId) {
+        return Api().get(`/almacens/${almacenId}/facturacion-info`);
+    },
+
+    updateFacturacionInfo(almacenId, facturacionData) {
+        return Api().post(`/almacens/${almacenId}/facturacion-info`, facturacionData);
+    },
+
+    uploadCSD(almacenId, formData) {
+        return Api().post(`/almacens/${almacenId}/upload-csd`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+    },
+
+    clearCSD(almacenId) {
+        return Api().delete(`/almacens/${almacenId}/clear-csd`);
+    },
+
     
 
 }
