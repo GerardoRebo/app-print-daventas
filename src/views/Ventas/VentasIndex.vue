@@ -29,8 +29,8 @@
 
         <!-- Almacén -->
         <v-col cols="12" md="2">
-          <v-select prepend-inner-icon="mdi-warehouse" v-model="filters.almacen_id" :items="almacenes" label="Almacén" clearable item-title="name"
-            item-value="id" color="primary" />
+          <v-select prepend-inner-icon="mdi-warehouse" v-model="filters.almacen_id" :items="almacenes" label="Almacén"
+            clearable item-title="name" item-value="id" color="primary" />
         </v-col>
       </v-row>
 
@@ -43,9 +43,10 @@
         </v-col>
         <!-- Cliente -->
         <v-col cols="12" md="2">
-          <v-autocomplete prepend-inner-icon="mdi-account" v-model="filters.cliente" :items="clientes" item-title="name" item-value="id" label="Cliente"
-            return-object clearable @update:model-value="val => filters.cliente_id = val ? val.id : null"
-            density="compact" variant="outlined" />
+          <v-autocomplete prepend-inner-icon="mdi-account" v-model="filters.cliente" :items="clientes" item-title="name"
+            item-value="id" label="Cliente" return-object clearable
+            @update:model-value="val => filters.cliente_id = val ? val.id : null" density="compact"
+            variant="outlined" />
         </v-col>
 
         <!-- Tipo -->
@@ -100,12 +101,20 @@
 
         <!-- Total -->
         <template #item.total="{ item }">
+          <p> ${{ formatNumber(item.total) }}
+          </p>
           <v-chip v-if="item.facturado_en" variant="flat" color="success" label size="x-small">
             Facturado
-          </v-chip><br></br>
-          ${{ formatNumber(item.total) }}
+          </v-chip>
+          <v-chip v-if="item.forma_de_pago == 'C'" variant="flat" color="accent" label size="x-small">
+            Crédito
+          </v-chip>
         </template>
 
+        <!-- Devuelto -->
+        <template #item.user="{ item }">
+          {{ item.user?.name }}
+        </template>
         <!-- Devuelto -->
         <template #item.total_devuelto="{ item }">
           {{ item.total_devuelto > 0 ? "Sí" : "No" }}
@@ -139,16 +148,22 @@ import Devoluciones from "@js/apis/Devoluciones";
 import VentaRowActions from "./VentaRowActions.vue";
 import useMisFechas from "@js/composables/useMisFechas";
 import { useUserStore } from "@js/s";
-import { useCurrency } from '@js/composables/useCurrency';
 import { computed } from "vue";
+import { useCurrency } from '@js/composables/useCurrency';
+import { useProcessRequest } from "@js/composables/useProcessRequest";
+import { useNotification } from "@js/composables/useNotification";
 const { formatNumber } = useCurrency('es-MX', 'MXN');
 
 const s = useUserStore();
 const { handleOpException } = s;
+const { processRequest } = useProcessRequest();
+const { notify } = useNotification();
 
 const route = useRoute();
 const router = useRouter();
-
+const isAdmin = computed(() => {
+  return s.roles.includes("Admin") || s.roles.includes("Owner") || s.roles.includes("Contador");
+});
 // Menús fechas
 const menuInicio = ref(false);
 const menuFin = ref(false);
@@ -170,19 +185,19 @@ const options = ref({
 const filters = reactive({
   cliente: null,
   cliente_id: null,
+  user: null,
+  user_id: null,
   almacen_id: null,
   consecutivo: "",
   tipo: null,
   turno_id: null,
-});
-const isAdmin = computed(() => {
-  return s.roles.includes("Admin") || s.roles.includes("Owner");
 });
 
 
 // las columnas de la tabla
 const headers = [
   { title: "ID", key: "id" },
+  { title: "Usuario", key: "user" },
   { title: "Fecha", key: "pagado_en" },
   { title: "Consecutivo", key: "consecutivo" },
   { title: "Corte", key: "turno_id" },
@@ -202,13 +217,14 @@ const loadingInitial = ref(true);
 
 watch([dfecha, hfecha], () => {
   if (loadingInitial.value) return;
-    
+
   getMisVentas(options.value)
 });
 // Cuando cambian los filtros, actualizar URL (sin fechas)
 watch(
   () => ({
     cliente_id: filters.cliente_id,
+    user_id: filters.user_id,
     almacen_id: filters.almacen_id,
     tipo: filters.tipo,
   }),
@@ -260,6 +276,12 @@ async function getMisVentas(newOptions) {
         c => c.id == filters.cliente_id
       ) || null;
     }
+    // Mantener usuario seleccionado
+    if (users.value.length && filters.user_id) {
+      filters.user = users.value.find(
+        u => u.id == filters.user_id
+      ) || null;
+    }
 
     // Mantener almacén seleccionado
     if (almacenes.value.length && filters.almacen_id) {
@@ -287,31 +309,31 @@ async function getMisVentas(newOptions) {
 
 
 function cancelarVenta(venta) {
-  if (cargando.value) return;
-
-  cargando.value = true;
-
-  PuntoVenta.cancelarVenta(venta)
-    .then(() => {
-      cargando.value = false;
-      getMisVentas(options.value);
-    })
-    .catch(handleOpException)
-    .finally(() => (cargando.value = false));
+  processRequest(async () => {
+    await PuntoVenta.cancelarVenta(venta);
+    getMisVentas(options.value);
+  }, cargando, {
+    onError: (error) => {
+      handleOpException(error);
+    }
+  });
 }
 
 function createDevolucion(venta) {
-  Devoluciones.createDevolucion(venta)
-    .then((response) => {
-      router.push({
-        name: "DevolucionesShow",
-        params: {
-          devolucion: response.data.id,
-          venta: response.data.ventaticket_id,
-        },
-      });
-    })
-    .catch(handleOpException);
+  processRequest(async () => {
+    const response = await Devoluciones.createDevolucion(venta);
+    router.push({
+      name: "DevolucionesShow",
+      params: {
+        devolucion: response.data.id,
+        venta: response.data.ventaticket_id,
+      },
+    });
+  }, cargando, {
+    onError: (error) => {
+      handleOpException(error);
+    }
+  });
 }
 
 function imprimirVenta(ticketActual) {
@@ -340,6 +362,7 @@ onMounted(async () => {
     if (route.query[key] !== undefined) filters[key] = route.query[key];
   });
   filters.cliente_id = route.query.cliente_id ?? null;
+  filters.user_id = route.query.user_id ?? null;
   filters.almacen_id = route.query.almacen_id ?? null;
   setTimeout(() => {
     loadingInitial.value = false;
