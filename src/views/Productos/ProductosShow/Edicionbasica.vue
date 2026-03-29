@@ -99,12 +99,12 @@ function showProduct() {
 
 function editarProduct() {
   errors.value = [];
-  if (product_form.value.es_kit) {
-    product_form.value.es_consumible = 0;
+
+  // Print invariant: consumable products cannot require production.
+  if (product_form.value.consumible) {
+    product_form.value.necesita_produccion = 0;
   }
-  if (!product_form.value.es_consumible) {
-    product_form.value.tipo_consumible = null;
-  }
+
   Product.update(route.params.productId, product_form.value)
     .then(() => {
       showProduct();
