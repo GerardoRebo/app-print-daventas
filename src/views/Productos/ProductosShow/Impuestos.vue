@@ -3,18 +3,26 @@
   <v-card>
     <v-card-text>
       <p class="font-weight-bold">Producto: {{ productActual.name }}</p>
-      <p class="font-weight-bold">Codigo: {{ productActual.codigo }}</p>
+      <p class="font-weight-bold">
+        Codigo: {{ productActual.codigo }}
+        <v-btn 
+          icon="mdi-content-copy" 
+          size="x-small" 
+          variant="plain"
+          @click="copiarCodigo"
+          class="ml-2"
+        ></v-btn>
+      </p>
       <v-divider></v-divider>
       <v-row dense class="mt-4">
         <v-col cols="12" md="auto">
-          <v-btn @click="abrirModal" prepend-icon="mdi-plus" variant="outlined" color="primary" class="mx-2"
-            size="small">Agregar
+          <v-btn @click="abrirModal" prepend-icon="mdi-plus" variant="outlined" color="primary" size="small">Agregar
             impuesto
           </v-btn>
         </v-col>
         <v-col cols="12" md="2">
           <v-select :items="ObjetoImpItems" v-model="productActual.ObjetoImp" @update:modelValue="updateObjetoImpuesto"
-            label="Objeto impuesto:" class="mx-2" color="primary"  :error-messages="errors">
+            label="Objeto impuesto:" class="mx-2" color="primary" :error-messages="errors">
           </v-select>
         </v-col>
         <v-col cols="12" md="2">
@@ -43,7 +51,7 @@
               Unidad de Medida:
             </div>
             <div>
-              {{ product?.c_ClaveUnidad }}|{{ product?.c_ClaveUnidad_descripcion }}
+              {{ product?.c_ClaveUnidad }}|{{ product?.unidad }}
             </div>
           </div>
         </v-col>
@@ -75,7 +83,7 @@
       <v-card-text>
         <v-text-field @input="makeUpdate" name='keywClave' label="Buscar Producto" prepend-inner-icon="mdi-magnify"
           variant="outlined" hide-details single-line ref="keywordRef"></v-text-field>
-        <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
+        <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
         <v-data-table :headers="claveHeaders" :items="claves">
           <template v-slot:item.actions="{ item }">
             <v-btn prepend-icon="mdi-check" size="small" color="primary"
@@ -93,7 +101,7 @@
       <v-card-text>
         <v-text-field @input="makeUpdate" name='keywUnidad' label="Buscar unidad" prepend-inner-icon="mdi-magnify"
           variant="outlined" hide-details single-line ref="keywordRef"></v-text-field>
-        <v-progress-linear color="accent" indeterminate v-if="cargando"></v-progress-linear>
+        <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
         <v-data-table :headers="headers" :items="unidades">
           <template v-slot:item.actions="{ item }">
             <v-btn prepend-icon="mdi-check" size="small" color="primary"
@@ -111,7 +119,7 @@
       <v-card-title>{{ title }}</v-card-title>
       <v-card-text>
         <v-progress-linear color="primary" indeterminate v-if="cargando"></v-progress-linear>
-        <v-select :items="impuestoItems" label="Impuesto" v-model="impuestoSelect"></v-select>
+        <v-select :disabled="impuestoActualId" :items="impuestoItems" label="Impuesto" v-model="impuestoSelect"></v-select>
         <v-checkbox v-model="venta" :label="`Venta`" density="compact"></v-checkbox hide-details>
         <v-checkbox v-model="compra" :label="`Compra`" density="compact"></v-checkbox hide-details>
       </v-card-text>
@@ -124,17 +132,20 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+  <!-- Comentario comentado -->
 </template>
 
 <script setup>
 import { onMounted, ref, watch, computed } from "@vue/runtime-core";
 import Impuesto from "@js/apis/Impuesto";
 import Product from "@js/apis/Product";
-import { useSnackBar } from "@js/composables/SnackBar";
+import { useNotification } from "@js/composables/useNotification";
+import { useProcessRequest } from "@js/composables/useProcessRequest";
 import { useRoute } from "vue-router";
-import { useProductActual } from "../../../composables/ProductActual";
+import { useProductActual } from "@js/composables/ProductActual";
 import ProductTaxes from "@js/apis/ProductTaxes";
-const { snackbar, snackSuccess, snackError, snackWarning } = useSnackBar();
+const { notify } = useNotification();
+const { processRequest, concurrentRequest } = useProcessRequest();
 const route = useRoute();
 
 const impuestos = ref([]);
@@ -148,6 +159,7 @@ const compra = ref(false);
 const claves = ref([]);
 const unidades = ref([]);
 const cargando = ref(false);
+const cargandoConcurrent = ref(false);
 const timeOut = ref("");
 const claveKeyword = ref("");
 const unidadKeyword = ref("");
@@ -171,7 +183,7 @@ const impuestoItems = computed(() => {
   return impuestos.value.map((item) => {
     return {
       value: item.id,
-      title: `${item.descripcion} %${item.tasa_cuota} ${item.tipo}`,
+      title: `${item.descripcion} %${item.tasa_cuota} ${item.tipo} ${item.tipo_factor}`,
     }
   });
 })
@@ -188,13 +200,14 @@ const claveHeaders = ref([
 const tHeaders = ref([
   { title: 'Nombre', key: 'descripcion', align: 'start', sortable: false },
   { title: 'Tipo', key: 'tipo', align: 'start', sortable: false },
+  { title: 'Tipo Factor', key: 'tipo_factor', align: 'start', sortable: false },
   { title: 'Porcentaje', key: 'tasa_cuota', align: 'start', sortable: false },
   { title: 'Venta', key: 'venta', align: 'start', sortable: false },
   { title: 'Compra', key: 'compra', align: 'start', sortable: false },
   { title: 'Acciones', key: 'actions', align: 'start', sortable: false },
 ]);
 
-useProductActual(productId.value, productActual, cargando, snackError);
+useProductActual(productId.value, productActual, cargando, notify.error);
 const buttonTitle = computed(() => {
   if (impuestoActualId.value) {
     return 'Actualizar'
@@ -208,31 +221,10 @@ const title = computed(() => {
   return 'Crea impuesto';
 })
 
-function quitarImpuesto(impuestoActualId) {
-  Impuesto.quitarD(impuestoActualId, productId.value)
-    .then((response) => {
-      showpd()
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
-}
-watch(() => productId.value, () => {
-  showpd();
+watch(() => productId.value, async() => {
+  await showpd();
 }, { immediate: true });
 
-function showpd() {
-  Impuesto.showPD(productId.value)
-    .then((response) => {
-      product.value = response.data;
-      misImpuestos.value = response.data.taxes
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un errorrr")
-    });
-}
 async function abrirModal() {
   isVisible.value = true;
   impuestoActualId.value = null;
@@ -240,6 +232,7 @@ async function abrirModal() {
   compra.value = false;
   venta.value = true;
 }
+
 async function abrirModalEdit(impuesto) {
   impuestoActualId.value = impuesto.pivot.id
   impuestoSelect.value = impuesto.id;
@@ -247,99 +240,100 @@ async function abrirModalEdit(impuesto) {
   venta.value = !!impuesto.pivot.venta;
   isVisible.value = true;
 }
+
 function abrirClave() {
   isClaveOpen.value = true;
   getAllClaves();
 }
+
 function abrirUnidad() {
   isUnidadOpen.value = true;
   getAllUnidades();
 }
+
+function quitarImpuesto(impuestoActualId) {
+  processRequest(async () => {
+    await Impuesto.quitarD(impuestoActualId, productId.value);
+    cargando.value = false;
+    await showpd();
+  }, cargando, {
+    onError: (error) => notify.error("Ha ocurrido un error")
+  });
+}
+
+async function showpd() {
+  await concurrentRequest(async () => {
+    const response = await Impuesto.showPD(productId.value);
+    product.value = response.data;
+    misImpuestos.value = response.data.taxes;
+  }, cargandoConcurrent, {
+  });
+}
+
 function getAllClaves() {
-  Impuesto.getAllClaves({ keyword: claveKeyword.value })
-    .then((response) => {
-      claves.value = response.data;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    const response = await Impuesto.getAllClaves({ keyword: claveKeyword.value });
+    claves.value = response.data;
+  }, cargando, {
+  });
 }
+
 function getAllUnidades() {
-  Impuesto.getAllUnidades({ keyword: unidadKeyword.value })
-    .then((response) => {
-      unidades.value = response.data;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  concurrentRequest(async () => {
+    const response = await Impuesto.getAllUnidades({ keyword: unidadKeyword.value });
+    unidades.value = response.data;
+  }, cargandoConcurrent, {
+    onError: (error) => notify.error("Ha ocurrido un error")
+  });
 }
+
 function updateClave(clave) {
-  Impuesto.updateClave(clave, productId.value)
-    .then(() => {
-      isClaveOpen.value = false;
-      showpd();
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    await Impuesto.updateClave(clave, productId.value);
+    isClaveOpen.value = false;
+    cargando.value = false;
+    await showpd();
+  }, cargando, {
+  });
 }
-async function updateObjetoImpuesto(e) {
-  try {
-    const { data } = await Product.updateObjetoImp(productActual.value.id, e);
-    snackSuccess("Actualizado correctamente")
-    showpd()
-  } catch (error) {
-    console.log(error);
-    // handleOpException(error);
-    alert("Ha ocurrido un error")
-  }
-}
+
 function getAllImpuestos() {
-  Impuesto.getTrasladoImpuestos()
-    .then((response) => {
-      impuestos.value = response.data;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  concurrentRequest(async () => {
+    const response = await Impuesto.getTrasladoImpuestos();
+    impuestos.value = response.data;
+  }, cargandoConcurrent, {
+  });
 }
+
 function agregarImpuesto() {
   if (impuestoActualId.value) {
-    ProductTaxes.update(impuestoActualId.value, venta.value, compra.value)
-      .then(() => {
-        isVisible.value = false;
-        showpd();
-      })
-      .catch((error) => {
-        handleOpException(error);
-        alert("Ha ocurrido un error")
-      });
+    processRequest(async () => {
+      await ProductTaxes.update(impuestoActualId.value, venta.value, compra.value);
+      isVisible.value = false;
+      cargando.value = false;
+      await showpd();
+    }, cargando, {
+    });
     return;
   }
-  ProductTaxes.store(productId.value, impuestoSelect.value, venta.value, compra.value)
-    .then(() => {
-      isVisible.value = false;
-      showpd();
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    await ProductTaxes.store(productId.value, impuestoSelect.value, venta.value, compra.value);
+    isVisible.value = false;
+    cargando.value = false;
+    await showpd();
+  }, cargando, {
+  });
 }
+
 function updateUnidad(unidad) {
-  Impuesto.updateUnidad(unidad, productId.value)
-    .then(() => {
-      isUnidadOpen.value = false;
-      showpd();
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    await Impuesto.updateUnidad(unidad, productId.value);
+    isUnidadOpen.value = false;
+    cargando.value = false;
+    await showpd();
+  }, cargando, {
+    onError: (error) => notify.error("Ha ocurrido un error")
+  });
 }
 function makeUpdate(e) {
   let task = null;
@@ -352,10 +346,32 @@ function makeUpdate(e) {
   }
   debounce(task, 500);
 }
+
+async function updateObjetoImpuesto(e) {
+  processRequest(async () => {
+    const { data } = await Product.updateObjetoImp(productActual.value.id, e);
+    notify.success("Actualizado correctamente");
+    cargando.value = false;
+    await showpd();
+  }, cargando, {
+  });
+}
 function debounce(func, wait = 1000) {
   clearTimeout(timeOut.value);
   timeOut.value = setTimeout(func, wait);
 }
+
+async function copiarCodigo() {
+  try {
+    if (productActual.value.codigo) {
+      await navigator.clipboard.writeText(productActual.value.codigo);
+      notify.success("Código copiado al portapapeles");
+    }
+  } catch (error) {
+    notify.error("Error al copiar el código");
+  }
+}
+
 onMounted(() => {
   getAllImpuestos();
 });
