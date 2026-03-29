@@ -29,7 +29,7 @@
           <v-card-title>Mi organización</v-card-title>
           <v-card-text>
             <v-text-field label="Nombre Comercial" autocomplete="off" placeholder="" v-model="myOrganization.name" />
-            <v-text-field label="Email"  placeholder="" v-model="myOrganization.email" :error-messages="errors.email ? errors.email[0] : null" />
+            <v-text-field label="Email" placeholder="" v-model="myOrganization.email" :error-messages="errors.email ? errors.email[0] : null" />
           </v-card-text>
           <v-card-actions>
             <v-btn @click.prevent="updateMyOrganization" color="primary" variant="outlined"
@@ -40,8 +40,46 @@
       <v-col cols="12">
         <TelegramConfig />
       </v-col>
+      <v-col cols="12">
+        <v-card>
+          <v-card-title>Administración de Folios</v-card-title>
+          <v-card-text>
+            <p class="mb-4">Selecciona qué contador de folios deseas resetear a 1.</p>
+            <p class="text-caption text-warning">⚠️ Esta acción reiniciará el contador de numeración seleccionado. Úsala con precaución.</p>
+            <div class="mt-6">
+              <p class="text-subtitle-2 mb-3">Selecciona el tipo de folio a resetear:</p>
+              <div class="d-flex gap-2 flex-wrap">
+                <v-btn @click="openResetConfirmDialog('venta')" color="warning" variant="outlined" :loading="cargando">
+                  📋 Folios de Ventas
+                </v-btn>
+                <v-btn @click="openResetConfirmDialog('cotizacion')" color="warning" variant="outlined" :loading="cargando">
+                  📄 Folios de Cotizaciones
+                </v-btn>
+                <v-btn @click="openResetConfirmDialog('compra')" color="warning" variant="outlined" :loading="cargando">
+                  🛒 Folios de Compras
+                </v-btn>
+              </div>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
     </v-row>
   </v-container>
+
+  <v-dialog v-model="showResetConfirmDialog" max-width="400">
+    <v-card>
+      <v-card-title>Confirmar Reseteo de Folios</v-card-title>
+      <v-card-text>
+        <p class="mb-4">¿Estás seguro de que deseas resetear el contador de <strong>{{ resetFolioTypeLabel }}</strong> a 1?</p>
+        <p class="text-caption">El próximo folio generado será el número 1.</p>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn @click="showResetConfirmDialog = false" variant="text">Cancelar</v-btn>
+        <v-btn @click="confirmResetFolios" color="warning" variant="outlined" :loading="cargando">Resetear</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup>
@@ -50,13 +88,18 @@ import { onMounted } from '@vue/runtime-core';
 
 import Organizacion from "@js/apis/Organizacion";
 import TelegramConfig from "./TelegramConfig.vue";
-import { ref, watch } from "vue";
-import { useUserStore } from "@js/s";
-const store = useUserStore();
-const { handleOpException } = store;
+import { ref, computed } from "vue";
+import { useNotification } from "@js/composables/useNotification";
+import { useProcessRequest } from "@js/composables/useProcessRequest";
+
+const { notify } = useNotification();
+const { processRequest } = useProcessRequest();
+
 const logo = ref(null);
 const myOrganizationId = ref(null);
 const cargando = ref(false);
+const showResetConfirmDialog = ref(false);
+const resetFolioType = ref(null);
 const myOrganization = reactive({
   name: "",
   razon_social: "",
@@ -75,51 +118,44 @@ async function submitForm() {
   let formData = new FormData();
   formData.append("logo", logo.value);
 
-  try {
-    const { data } = await Organizacion.uploadLogo(formData)
+  processRequest(async () => {
+    const { data } = await Organizacion.uploadLogo(formData);
     if (data.success) {
-      alert('Logo subido exitosamente')
-      logo.value = null
-      getMyOrganization()
-    }
-
-  } catch (error) {
-    console.log(error);
-    if (error.resopnse) {
-      if (error.response.status === 422) {
-        errors.value = error.response.data.errors;
-      }
-    }
-    handleOpException(error);
-    alert("Ha ocurrido un error")
-  }
-}
-function getMyOrganization() {
-  Organizacion.getMyOrganization()
-    .then((response) => {
-      console.log(response.data, 'data');
-
-      fillValues(response);
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
-}
-function updateMyOrganization() {
-  Organizacion.update(myOrganizationId.value, myOrganization)
-    .then((response) => {
-      alert("Exitoso");
-    })
-    .catch((error) => {
       cargando.value = false;
-      if (error.response.status === 422) {
+      notify.success('Logo subido exitosamente');
+      logo.value = null;
+      getMyOrganization();
+    }
+  }, cargando, {
+    onError: (error) => {
+      if (error.response?.status === 422) {
         errors.value = error.response.data.errors;
         return;
       }
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+      notify.error("Error al subir el logo");
+    }
+  });
+}
+function getMyOrganization() {
+  processRequest(async () => {
+    const response = await Organizacion.getMyOrganization();
+    fillValues(response);
+  }, cargando);
+}
+function updateMyOrganization() {
+  processRequest(async () => {
+    await Organizacion.update(myOrganizationId.value, myOrganization);
+    notify.success("Datos actualizados exitosamente");
+  }, cargando, {
+    errorsRef: errors,
+    onError: (error) => {
+      if (error.response?.status === 422) {
+        errors.value = error.response.data.errors;
+        return;
+      }
+      notify.error("Error al actualizar los datos");
+    }
+  });
 }
 
 const fillValues = (response) => {
@@ -140,6 +176,32 @@ const fillValues = (response) => {
   myOrganization.image = data.image;
   myOrganization.show_fiscal_info = data.show_fiscal_info !== false;
 };
+
+const resetFolioTypeLabel = computed(() => {
+  return {
+    venta: 'Folios de Ventas',
+    cotizacion: 'Folios de Cotizaciones',
+    compra: 'Folios de Compras',
+  }[resetFolioType.value] || '';
+});
+
+function openResetConfirmDialog(type) {
+  resetFolioType.value = type;
+  showResetConfirmDialog.value = true;
+}
+
+function confirmResetFolios() {
+  processRequest(async () => {
+    await Organizacion.resetFolios(resetFolioType.value);
+    showResetConfirmDialog.value = false;
+    resetFolioType.value = null;
+    notify.success("Folio reseteado a 1 exitosamente");
+  }, cargando, {
+    onError: () => {
+      notify.error("Error al resetear el folio");
+    }
+  });
+}
 
 onMounted(() => {
   getMyOrganization();
