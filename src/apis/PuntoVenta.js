@@ -5,10 +5,11 @@ export default {
   getAll() {
     return Api().get("/puntoventa/ventaticket");
   },
-  getSpecificVT(ventaticket) {
+  getSpecificVT(ventaticket, abonos = false) {
     return Api().get("/puntoventa/specific", {
       params: {
         ventaticket,
+        abonos,
       },
     });
   },
@@ -126,6 +127,12 @@ export default {
   facturar(ticket, post) {
     return Api().post("/puntoventa/facturar/" + ticket, post);
   },
+  facturaVistaPrevia(ticket, post) {
+    return ApiBlob().post("/puntoventa/facturaVistaPrevia/" + ticket, post);
+  },
+  facturaVistaPreviaXml(ticket, post) {
+    return ApiBlob().post("/puntoventa/facturaVistaPreviaXml/" + ticket, post);
+  },
   cancelarFactura(ticket, post) {
     return Api().post("/puntoventa/cancelar_factura/" + ticket, post);
   },
@@ -140,6 +147,9 @@ export default {
   },
   descargarPdf(ticket) {
     return ApiBlob().get("/puntoventa/descargarPdf/" + ticket);
+  },
+  regenerarPdf(ticket) {
+    return ApiBlob().get("/puntoventa/regenerarPdf/" + ticket);
   },
   updateFechaEntrega(ticket, fechaEntrega) {
     return Api().post(`/puntoventa/updateFechaEntrega`, {
