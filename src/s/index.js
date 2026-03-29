@@ -16,6 +16,43 @@ export const useUserStore = defineStore('index', () => {
   const productsQuery = ref("");
   const productsData = ref({});
   const lastFetchTimes = ref({});
+  const organizations = ref([]);
+  const activeOrganizationId = ref(null);
+
+  const initializeFromStorage = () => {
+    try {
+      const storedIsLoggedIn = localStorage.getItem("isLoggedIn");
+      const storedAuthuser = localStorage.getItem("authuser");
+      const storedRoles = localStorage.getItem("roles");
+      const storedOrganizations = localStorage.getItem("organizations");
+      const storedActiveOrgId = localStorage.getItem("active_organization_id");
+      const storedApiToken = localStorage.getItem("token");
+
+      if (!storedApiToken) {
+        return;
+      }
+
+      if (storedIsLoggedIn) isLoggedIn.value = JSON.parse(storedIsLoggedIn);
+      if (storedAuthuser) authuser.value = JSON.parse(storedAuthuser);
+      if (storedRoles) roles.value = JSON.parse(storedRoles);
+      if (storedOrganizations) organizations.value = JSON.parse(storedOrganizations);
+
+      if (storedActiveOrgId) {
+        activeOrganizationId.value = JSON.parse(storedActiveOrgId);
+        if (authuser.value) {
+          authuser.value.active_organization_id = activeOrganizationId.value;
+        }
+      }
+    } catch (error) {
+      console.error("Error initializing store from storage:", error);
+    }
+  };
+
+  watch(activeOrganizationId, (newVal) => {
+    if (authuser.value) {
+      authuser.value.active_organization_id = newVal;
+    }
+  });
 
   watch(myAlmacens, (newVal) => {
     localStorage.setItem("myAlmacens", JSON.stringify(newVal))
@@ -64,10 +101,13 @@ export const useUserStore = defineStore('index', () => {
     productsQuery,
     productsData,
     lastFetchTimes,
+    organizations,
+    activeOrganizationId,
     isAdmin,
     setUserRoles,
     isOpException,
     getExceptionMsg,
-    handleOpException
+    handleOpException,
+    initializeFromStorage,
   }
 })

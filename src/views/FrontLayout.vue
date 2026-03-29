@@ -4,6 +4,7 @@ import { useUserStore } from "../s";
 import { useRoute, useRouter } from "vue-router";
 import User from "../apis/User";
 import { useDisplay } from "vuetify";
+import { useProcessRequest } from "@js/composables/useProcessRequest";
 
 const { mobile } = useDisplay();
 const s = useUserStore();
@@ -12,6 +13,7 @@ const route = useRoute();
 const countNotf = ref(0);
 const notifications = ref([]);
 const intervalId = ref(null);
+const { processRequest } = useProcessRequest();
 
 const drawer = ref(true);
 const rail = ref(true);
@@ -61,7 +63,7 @@ const links = computed(() => {
           { icon: "", title: "Ventas", href: "VentasIndex" },
           { icon: "", title: "Devoluciones", href: "DevolucionesIndex" },
           { icon: "", title: "Movimientos", href: "MovimientosIndex" },
-          { icon: "", title: "Cotizaciones.", href: "CotizacionesIndex" },
+          { icon: "", title: "Cotizaciones", href: "CotizacionesIndex" },
         ],
       },
       {
@@ -93,7 +95,7 @@ const links = computed(() => {
         children: [
           { icon: "", title: "Ventas", href: "VentasIndex" },
           { icon: "", title: "Movimientos", href: "MovimientosIndex" },
-          { icon: "", title: "Cotizaciones.", href: "CotizacionesIndex" },
+          { icon: "", title: "Cotizaciones", href: "CotizacionesIndex" },
         ],
       },
       {
@@ -110,24 +112,39 @@ const links = computed(() => {
 });
 const isLoggedIn = computed(() => s.isLoggedIn);
 const isAdmin = computed(() => {
-  return s.roles.includes("Admin") || s.roles.includes("Owner");
+  return s.roles.includes("Admin") || s.roles.includes("Owner") || s.roles.includes("Contador");
 });
 const initials = computed(() =>
   s.authuser?.name ? s.authuser.name.charAt(0) : "Inicio"
 );
 const nombre = computed(() => (s.authuser?.name ? s.authuser.name : "Inicio"));
 const email = computed(() => s.authuser?.email);
+const displayCountNotf = computed(() => {
+  return countNotf.value > 9 ? "+9" : countNotf.value;
+});
+const activeOrganizationName = computed(() => {
+  const orgId = s.authuser?.active_organization_id;
+  const orgs = s.organizations;
+  return orgs?.find((org) => org.id === orgId)?.name || "";
+});
 function getCountNotf() {
   if (s.isLoggedIn) {
-    User.getCountNotf().then((response) => {
+    processRequest(async () => {
+      const response = await User.getCountNotf();
       countNotf.value = response.data;
+    }, ref(false), {
+      onError: () => {},
     });
   }
 }
 function getNotifications() {
-  User.getNotifications().then((response) => {
+  if (!s.isLoggedIn) return;
+  processRequest(async () => {
+    const response = await User.getNotifications();
     notifications.value = response.data;
     countNotf.value = 0;
+  }, ref(false), {
+    onError: () => {},
   });
 }
 function onEscape(e) {
@@ -162,7 +179,8 @@ function logout() {
     router.push({ name: "Login" });
     return;
   }
-  User.logout().then(() => {
+  processRequest(async () => {
+    await User.logout();
     localStorage.removeItem("token");
     s.isLoggedIn = false;
     s.authuser = {};
@@ -172,6 +190,8 @@ function logout() {
     s.departamentos = [];
     s.productsData = ref({});
     router.push({ name: "Login" });
+  }, ref(false), {
+    onError: () => {},
   });
 }
 const isChildRouteActive = computed(() => {
@@ -179,37 +199,52 @@ const isChildRouteActive = computed(() => {
     link.children?.some(child => route.name === child.href || route.path.includes(child.href))
   )
 })
-watch(route, () => {
+const isLinkActive = (link) => {
+  if (link.children) {
+    return link.children.some((child) => route.name === child.href);
+  }
+  return route.name === link.href;
+};
+
+const syncNavigationState = () => {
+  if (permanentDrawer.value) {
+    drawer.value = true;
+  }
+
   if (mobile.value) {
-    rail.value = false
+    rail.value = false;
     return;
   }
+
   if (isChildRouteActive.value) {
-    rail.value = false
+    rail.value = false;
   } else {
-    rail.value = true
+    rail.value = true;
   }
-})
+};
+
+watch(
+  [() => route.name, mobile],
+  () => {
+    syncNavigationState();
+  },
+  { immediate: true }
+);
+
 onMounted(() => {
+  s.initializeFromStorage();
   getCountNotf();
   intervalId.value = setInterval(getCountNotf, 600000);
   document.addEventListener("keydown", onEscape);
-});
-onMounted(() => {
-  getCountNotf();
-  intervalId.value = setInterval(getCountNotf, 600000);
-  document.addEventListener("keydown", onEscape);
+  syncNavigationState();
 });
 
-
-if (permanentDrawer.value) {
-  drawer.value = true
-}
-if (mobile.value) {
-  rail.value = false
-}
-
-
+onUnmounted(() => {
+  document.removeEventListener("keydown", onEscape);
+  if (intervalId.value) {
+    clearInterval(intervalId.value);
+  }
+});
 
 </script>
 <template>
@@ -227,40 +262,63 @@ if (mobile.value) {
 
       <v-divider></v-divider>
       <v-list nav color="primary">
-        <!-- Loop through the main links array -->
-        <div v-for="(link, index) in links" :key="link.title + index" :prepend-icon="link.icon" :value="link.title">
-          <!-- Handle nested children with v-list-group -->
-          <v-list-group v-if="link.children" @click="rail = false">
-            <template v-slot:activator="{ props }" v-if="rail">
-              <v-tooltip location="right">
-                <template #activator="{ props }">
-                  <v-list-item v-bind="props" :title="link.title" :prepend-icon="link.icon"
-                    @click="rail = false"></v-list-item>
-                </template>
-                <span>{{ link.title }}</span>
-              </v-tooltip>
+        <template v-for="(link, index) in links" :key="index">
+          <v-tooltip v-if="rail && link.children" location="right">
+            <template #activator="{ props }">
+              <v-list-item
+                v-bind="props"
+                :prepend-icon="link.icon"
+                :title="link.title"
+                :active="isLinkActive(link)"
+                @click.stop.prevent="rail = false"
+              ></v-list-item>
             </template>
-            <template v-else v-slot:activator="{ props }">
-              <v-list-item v-bind="props" :title="link.title" :prepend-icon="link.icon"
-                @click="rail = false"></v-list-item>
+            <span>{{ link.title }}</span>
+          </v-tooltip>
+
+          <v-list-group v-else-if="!rail && link.children" :value="link.title">
+            <template v-slot:activator="{ props }">
+              <v-list-item
+                v-bind="props"
+                :prepend-icon="link.icon"
+                :title="link.title"
+                :active="isLinkActive(link)"
+              ></v-list-item>
             </template>
-            <!-- Loop through the children of the current link -->
-            <v-list-item v-for="(child, childIndex) in link.children" v-if="link.children" :key="childIndex"
-              :prepend-icon="child.icon" :title="child.title" :to="{ name: child.href }" 
-              @click="rail = false"></v-list-item>
+            <v-list-item
+              v-for="(child, childIndex) in link.children"
+              :key="childIndex"
+              :prepend-icon="child.icon"
+              :title="child.title"
+              :to="{ name: child.href }"
+              :active="route.name === child.href"
+              @click="rail = false"
+            ></v-list-item>
           </v-list-group>
-          <div v-else>
-            <v-tooltip location="right" v-if="rail">
-              <template #activator="{ props }">
-                <v-list-item v-bind="props" :prepend-icon="link.icon" :title="link.title" :to="{ name: link.href }"
-                  @click="rail = false"></v-list-item>
-              </template>
-              <span>{{ link.title }}</span>
-            </v-tooltip>
-            <v-list-item :prepend-icon="link.icon" :title="link.title" :to="{ name: link.href }" @click="rail = false"
-              v-else></v-list-item>
-          </div>
-        </div>
+
+          <v-tooltip v-else-if="rail && !link.children" location="right">
+            <template #activator="{ props }">
+              <v-list-item
+                v-bind="props"
+                :prepend-icon="link.icon"
+                :title="link.title"
+                :to="{ name: link.href }"
+                :active="isLinkActive(link)"
+                @click="rail = false"
+              ></v-list-item>
+            </template>
+            <span>{{ link.title }}</span>
+          </v-tooltip>
+
+          <v-list-item
+            v-else
+            :prepend-icon="link.icon"
+            :title="link.title"
+            :to="{ name: link.href }"
+            :active="isLinkActive(link)"
+            @click="rail = false"
+          ></v-list-item>
+        </template>
       </v-list>
     </v-navigation-drawer>
     <v-app-bar color="secondary">
@@ -273,8 +331,14 @@ if (mobile.value) {
       <!-- <v-img src="https://cdn.vuetifyjs.com/images/cards/docks.jpg" height="128px" class="mr-3" max-width="50"
           contain></v-img> -->
       <v-app-bar-title v-if="isLoggedIn">
-        <router-link :to="{ name: 'Home' }" class="text-decoration-none text-white">
-          Daventas
+        <router-link :to="{ name: 'Home' }" class="text-decoration-none text-white d-flex align-center">
+          <span>Daventas</span>
+          <span v-if="activeOrganizationName" class="text-caption ml-2 text-grey-lighten-1">
+            / {{ activeOrganizationName }}
+          </span>
+          <span v-else-if="s.organizations && s.organizations.length > 0" class="text-caption ml-2 text-error">
+            [orgs: {{ s.organizations.length }}]
+          </span>
         </router-link>
       </v-app-bar-title>
       <v-app-bar-title v-else>
@@ -291,19 +355,41 @@ if (mobile.value) {
           <v-menu min-width="200px" rounded v-if="isLoggedIn">
             <template v-slot:activator="{ props }">
               <v-btn icon color="white" @click="getNotifications" v-bind="props">
-                <v-badge color="accent" :content="countNotf">
+                <v-badge color="accent" :content="displayCountNotf">
                   <v-icon> mdi-bell</v-icon>
                 </v-badge>
               </v-btn>
             </template>
-            <v-card>
-              <v-card-text>
-                <v-list>
-                  <v-list-item v-for="(notification, index) in notifications">{{
-                    notification.data.data
-                    }}</v-list-item>
-                </v-list>
+            <v-card min-width="400px" max-height="500px" class="overflow-y-auto">
+              <v-card-title class="d-flex justify-space-between align-center">
+                <span>Notificaciones</span>
+                <v-btn size="small" variant="text" icon="mdi-close" @click="notifications = []"
+                  v-if="notifications.length > 0"></v-btn>
+              </v-card-title>
+              <v-divider></v-divider>
+              <v-card-text v-if="notifications.length === 0" class="text-center py-6">
+                <v-icon class="d-block mb-2" size="32" color="grey-lighten-1">mdi-bell-outline</v-icon>
+                <p class="text-grey">No hay notificaciones</p>
               </v-card-text>
+              <v-list v-else density="compact" class="py-0">
+                <template v-for="(notification, index) in notifications" :key="notification.id || index">
+                  <v-list-item class="my-1 rounded">
+                    <template v-slot:prepend>
+                      <v-icon color="primary" class="mr-3">mdi-information-outline</v-icon>
+                    </template>
+                    <v-list-item-title class="font-weight-medium text-sm">
+                      {{ notification.data.data || "Notificación" }}
+                    </v-list-item-title>
+                    <v-list-item-subtitle class="text-xs mt-1">
+                      {{ notification.created_at ? new Date(notification.created_at).toLocaleString("es-MX") : "Hace poco" }}
+                    </v-list-item-subtitle>
+                    <template v-slot:append>
+                      <v-btn size="x-small" variant="text" icon="mdi-close" density="compact"></v-btn>
+                    </template>
+                  </v-list-item>
+                  <v-divider v-if="index < notifications.length - 1" class="my-0"></v-divider>
+                </template>
+              </v-list>
             </v-card>
           </v-menu>
         </v-container>
@@ -337,7 +423,7 @@ if (mobile.value) {
                     Administración
                   </v-btn>
                   <v-divider class="my-3"></v-divider>
-                  <v-btn variant="text" rounded prepend-icon="mdi-logout" @click="logout">
+                  <v-btn variant="text" rounded prepend-icon="mdi-logout" @click="logout" color="error">
                     Cerrar session
                   </v-btn>
                 </div>
