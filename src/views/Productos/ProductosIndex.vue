@@ -310,20 +310,25 @@
       <v-card-actions class="pa-3">
         <v-btn @click="openAjuste = false" :loading="cargando" size="small">Cancelar</v-btn>
         <v-spacer></v-spacer>
-        <v-tooltip text="Ajustar inventario y precios de este producto en todos los almacenes">
-          <template #activator="{ props }">
-            <v-btn v-bind="props" @click="ajusteInventarioGeneral" :loading="cargando" variant="outlined"   color="" size="small">
-              Guardar General
-            </v-btn>
-          </template>
-        </v-tooltip>
-        <v-tooltip text="Ajustar solo este almacén">
-          <template #activator="{ props }">
-            <v-btn v-bind="props" @click="ajusteInventario" :loading="cargando" variant="outlined" color="primary" size="small">
-              Guardar
-            </v-btn>
-          </template>
-        </v-tooltip>
+        <v-btn
+          @click="ajusteInventarioGeneral"
+          :loading="cargando"
+          variant="outlined"
+          size="small"
+          title="Ajustar inventario y precios de este producto en todos los almacenes"
+        >
+          Guardar General
+        </v-btn>
+        <v-btn
+          @click="ajusteInventario"
+          :loading="cargando"
+          variant="outlined"
+          color="primary"
+          size="small"
+          title="Ajustar solo este almacén"
+        >
+          Guardar
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -747,6 +752,7 @@ function ajusteProduct(productId) {
   if (!isAdmin.value) {
     return notify.warning("Lo sentimos, no cuentas con el rol adecuado :(");
   }
+  productActualId.value = productId;
   openAjuste.value = true;
   resetAjusteForm();
 
