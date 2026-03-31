@@ -65,5 +65,8 @@ export default {
     downloadXml(abono) {
         return ApiBlob().get("/creditos/downloadXml/" + abono);
     },
+    regenerarPdf(abono) {
+        return ApiBlob().get("/creditos/regenerarPdf/" + abono);
+    },
 
 }

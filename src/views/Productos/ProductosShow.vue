@@ -17,15 +17,19 @@
 
 <script setup>
 import { onMounted, ref, computed, reactive } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useDisplay } from "vuetify";
+import { useRoute } from "vue-router";
 import Product from "../../apis/Product";
 const route = useRoute();
 const productActualId = ref(null);
-const product = ref({});
+const product = reactive({
+  name: "",
+  es_kit: false,
+  consumible: "",
+});
 
-const items = ref([
+const allItems = [
   { title: "Edición Básica", to: "ProductosShowBasica" },
+  { title: "Componentes kit", to: "ProductosShowComponentes", kitOnly: true },
   { title: "Proveedores", to: "ProductosShowProveedores" },
   { title: "Departamentos", to: "ProductosShowDepartamentos" },
   { title: "Min Max", to: "ProductosShowMinMax" },
@@ -33,25 +37,20 @@ const items = ref([
   { title: "Impuestos", to: "ProductosShowImpuestos" },
   { title: "Descuentos", to: "ProductosShowDescuentos" },
   { title: "Imagenes", to: "ProductosShowImagenes" },
-]);
+  { title: "Consumibles", to: "ProductosShowConsumibles", consumibleOnly: true },
+];
+
+const items = computed(() =>
+  allItems.filter((i) => (!i.kitOnly || product.es_kit) && (!i.consumibleOnly || product.consumible === "generico"))
+);
 onMounted(() => {
   productActualId.value = route.params.productId;
   Product.show(productActualId.value)
     .then((response) => {
       console.log(response.data);
-      product.value = response.data;
-      if (product.value.es_kit) {
-        items.value.push({
-          title: "Componentes kit",
-          to: "ProductosShowComponentes",
-        });
-      }
-      if (product.value.consumible == 'generico') {
-        items.value.push({
-          title: "Consumibles",
-          to: "ProductosShowConsumibles",
-        });
-      }
+      product.name = response.data.name;
+      product.es_kit = response.data.es_kit;
+      product.consumible = response.data.consumible;
     })
     .catch((error) => {
       handleOpException(error);

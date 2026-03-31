@@ -310,6 +310,12 @@
                     </template>
                     <v-list-item-title>Descarga XML</v-list-item-title>
                   </v-list-item>
+                  <v-list-item @click="onRegenerarPdf(item)">
+                    <template #prepend>
+                      <v-icon icon="mdi-sync"></v-icon>
+                    </template>
+                    <v-list-item-title>Regenerar PDF</v-list-item-title>
+                  </v-list-item>
                 </v-list>
               </v-menu>
               <v-btn @click="abrirFacturarAbono(item)" size="small" v-if="!item.facturado_en && selectedDeuda?.ventaticket?.facturado_en">Facturar abono</v-btn>
@@ -741,6 +747,13 @@ function onDownloadXml(abono) {
     link.download = `${fileName.value}.xml`;
     link.click();
     URL.revokeObjectURL(link.href);
+  }, loading, {});
+}
+
+function onRegenerarPdf(abono) {
+  processRequest(async () => {
+    await Creditos.regenerarPdf(abono.id);
+    notify.success("PDF regenerado correctamente");
   }, loading, {});
 }
 

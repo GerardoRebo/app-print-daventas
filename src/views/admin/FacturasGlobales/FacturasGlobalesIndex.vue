@@ -37,6 +37,9 @@
     </v-card-text>
   </v-card>
   <v-container fluid>
+    <v-alert type="info" density="compact" v-if="facturas.data?.length">
+      Estas son las facturas globales que ya han sido emitidas. Si quieres crear una nueva, click en el boton "Crear factura global".
+    </v-alert>
     <v-table density="compact" color="secondary">
       <thead>
         <tr>
