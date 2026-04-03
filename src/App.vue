@@ -7,10 +7,10 @@
     :timeout="toast.timeout" 
     :color="toast.status" 
     :variant="toast.variant"
-    location="bottom right"
+    :location="toast.status == 'error' ? 'top center' : 'bottom right'"
     :style="{ 
       transform: `translateY(-${index * 100}px)`,
-      zIndex: 1000 + index
+      zIndex: TOAST_BASE_Z_INDEX + index
     }"
   >
     {{ toast.text }}
@@ -27,6 +27,7 @@ import Offline from './sqlite/Offline'
 import PuntoVenta from './apis/PuntoVenta'
 import { useToasterStore } from "./s/toaster";
 const toasterStore = useToasterStore();
+const TOAST_BASE_Z_INDEX = 2600;
 
 
 const syncLocalVentas = async () => {

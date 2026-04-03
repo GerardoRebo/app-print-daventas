@@ -44,7 +44,11 @@ import Proveedor from "@js/apis/Proveedor";
 import { useProductActual } from "../../../composables/ProductActual";
 import { useRoute } from "vue-router";
 import { useSnackBar } from "../../../composables/SnackBar";
+import { useNotification } from "@js/composables/useNotification";
+import { useProcessRequest } from "@js/composables/useProcessRequest";
 const { snackbar, snackSuccess, snackError, snackWarning } = useSnackBar();
+const { notify } = useNotification();
+const { processRequest, concurrentRequest } = useProcessRequest();
 
 const proveedors = ref([]);
 const misProveedors = ref([]);
@@ -75,50 +79,44 @@ watch(() => route.params.productId, () => {
   showpp();
 }, { immediate: true });
 
-function showpp() {
-  Proveedor.showPP(productId.value)
-    .then((response) => {
-      misProveedors.value = response.data;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+async function showpp() {
+  concurrentRequest(async () => {
+    const response = await Proveedor.showPP(productId.value);
+    misProveedors.value = response.data;
+  }, cargando, {
+    onError: () => notify.error("Ha ocurrido un error")
+  });
 }
 function abrirModal() {
   isVisible.value = true;
   getAllProveedors();
 }
 function getAllProveedors() {
-  Proveedor.getAll()
-    .then((response) => {
-      proveedors.value = response.data;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  concurrentRequest(async () => {
+    const response = await Proveedor.getAll();
+    proveedors.value = response.data;
+  }, cargando, {
+    onError: () => notify.error("Ha ocurrido un error")
+  });
 }
 function agregarProveedor(proveedorActualId) {
-  Proveedor.agregarP(proveedorActualId, productId.value)
-    .then(() => {
-      isVisible.value = false;
-      showpp();
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    await Proveedor.agregarP(proveedorActualId, productId.value);
+    cargando.value = false;
+    isVisible.value = false;
+    await showpp();
+  }, cargando, {
+    onError: () => notify.error("Ha ocurrido un error")
+  });
 }
 function quitarP(proveedorActualId) {
-  Proveedor.quitarP(proveedorActualId, productId.value)
-    .then(() => {
-      showpp();
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    await Proveedor.quitarP(proveedorActualId, productId.value);
+    cargando.value = false;
+    await showpp();
+  }, cargando, {
+    onError: () => notify.error("Ha ocurrido un error")
+  });
 }
 </script>
 

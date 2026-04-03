@@ -42,9 +42,13 @@
 import { onMounted, ref, watch } from "vue";
 import Departamento from "@js/apis/Departamento";
 import { useSnackBar } from "@js/composables/SnackBar";
+import { useNotification } from "@js/composables/useNotification";
+import { useProcessRequest } from "@js/composables/useProcessRequest";
 import { useRoute } from "vue-router";
 import { useProductActual } from "@js/composables/ProductActual";
 const { snackbar, snackSuccess, snackError, snackWarning } = useSnackBar();
+const { notify } = useNotification();
+const { processRequest, concurrentRequest } = useProcessRequest();
 const route = useRoute();
 
 const departamentos = ref([]);
@@ -72,50 +76,44 @@ watch(() => productId.value, () => {
 }, { immediate: true });
 
 function showpd() {
-  Departamento.showPD(productId.value)
-    .then((response) => {
-      misDepartamentos.value = response.data;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  concurrentRequest(async () => {
+    const response = await Departamento.showPD(productId.value);
+    misDepartamentos.value = response.data;
+  }, cargando, {
+    onError: () => notify.error("Ha ocurrido un error")
+  });
 }
 function abrirModal() {
   isVisible.value = true;
   getAllDepartamentos();
 }
 function getAllDepartamentos() {
-  Departamento.getAll()
-    .then((response) => {
-      departamentos.value = response.data;
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  concurrentRequest(async () => {
+    const response = await Departamento.getAll();
+    departamentos.value = response.data;
+  }, cargando, {
+    onError: () => notify.error("Ha ocurrido un error")
+  });
 }
 function agregarDepartamento(departamentoActualId) {
-  Departamento.agregarD(departamentoActualId, productId.value)
-    .then(() => {
-      isVisible.value = false;
-      showpd();
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    await Departamento.agregarD(departamentoActualId, productId.value);
+    cargando.value = false;
+    isVisible.value = false;
+    showpd();
+  }, cargando, {
+    onError: () => notify.error("Ha ocurrido un error")
+  });
 }
 function quitarDepartamento(departamentoActualId) {
-  Departamento.quitarD(departamentoActualId, productId.value)
-    .then(() => {
-      isVisible.value = false;
-      showpd();
-    })
-    .catch((error) => {
-      handleOpException(error);
-      alert("Ha ocurrido un error")
-    });
+  processRequest(async () => {
+    await Departamento.quitarD(departamentoActualId, productId.value);
+    cargando.value = false;
+    isVisible.value = false;
+    showpd();
+  }, cargando, {
+    onError: () => notify.error("Ha ocurrido un error")
+  });
 }
 onMounted(() => {
 });
