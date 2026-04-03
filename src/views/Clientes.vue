@@ -53,12 +53,31 @@
         <!-- DATOS PERSONALES -->
         <div class="mb-8">
           <v-row class="mb-4">
-            <v-col cols="12">
+            <v-col cols="12" sm="10">
               <div class="d-flex align-center mb-4">
                 <v-icon color="primary" class="me-3">mdi-account-outline</v-icon>
                 <h3 class="text-subtitle1 font-weight-semibold">Datos Personales</h3>
               </div>
-              <v-divider></v-divider>
+            </v-col>
+            <v-col cols="12" sm="2">
+              <input ref="csfInput" type="file" accept="application/pdf" style="display:none" @change="onCsfSelected" />
+              <v-tooltip location="top" max-width="360"
+                text="Función exclusiva para México: carga tu Constancia de Situación Fiscal (CSF) en PDF para autocompletar campos. Revisa y valida los datos en SAT antes de guardar.">
+                <template v-slot:activator="{ props }">
+                  <v-btn v-bind="props" size="small" variant="tonal" color="primary" :loading="cargandoCsf"
+                    prepend-icon="mdi-file-upload-outline" @click="csfInput.click()">
+                    Subir CSF
+                  </v-btn>
+                </template>
+              </v-tooltip>
+            </v-col>
+            <v-divider></v-divider>
+          </v-row>
+          <v-row>
+            <v-col cols="12">
+              <v-alert type="info" variant="tonal" density="compact" class="mb-2">
+                La CSF (Constancia de Situación Fiscal) solo aplica para México. La carga automática puede contener errores de lectura: valida RFC y datos fiscales en SAT antes de guardar.
+              </v-alert>
             </v-col>
           </v-row>
 
@@ -146,7 +165,7 @@
                   <span class="text-caption ms-2 text-grey-darken-1">(para timbrado de CFDIs)</span>
                 </div>
                 <v-badge v-if="isClienteAptoCfdi" color="success" offset-x="-10" offset-y="-10" dot>
-                  <span class="text-success text-caption font-weight-semibold">✓ Apto para CFDI</span>
+                    <span class="text-success text-caption font-weight-semibold">✓ Datos fiscales completos</span>
                 </v-badge>
               </div>
               <v-divider class="mt-2"></v-divider>
@@ -217,27 +236,20 @@
           <!-- Estado CFDI -->
           <v-row class="mt-4">
             <v-col cols="12">
-              <v-alert 
-                v-if="isClienteAptoCfdi" 
-                type="success" 
-                variant="tonal"
-                class="mb-0"
-                closable>
+              <v-alert v-if="isClienteAptoCfdi" type="success" variant="tonal" class="mb-0" closable>
                 <template v-slot:prepend>
                   <v-icon icon="mdi-check-circle"></v-icon>
                 </template>
-                Este cliente está listo para el timbrado de CFDIs
+                Los datos fiscales obligatorios están completos. Esto no garantiza que el timbrado CFDI sea exitoso: revisa ortografía y valida en SAT antes de facturar.
+                <v-btn variant="text" size="small" color="primary" class="ms-2" @click="openSatValidation">
+                  Validar en SAT
+                </v-btn>
               </v-alert>
-              <v-alert 
-                v-else
-                type="info" 
-                variant="tonal"
-                class="mb-0"
-                closable>
+              <v-alert v-else type="info" variant="tonal" class="mb-0" closable>
                 <template v-slot:prepend>
                   <v-icon icon="mdi-information"></v-icon>
                 </template>
-                Complete todos los datos fiscales para habilitar el timbrado de CFDIs
+                Completa los datos fiscales obligatorios y verifica su exactitud. La validación oficial se recomienda en los servicios del SAT.
               </v-alert>
             </v-col>
           </v-row>
@@ -322,6 +334,8 @@ const clientes = ref([]);
 const errors = ref([]);
 const isVisible = ref(false);
 const cargando = ref(false);
+const cargandoCsf = ref(false);
+const csfInput = ref(null);
 const fiscalRegimenes = ref(catalogoRegimenes);
 
 
@@ -449,6 +463,26 @@ function search(keyword) {
 }
 function openSatValidation() {
   window.open('https://agsc.siat.sat.gob.mx/PTSC/ValidaRFC/index.jsf', '_blank');
+}
+async function onCsfSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  cargandoCsf.value = true;
+  try {
+    const response = await Cliente.parseCsf(file);
+    const data = response.data;
+    if (data.rfc) cliente_form.rfc = data.rfc;
+    if (data.razon_social) cliente_form.name = cliente_form.razon_social = data.razon_social;
+    if (data.codigo_postal) cliente_form.codigo_postal = data.codigo_postal;
+    if (data.domicilio) cliente_form.domicilio = data.domicilio;
+    if (data.regimen_fiscal) cliente_form.regimen_fiscal = data.regimen_fiscal + '';
+    notify.success('Datos de la CSF cargados. Revisa y valida en SAT antes de guardar.');
+  } catch (e) {
+    notify.error('No se pudieron leer los datos del PDF');
+  } finally {
+    cargandoCsf.value = false;
+    csfInput.value.value = '';
+  }
 }
 function onKeyPressed(e) {
   if (e.key === "Esc" || e.key === "Escape") {

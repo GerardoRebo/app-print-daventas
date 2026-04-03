@@ -80,6 +80,14 @@ export default {
 
     },
 
+    parseCsf(file) {
+        const formData = new FormData();
+        formData.append('csf', file);
+        return Api().post('/clients/parse-csf', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    },
+
 
 
 }
