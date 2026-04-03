@@ -28,7 +28,7 @@
           prepend-inner-icon="mdi-magnify"
           @update:model-value="limpiarPaginacion"
         ></v-text-field>
-        <v-btn color="primary" variant="elevated" class="ml-8 mt-4" prepend-icon="mdi-plus" @click="abrirAbonoGlobal" :disabled="saldoGlobal <= 0">
+        <v-btn color="primary" variant="elevated" class="ml-8 mt-4" prepend-icon="mdi-plus" @click="abrirAbonoGlobal" :disabled="saldoGlobalFacturable <= 0">
           Abono Global
         </v-btn>
         <v-spacer></v-spacer>
@@ -80,7 +80,7 @@
               </v-btn>
             </template>
             <v-list>
-              <v-list-item @click="abrirAbono(item)" :disabled="+item.saldo <= 0" color="success">
+              <v-list-item @click="abrirAbono(item)" :disabled="+item.saldo <= 0 || !item.ventaticket?.facturado_en" color="success">
                 <template #prepend>
                   <v-icon icon="mdi-plus"></v-icon>
                 </template>
@@ -102,7 +102,7 @@
           </v-menu>
         </div>
         <div v-else>
-          <v-btn @click="abrirAbono(item)" class="mx-2" size="small" color="primary" variant="tonal" :disabled="item.saldo <= 0" prepend-icon="mdi-plus">Realizar abono</v-btn>
+          <v-btn @click="abrirAbono(item)" class="mx-2" size="small" color="primary" variant="tonal" :disabled="item.saldo <= 0 || !item.ventaticket?.facturado_en" prepend-icon="mdi-plus">Realizar abono</v-btn>
           <v-btn size="small" @click="imprimirVenta(item)" class="mx-2" prepend-icon="mdi-printer-pos">Reimprimir</v-btn>
           <v-btn size="small" @keydown.enter="verAbonos(item)" @click="verAbonos(item)" prepend-icon="mdi-eye">Abonos</v-btn>
         </div>
@@ -112,14 +112,42 @@
 
   <v-dialog v-model="openAbonoGlobal" max-width="600">
     <v-card>
-      <v-card-title>Realizar Abono Global, saldo total: ${{ formatNumber(saldoGlobal) }}</v-card-title>
+      <v-card-title>
+        Realizar Abono Global, saldo {{ abonoGlobalData.facturar ? 'facturable' : 'global' }}:
+        ${{ formatNumber(abonoGlobalData.facturar ? saldoGlobalFacturable : saldoGlobal) }}
+      </v-card-title>
       <v-card-text>
         <p class="text-caption mb-4 text-warning">
           <v-icon icon="mdi-information-outline" size="small"></v-icon>
           Este abono se distribuirá automáticamente entre las deudas pendientes del cliente, comenzando por las más antiguas.
         </p>
+        <v-alert
+          v-if="abonoGlobalData.facturar"
+          type="info"
+          variant="tonal"
+          density="compact"
+          class="mb-4"
+        >
+          Solo se incluirán tickets facturados con saldo pendiente. Se emitirá un solo complemento de pago con varios documentos relacionados y los CFDI origen deben tener método de pago PPD.
+        </v-alert>
         <v-text-field label="Monto Global" autocomplete="off" placeholder="" v-model="abonoGlobalData.montoGlobal" ref="montoGlobalRef" type="number" step="0.01" @keydown.enter="realizarAbonoGlobal" />
         <v-select :items="pagoFormas" label="Forma de pago" v-model="abonoGlobalData.forma_pago" :error-messages="errors?.forma_pago?.[0]"></v-select>
+        <v-checkbox label="Facturar este abono global" v-model="abonoGlobalData.facturar" />
+        <div v-if="abonoGlobalData.facturar" class="text-caption text-primary mb-2">
+          Saldo facturable disponible: ${{ formatNumber(saldoGlobalFacturable) }}
+        </div>
+        <TimbresOrganizationSelector
+          v-if="abonoGlobalData.facturar"
+          :model-value="selectedTimbresOrganizationGlobal"
+          :is-contador="s.isContador"
+          :contador-organizations="s.contadorOrganizations"
+          :active-organization-name="activeOrganizationName"
+          :saldo="saldo"
+          :saldos="saldos"
+          @update:model-value="selectedTimbresOrganizationGlobal = $event"
+        />
+        <v-checkbox v-if="abonoGlobalData.facturar" label="Usar fecha personalizada para la factura" v-model="abonoGlobalData.usarFechaPersonalizada" />
+        <v-date-input v-if="abonoGlobalData.facturar && abonoGlobalData.usarFechaPersonalizada" v-model="abonoGlobalData.fechaFactura" label="Fecha de la factura" class="mt-2" :max="new Date().toISOString().split('T')[0]" />
         <v-textarea label="Comentarios (opcional)" v-model="abonoGlobalData.comments" variant="outlined"></v-textarea>
       </v-card-text>
       <v-card-actions>
@@ -269,7 +297,7 @@
             <span class="text-caption">{{ moment(item.fecha).format('DD/MM/YYYY HH:mm') }}</span>
           </template>
           <template #item.abono="{ item }">
-            <span>${{ formatNumber(item.abono) }}</span>
+            <span><strong>${{ formatNumber(item.abono) }}</strong></span>
           </template>
           <template #item.saldo="{ item }">
             <span>${{ formatNumber(item.saldo) }}</span>
@@ -401,6 +429,9 @@ const abonoGlobalData = reactive({
   montoGlobal: 0,
   comments: "",
   forma_pago: "01",
+  facturar: false,
+  usarFechaPersonalizada: false,
+  fechaFactura: null,
 });
 const facturarAbonoData = reactive({
   forma_pago: "01",
@@ -415,9 +446,11 @@ const totalItems = ref(0);
 const filtroConsecutivo = ref("");
 const clienteInfo = ref(null);
 const saldoGlobal = ref(0);
+const saldoGlobalFacturable = ref(0);
 const saldo = ref(null);
 const saldos = ref(null);
 const selectedTimbresOrganization = ref(null);
+const selectedTimbresOrganizationGlobal = ref(null);
 const selectedTimbresOrganizationAbono = ref(null);
 const isEmailOpen = ref(false);
 const cargando = ref(false);
@@ -513,6 +546,7 @@ async function getDeudas({ page }) {
     deudas.value = response.data.data;
     totalItems.value = response.data.total;
     saldoGlobal.value = response.data.saldo_global;
+    saldoGlobalFacturable.value = response.data.saldo_global_facturable ?? 0;
   }, loading, {});
 }
 
@@ -555,16 +589,30 @@ function getClienteInfo() {
 }
 
 function abrirAbono(deuda) {
+  if (!deuda?.ventaticket?.facturado_en) {
+    notify.warning("Solo se pueden registrar abonos en tickets previamente facturados");
+    return;
+  }
+
   selectedDeuda.value = deuda;
   openAbono.value = true;
   nextTick(() => cantidadRef.value?.select());
 }
 
 function abrirAbonoGlobal() {
+  if (+saldoGlobalFacturable.value <= 0) {
+    notify.warning("No hay tickets facturados con saldo pendiente para registrar abonos");
+    return;
+  }
+
   openAbonoGlobal.value = true;
   abonoGlobalData.montoGlobal = 0;
   abonoGlobalData.comments = "";
   abonoGlobalData.forma_pago = "01";
+  abonoGlobalData.facturar = false;
+  abonoGlobalData.usarFechaPersonalizada = false;
+  abonoGlobalData.fechaFactura = null;
+  selectedTimbresOrganizationGlobal.value = null;
   errors.value = [];
   nextTick(() => montoGlobalRef.value?.focus());
 }
@@ -630,6 +678,11 @@ async function sendEmail(localEmailData) {
 }
 
 function realizarAbono() {
+  if (!selectedDeuda.value?.ventaticket?.facturado_en) {
+    notify.warning("Solo se pueden registrar abonos en tickets previamente facturados");
+    return;
+  }
+
   if (+postData.cantidad > +selectedDeuda.value?.saldo) {
     notify.warning("La cantidad es mayor a la deuda");
     return;
@@ -662,8 +715,12 @@ function realizarAbonoGlobal() {
     notify.warning("El monto del abono debe ser mayor a 0");
     return;
   }
-  if (+abonoGlobalData.montoGlobal > +saldoGlobal.value) {
-    notify.warning("El monto del abono es mayor al saldo global del cliente");
+  if (+abonoGlobalData.montoGlobal > +saldoGlobalFacturable.value) {
+    notify.warning(
+      abonoGlobalData.facturar
+        ? "El monto del abono es mayor al saldo facturable del cliente"
+        : "El monto del abono es mayor al saldo disponible para abonos"
+    );
     return;
   }
   processRequest(async () => {
@@ -672,7 +729,14 @@ function realizarAbonoGlobal() {
       monto_global: abonoGlobalData.montoGlobal,
       comments: abonoGlobalData.comments,
       forma_pago: abonoGlobalData.forma_pago,
+      facturar: abonoGlobalData.facturar,
+      timbres_organization_id: selectedTimbresOrganizationGlobal.value,
+      usarFechaPersonalizada: abonoGlobalData.usarFechaPersonalizada,
     };
+    if (abonoGlobalData.facturar && abonoGlobalData.usarFechaPersonalizada && abonoGlobalData.fechaFactura) {
+      const fecha = new Date(abonoGlobalData.fechaFactura);
+      payload.fechaFactura = fecha.toISOString().split("T")[0];
+    }
     const response = await Creditos.realizarAbonoGlobal(payload);
     const createdAbonos = response.data?.abonos?.length ?? 0;
     const noDistribuido = response.data?.montoNoDistribuido ?? 0;
@@ -680,8 +744,15 @@ function realizarAbonoGlobal() {
     abonoGlobalData.montoGlobal = 0;
     abonoGlobalData.comments = "";
     abonoGlobalData.forma_pago = "01";
+    abonoGlobalData.facturar = false;
+    abonoGlobalData.usarFechaPersonalizada = false;
+    abonoGlobalData.fechaFactura = null;
+    selectedTimbresOrganizationGlobal.value = null;
     search.value = String(Date.now());
-    let msg = `Abono global realizado. Se crearon ${createdAbonos} abono(s)`;
+    let msg = response.data?.message ?? `Abono global realizado. Se crearon ${createdAbonos} abono(s)`;
+    if (response.data?.message) {
+      msg += `. Se distribuyó en ${createdAbonos} abono(s)`;
+    }
     if (noDistribuido > 0) {
       msg += `. Monto no distribuido: $${formatNumber(noDistribuido)}`;
     }

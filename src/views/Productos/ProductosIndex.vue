@@ -217,6 +217,7 @@
               density="compact"
               variant="outlined"
               @keydown.enter="ajusteInventarioGeneral" 
+              :error-messages="errors.cantidad ? errors.cantidad[0] : null"
               v-model="inventario_form.cantidad"
             />
           </div>
@@ -234,6 +235,7 @@
               density="compact"
               variant="outlined"
               v-model="inventario_form.pcosto"
+              :error-messages="errors.pcosto ? errors.pcosto[0] : null"
               @keydown.enter="ajusteInventarioGeneral"
             />
           </div>
@@ -256,6 +258,7 @@
               variant="outlined"
               color="success"
               v-model="inventario_form.pventa"
+              :error-messages="errors.pventa ? errors.pventa[0] : null"
               @keydown.enter="ajusteInventarioGeneral"
             />
           </div>
@@ -272,6 +275,7 @@
                   density="compact"
                   variant="outlined"
                   v-model="inventario_form.precio_medio_mayoreo"
+                  :error-messages="errors.precio_medio_mayoreo ? errors.precio_medio_mayoreo[0] : null"
                   @keydown.enter="ajusteInventarioGeneral"
                 />
               </v-col>
@@ -283,6 +287,7 @@
                   density="compact"
                   variant="outlined"
                   v-model="inventario_form.precio_mayoreo"
+                  :error-messages="errors.precio_mayoreo ? errors.precio_mayoreo[0] : null"
                   @keydown.enter="ajusteInventarioGeneral"
                 />
               </v-col>
@@ -785,6 +790,7 @@ function ajusteProduct(productId) {
   });
 }
 function ajusteInventario() {
+  errors.value = [];
   if (+inventario_form.pventa < +inventario_form.precio_mayoreo ||
     +inventario_form.pventa < +inventario_form.precio_medio_mayoreo
   ) {
@@ -804,6 +810,7 @@ function ajusteInventario() {
   });
 }
 function ajusteInventarioGeneral() {
+  errors.value = [];
   if (+inventario_form.pventa < +inventario_form.precio_mayoreo ||
     +inventario_form.pventa < +inventario_form.precio_medio_mayoreo
   ) {
