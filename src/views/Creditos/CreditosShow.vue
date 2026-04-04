@@ -28,7 +28,7 @@
           prepend-inner-icon="mdi-magnify"
           @update:model-value="limpiarPaginacion"
         ></v-text-field>
-        <v-btn color="primary" variant="elevated" class="ml-8 mt-4" prepend-icon="mdi-plus" @click="abrirAbonoGlobal" :disabled="saldoGlobalFacturable <= 0">
+        <v-btn color="primary" variant="elevated" class="ml-8 mt-4" prepend-icon="mdi-plus" @click="abrirAbonoGlobal" :disabled="saldoGlobal <= 0">
           Abono Global
         </v-btn>
         <v-spacer></v-spacer>
@@ -80,7 +80,7 @@
               </v-btn>
             </template>
             <v-list>
-              <v-list-item @click="abrirAbono(item)" :disabled="+item.saldo <= 0 || !item.ventaticket?.facturado_en" color="success">
+              <v-list-item @click="abrirAbono(item)" :disabled="+item.saldo <= 0" color="success">
                 <template #prepend>
                   <v-icon icon="mdi-plus"></v-icon>
                 </template>
@@ -102,7 +102,7 @@
           </v-menu>
         </div>
         <div v-else>
-          <v-btn @click="abrirAbono(item)" class="mx-2" size="small" color="primary" variant="tonal" :disabled="item.saldo <= 0 || !item.ventaticket?.facturado_en" prepend-icon="mdi-plus">Realizar abono</v-btn>
+          <v-btn @click="abrirAbono(item)" class="mx-2" size="small" color="primary" variant="tonal" :disabled="item.saldo <= 0" prepend-icon="mdi-plus">Realizar abono</v-btn>
           <v-btn size="small" @click="imprimirVenta(item)" class="mx-2" prepend-icon="mdi-printer-pos">Reimprimir</v-btn>
           <v-btn size="small" @keydown.enter="verAbonos(item)" @click="verAbonos(item)" prepend-icon="mdi-eye">Abonos</v-btn>
         </div>
@@ -130,7 +130,7 @@
         >
           Solo se incluirán tickets facturados con saldo pendiente. Se emitirá un solo complemento de pago con varios documentos relacionados y los CFDI origen deben tener método de pago PPD.
         </v-alert>
-        <v-text-field label="Monto Global" autocomplete="off" placeholder="" v-model="abonoGlobalData.montoGlobal" ref="montoGlobalRef" type="number" step="0.01" @keydown.enter="realizarAbonoGlobal" />
+        <v-text-field label="Monto Global" autocomplete="off" placeholder="" v-model="abonoGlobalData.montoGlobal" ref="montoGlobalRef" type="number" step="0.01" :max="abonoGlobalData.facturar ? saldoGlobalFacturable : saldoGlobal" @keydown.enter="realizarAbonoGlobal" />
         <v-select :items="pagoFormas" label="Forma de pago" v-model="abonoGlobalData.forma_pago" :error-messages="errors?.forma_pago?.[0]"></v-select>
         <v-checkbox label="Facturar este abono global" v-model="abonoGlobalData.facturar" />
         <div v-if="abonoGlobalData.facturar" class="text-caption text-primary mb-2">
@@ -589,19 +589,27 @@ function getClienteInfo() {
 }
 
 function abrirAbono(deuda) {
-  if (!deuda?.ventaticket?.facturado_en) {
-    notify.warning("Solo se pueden registrar abonos en tickets previamente facturados");
+  if (+deuda?.saldo <= 0) {
+    notify.warning("El ticket no tiene saldo pendiente por abonar");
     return;
   }
 
   selectedDeuda.value = deuda;
+  postData.cantidad = 0;
+  postData.comments = "";
+  postData.facturar = false;
+  postData.forma_pago = "01";
+  postData.usarFechaPersonalizada = false;
+  postData.fechaFactura = null;
+  selectedTimbresOrganization.value = null;
+  errors.value = [];
   openAbono.value = true;
   nextTick(() => cantidadRef.value?.select());
 }
 
 function abrirAbonoGlobal() {
-  if (+saldoGlobalFacturable.value <= 0) {
-    notify.warning("No hay tickets facturados con saldo pendiente para registrar abonos");
+  if (+saldoGlobal.value <= 0) {
+    notify.warning("No hay saldo pendiente para registrar abonos");
     return;
   }
 
@@ -678,8 +686,9 @@ async function sendEmail(localEmailData) {
 }
 
 function realizarAbono() {
-  if (!selectedDeuda.value?.ventaticket?.facturado_en) {
-    notify.warning("Solo se pueden registrar abonos en tickets previamente facturados");
+  if (postData.facturar && !selectedDeuda.value?.ventaticket?.facturado_en) {
+    notify.warning("Solo se puede facturar el abono cuando el ticket ya fue facturado");
+    postData.facturar = false;
     return;
   }
 
@@ -715,11 +724,16 @@ function realizarAbonoGlobal() {
     notify.warning("El monto del abono debe ser mayor a 0");
     return;
   }
-  if (+abonoGlobalData.montoGlobal > +saldoGlobalFacturable.value) {
+
+  const availableBalance = abonoGlobalData.facturar
+    ? +saldoGlobalFacturable.value
+    : +saldoGlobal.value;
+
+  if (+abonoGlobalData.montoGlobal > availableBalance) {
     notify.warning(
       abonoGlobalData.facturar
         ? "El monto del abono es mayor al saldo facturable del cliente"
-        : "El monto del abono es mayor al saldo disponible para abonos"
+        : "El monto del abono es mayor al saldo global pendiente del cliente"
     );
     return;
   }
